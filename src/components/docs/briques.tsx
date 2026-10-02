@@ -78,7 +78,7 @@ export function Etapes({
     <ol className="doc-etapes">
       {items.map((e, i) => (
         <li key={e.titre}>
-          <span>{i + 1}</span>
+          <span aria-hidden="true">{i + 1}</span>
           <div>
             <b>{e.titre}</b>
             <p>{e.texte}</p>

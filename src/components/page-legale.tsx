@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { ArrowRight, Building2, CalendarDays, FileText, Scale, Shield } from "lucide-react";
+import { ArrowRight, Building2, CalendarDays, ChevronDown, FileText, ListFilter, Scale, Shield } from "lucide-react";
 import { z } from "zod";
-import { LogoMarque } from "@/components/acces/coque-acces";
 import { Encart, Liste, Paragraphe, SousTitre, Tableau } from "@/components/docs/briques";
-import { SommaireRepliable } from "@/components/sommaire-repliable";
+import { CoqueSite } from "@/components/public/coque-site";
 import { signalementDisponible } from "@/lib/contact";
 import { PRIX_PRO_EUR } from "@/lib/paiement/plan";
 
@@ -151,8 +150,6 @@ export async function PageLegale({
   readonly sorte: SorteLegale;
 }) {
   const t = await getTranslations("legal");
-  const nav = await getTranslations("navigation");
-  const landing = await getTranslations("landing");
   const format = await getFormatter();
   const dateMaj = format.dateTime(DERNIERE_MAJ, {
     year: "numeric",
@@ -165,202 +162,100 @@ export async function PageLegale({
   const { titre, pastille, chapeau, sections } = documentLegal(t.raw(`pages.${sorte}`), signalable, { prixPro });
   const IconePastille = sorte === "conditions" ? FileText : sorte === "confidentialite" ? Shield : Scale;
 
-  /* LES LIENS D'EN-TÊTE ET DE PIED SONT DES CIBLES TACTILES : 44 px au
-     téléphone, compensés par la marge négative, et la hauteur de leur texte au
-     bureau, comme au kit. */
-  const lienEntete =
-    "-my-3.5 hidden min-h-11 items-center text-[14.5px] font-medium text-ds-texte-corps hover:text-ds-accent-encre sm:inline-flex md:my-0 md:min-h-0";
-
-  const encartSignalement = signalable ? (
-    <div className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4">
-      <p className="text-[14px] font-bold text-ds-texte-fort">{t("encartSignalerTitre")}</p>
-      <p className="mt-1.5 mb-3 text-[13px] leading-[1.5] text-ds-texte-corps">
-        {t("encartSignalerTexte")}
-      </p>
-      <Link
-        href={`/${locale}/signalement`}
-        className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] font-semibold text-ds-texte-lien hover:text-ds-accent-encre"
-      >
-        {t("encartSignalerLien")}
-      </Link>
-    </div>
-  ) : null;
-
-  const sommaire = (
-    <nav aria-label={t("sommaireTitre")} className="flex flex-col gap-[3px]">
-      <span className="px-3 pb-1.5 text-[11.5px] font-bold tracking-[0.08em] text-ds-texte-tenu uppercase">
-        {t("sommaireTitre")}
-      </span>
+  const liensSommaire = (
+    <>
       {sections.map((s, i) => (
-        <a
-          key={s.id}
-          href={`#${s.id}`}
-          className="flex min-h-11 items-center rounded-ds-sm px-3 py-2 text-[14px] font-medium text-ds-texte-corps transition-colors hover:bg-ds-surface-teinte hover:text-ds-accent-encre md:block md:min-h-0"
-        >
+        <a key={s.id} href={`#${s.id}`}>
           {`${i + 1}. ${s.titre}`}
         </a>
       ))}
-      <div className="mt-[18px] flex flex-col gap-2 border-t border-ds-filet px-3 pt-4">
-        <Link
-          href={`/${locale}/conditions`}
-          className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
-        >
-          {t("conditionsTitre")}
-        </Link>
-        <Link
-          href={`/${locale}/confidentialite`}
-          className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
-        >
-          {t("confidentialiteTitre")}
-        </Link>
-        <Link
-          href={`/${locale}/mentions-legales`}
-          className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
-        >
-          {t("mentionsTitre")}
-        </Link>
-      </div>
-    </nav>
+      <p className="doc-nav__groupe">{t("piedTitre")}</p>
+      <Link href={`/${locale}/conditions`} aria-current={sorte === "conditions" ? "page" : undefined}>
+        {t("conditionsTitre")}
+      </Link>
+      <Link href={`/${locale}/confidentialite`} aria-current={sorte === "confidentialite" ? "page" : undefined}>
+        {t("confidentialiteTitre")}
+      </Link>
+      <Link href={`/${locale}/mentions-legales`} aria-current={sorte === "mentions" ? "page" : undefined}>
+        {t("mentionsTitre")}
+      </Link>
+    </>
   );
 
+  /* LA REFONTE (02/10/2026) suit `conditions.html` : en-tête de page, puis le sommaire et
+     l'encart de signalement à gauche, le texte à droite, sections numérotées. Le texte
+     reste celui du kit légal recopié dans les catalogues (`legal.pages`), validé par Zod.
+
+     LE SOMMAIRE RESTE SANS JAVASCRIPT (arbitrage du § 5) : une colonne au bureau, un
+     `<details>` replié au téléphone — deux rendus du même contenu, chacun masqué à
+     l'autre largeur, plutôt qu'un script qui ouvrirait l'un ou l'autre. */
   return (
-    <div className="flex min-h-screen flex-col bg-[linear-gradient(180deg,#FAF9FE_0%,#FBFAFE_60%,#F8F3FD_100%)] bg-fixed leading-[normal]">
-      {/*
-        L'EN-TÊTE DU KIT, COLLANT ET TRANSLUCIDE. Le flou est autorisé ici : la
-        règle 2 ne l'interdit que sur `/p/[token]`, et cette surface est la
-        nôtre.
-      */}
-      <header className="sticky top-0 z-10 flex flex-wrap items-center gap-2.5 border-b border-ds-filet bg-[rgba(255,255,255,0.82)] px-3.5 py-2.5 backdrop-blur-[12px] md:gap-5 md:px-[34px] md:py-4">
-        {/* Le saut au contenu doit rester le premier élément focusable. */}
-        <a
-          href="#contenu"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-ds-sm focus:bg-ds-surface-carte focus:px-4 focus:py-2 focus:text-ds-texte-fort focus:shadow-ds-md"
-        >
-          {nav("allerAuContenu")}
-        </a>
-        <Link href={`/${locale}`} className="inline-flex min-h-11 items-center md:min-h-0">
-          <LogoMarque hauteur={30} />
-        </Link>
-        <span className="rounded-ds-pill border border-ds-violet-200 bg-ds-surface-teinte px-[11px] py-[5px] text-[12px] font-bold text-ds-accent-encre">
-          {t("pastille")}
-        </span>
-        <span className="flex-1" />
-        <Link href={`/${locale}/docs`} className={lienEntete}>
-          {landing("menu.docs")}
-        </Link>
-        <Link href={`/${locale}`} className={lienEntete}>
-          {t("accueil")}
-        </Link>
-        {/* LE SEUL DÉGRADÉ DE L'ÉCRAN — règle 3. */}
-        <Link
-          href={`/${locale}/inscription`}
-          className="degrade-ds-marque inline-flex h-11 items-center gap-2 rounded-ds-pill border border-transparent px-[22px] text-[14px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
-        >
-          {nav("creerCompte")}
-          <ArrowRight aria-hidden="true" size={16} strokeWidth={1.9} />
-        </Link>
-      </header>
-
-      <main className="mx-auto grid w-full max-w-[1240px] flex-1 grid-cols-[minmax(0,1fr)] items-start gap-7 px-4 pt-6 pb-12 min-[980px]:grid-cols-[268px_minmax(0,1fr)] min-[980px]:gap-12 min-[980px]:px-[34px] min-[980px]:pt-10 min-[980px]:pb-20">
-        <aside className="min-[980px]:sticky min-[980px]:top-24">
-          {/* Au téléphone replié — dix entrées de 44 px passaient avant le texte —,
-              dans la colonne au bureau. Voir `SommaireRepliable`. */}
-          <SommaireRepliable titre={t("sommaireTitre")} masque="min-[980px]:hidden">
-            {sommaire}
-          </SommaireRepliable>
-          <div className="hidden min-[980px]:block">{sommaire}</div>
-
-          {/* L'ENCART DE SIGNALEMENT — écrit au kit le 29/09/2026 : la procédure
-              de notification et retrait fonde notre statut d'hébergeur (brief
-              §12), et c'est ici, à côté des conditions, qu'on la cherche. */}
-          {encartSignalement === null ? null : (
-            <div className="mt-[22px] hidden min-[980px]:block">{encartSignalement}</div>
-          )}
-        </aside>
-
-        <article id="contenu" className="max-w-[780px] min-w-0">
-          <span className="inline-flex items-center gap-2 rounded-ds-pill border border-ds-violet-200 bg-ds-surface-teinte px-3.5 py-[7px] text-[12.5px] font-bold text-ds-accent-encre">
-            <IconePastille aria-hidden="true" size={14} strokeWidth={2} />
+    <CoqueSite locale={locale} page="legal">
+      <main id="contenu" className="pub">
+        <section className="pub-tete conteneur">
+          <p className="l4-etiquette">
+            <span>
+              <IconePastille aria-hidden="true" className="ic" />
+            </span>
             {pastille}
-          </span>
-          <h1 className="mt-5 text-[27px] leading-[1.06] font-extrabold tracking-[-0.045em] text-balance text-ds-texte-fort sm:text-[32px] md:text-[44px]">
-            {titre}
-          </h1>
-
-          <div className="mt-[18px] mb-[22px] flex flex-wrap items-center gap-4 border-y border-ds-filet pt-3.5 pb-1 text-[12.5px] text-ds-texte-sourdine">
-            <span className="flex items-center gap-[7px]">
-              <CalendarDays aria-hidden="true" size={14} strokeWidth={1.9} />
-              {/* Une seule chaîne par ligne, ponctuation comprise : « : » prend
-                  une espace avant en français et aucune en anglais ni en
-                  chinois — la coller dans le code l'imposait aux trois. */}
-              {t("misAJourDate", { date: dateMaj })}
-            </span>
-            <span className="flex items-center gap-[7px]">
-              <Building2 aria-hidden="true" size={14} strokeWidth={1.9} />
-              {t("editeurLigne", { nom: t("editeurNom") })}
-            </span>
-          </div>
-
-          <Paragraphe>{chapeau}</Paragraphe>
-
-          {sections.map((s, i) => (
-            <section key={s.id}>
-              <h2
-                id={s.id}
-                className="mt-12 mb-3.5 scroll-mt-24 text-[21px] leading-[1.1] font-extrabold tracking-[-0.035em] text-balance text-ds-texte-fort sm:text-[23px] md:text-[28px]"
-              >
-                {`${i + 1}. ${s.titre}`}
-              </h2>
-              {s.blocs.map((b, j) => (
-                <BlocLegal key={j} bloc={b} />
-              ))}
-            </section>
-          ))}
-
-          {/* AU TÉLÉPHONE L'ENCART DE SIGNALEMENT VIENT EN FIN DE DOCUMENT : il
-              n'y a pas de colonne pour le porter, et le mettre en tête
-              retarderait le texte qu'on vient lire. */}
-          {encartSignalement === null ? null : (
-            <div className="mt-[34px] min-[980px]:hidden">{encartSignalement}</div>
-          )}
-        </article>
+          </p>
+          <h1 className="pub-titre">{titre}</h1>
+          <p className="leg-meta">
+            <CalendarDays aria-hidden="true" className="ic" />
+            {/* Une seule chaîne par ligne, ponctuation comprise : « : » prend une espace
+                avant en français, aucune en anglais ni en chinois. */}
+            {t("misAJourDate", { date: dateMaj })}
+            <span aria-hidden="true">·</span>
+            <Building2 aria-hidden="true" className="ic" />
+            {t("editeurLigne", { nom: t("editeurNom") })}
+          </p>
+        </section>
+        <div className="conteneur doc leg">
+          <aside className="doc-cote">
+            <details className="doc-sommaire sommaire--telephone">
+              <summary>
+                <ListFilter aria-hidden="true" className="ic" />
+                <span>{t("sommaireTitre")}</span>
+                <b />
+                <ChevronDown aria-hidden="true" className="ic" />
+              </summary>
+              <nav className="doc-nav" aria-label={t("sommaireTitre")}>
+                {liensSommaire}
+              </nav>
+            </details>
+            <nav className="doc-nav sommaire--bureau" aria-label={t("sommaireTitre")}>
+              {liensSommaire}
+            </nav>
+            {/* L'ENCART DE SIGNALEMENT : la procédure de notification et retrait fonde
+                notre statut d'hébergeur (brief §12), et c'est à côté des conditions qu'on
+                la cherche. Seulement si la page de signalement existe. */}
+            {signalable ? (
+              <div className="leg-encart v4-carte">
+                <b>{t("encartSignalerTitre")}</b>
+                <p>{t("encartSignalerTexte")}</p>
+                <Link className="lien-texte min-h-11" href={`/${locale}/signalement`}>
+                  {t("encartSignalerLien")}
+                  <ArrowRight aria-hidden="true" className="ic" />
+                </Link>
+              </div>
+            ) : null}
+          </aside>
+          <article className="doc-article leg-article">
+            <p className="leg-chapeau">{chapeau}</p>
+            {sections.map((s, i) => (
+              <section key={s.id} className="doc-section" id={s.id} aria-labelledby={"h-" + s.id}>
+                <h2 id={"h-" + s.id}>
+                  <span className="leg-n">{String(i + 1).padStart(2, "0")}</span>
+                  {s.titre}
+                </h2>
+                {s.blocs.map((b, j) => (
+                  <BlocLegal key={j} bloc={b} />
+                ))}
+              </section>
+            ))}
+          </article>
+        </div>
       </main>
-
-      <footer className="flex flex-wrap items-center gap-[18px] border-t border-ds-filet px-4 py-[26px] md:px-[34px]">
-        <LogoMarque hauteur={22} />
-        <span className="min-w-20 flex-1" />
-        <nav aria-label={t("piedTitre")} className="flex flex-wrap gap-x-[18px]">
-          <Link
-            href={`/${locale}/conditions`}
-            className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
-          >
-            {t("piedConditions")}
-          </Link>
-          <Link
-            href={`/${locale}/confidentialite`}
-            className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
-          >
-            {t("piedConfidentialite")}
-          </Link>
-          <Link
-            href={`/${locale}/mentions-legales`}
-            className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
-          >
-            {t("piedMentions")}
-          </Link>
-          {signalable ? (
-            <Link
-              href={`/${locale}/signalement`}
-              className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
-            >
-              {t("piedSignaler")}
-            </Link>
-          ) : null}
-        </nav>
-        <span className="text-[13px] text-ds-texte-sourdine">
-          {nav("piedDePage", { annee: new Date().getFullYear() })}
-        </span>
-      </footer>
-    </div>
+    </CoqueSite>
   );
 }

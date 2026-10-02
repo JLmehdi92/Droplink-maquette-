@@ -6,16 +6,14 @@ import { CalendarDays, Clock } from "lucide-react";
  * recopiaient chacun leur propre table des mois.
  */
 export function MetaArticle({ date, duree }: { readonly date: string; readonly duree: string }) {
+  // Le vocabulaire de la maquette (`.blog-meta`) : date, point médian, durée.
   return (
-    <span className="flex flex-wrap items-center gap-4 text-[12.5px] text-ds-texte-sourdine">
-      <span className="flex items-center gap-[7px]">
-        <CalendarDays aria-hidden="true" size={14} strokeWidth={1.9} />
-        <time dateTime={date}>{dateLisible(date)}</time>
-      </span>
-      <span className="flex items-center gap-[7px]">
-        <Clock aria-hidden="true" size={14} strokeWidth={1.9} />
-        {duree}
-      </span>
+    <span className="blog-meta">
+      <CalendarDays aria-hidden="true" className="ic" />
+      <time dateTime={date}>{dateLisible(date)}</time>
+      <span aria-hidden="true">·</span>
+      <Clock aria-hidden="true" className="ic" />
+      {duree}
     </span>
   );
 }

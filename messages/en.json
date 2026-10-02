@@ -39,13 +39,9 @@
       "docs": "Documentation"
     },
     "pied": {
-      "conditions": "Terms",
-      "confidentialite": "Privacy",
       "docs": "Documentation"
     },
     "piedCourt": {
-      "conditions": "Terms",
-      "confidentialite": "Privacy",
       "docs": "Documentation"
     },
     "piedDroits": "© {annee} DropLink. All rights reserved.",
@@ -101,9 +97,6 @@
     "encartSignalerTexte": "Use the dedicated form: every report is reviewed.",
     "encartSignalerLien": "Report content",
     "piedTitre": "Legal pages",
-    "piedConditions": "Terms",
-    "piedConfidentialite": "Privacy",
-    "piedSignaler": "Report content",
     "signalement": {
       "intro": "If a page we host infringes your rights or looks unlawful to you, describe it here. Every report is reviewed by a person.",
       "etape1Titre": "You send us the link",
@@ -125,8 +118,16 @@
       "email": "Your email address",
       "emailExemple": "So that we can reply",
       "envoyer": "Prepare the report",
-      "ouvreMessagerie": "This button opens your email client with the message already filled in. Nothing is sent until you send it yourself.",
-      "adresseDirecte": "Or write directly to"
+      "ouvreMessagerie": "This button prepares the message to send. Nothing is sent until you send it yourself.",
+      "adresseDirecte": "Or write directly to",
+      "pretTitre": "Your message is ready",
+      "a": "To",
+      "objet": "Subject",
+      "copier": "Copy the message",
+      "copie": "Message copied",
+      "copieRefusee": "Copy blocked by the browser",
+      "ouvrir": "Open your email app",
+      "rienEnvoye": "Nothing is sent until you send it yourself."
     },
     "conditionsMetaTitre": "Terms of use — DropLink",
     "conditionsMetaDescription": "DropLink's terms of use: the service, the seller account, content, the Free and Pro plans, termination and liability.",
@@ -134,11 +135,8 @@
     "confidentialiteMetaDescription": "What data DropLink processes, why, for how long, with which providers, and your rights — for sellers and their customers alike.",
     "signalementMetaTitre": "Report content — DropLink",
     "signalementMetaDescription": "Report content hosted on DropLink. Describe the link and the reason: every report is read, and a page can be taken down without delay.",
-    "pastille": "Legal",
-    "accueil": "Home",
     "editeurNom": "Mahfoud SEDDIKI",
     "mentionsTitre": "Legal notice",
-    "piedMentions": "Legal notice",
     "mentionsMetaTitre": "Legal notice — DropLink",
     "mentionsMetaDescription": "DropLink's legal notice: publisher, publication director, hosting providers and contact.",
     "misAJourDate": "Last updated: {date}",

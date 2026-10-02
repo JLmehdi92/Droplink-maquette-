@@ -2,11 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { CoquePublique } from "@/components/coque-publique";
+import { ArrowLeft, ArrowRight, FileText } from "lucide-react";
+import { CoqueSite } from "@/components/public/coque-site";
 import { MetaArticle } from "@/components/blog/meta-article";
 import { CorpsArticle } from "@/components/blog/corps-article";
-import { articleParSlug, estLangueDuBlog, LANGUE_DU_BLOG, slugs } from "@/lib/blog/articles";
+import { articleParSlug, estLangueDuBlog, LANGUE_DU_BLOG, slugs, tousLesArticles } from "@/lib/blog/articles";
 import { alternatesUneSeuleLangue, openGraphDe } from "@/lib/seo/alternates";
 import { donneesArticle } from "@/lib/seo/donnees-structurees";
 import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
@@ -68,13 +68,16 @@ export default async function ArticleDuBlog({
   setRequestLocale(locale);
   const graphe = donneesArticle(langue, article);
 
+  // « À lire aussi » : les deux articles qui suivent dans la liste, en boucle.
+  const tous = tousLesArticles();
+  const rang = tous.findIndex((a) => a.slug === article.slug);
+  const suite = [1, 2].map((k) => tous[(rang + k) % tous.length]).filter((a) => a !== undefined && a.slug !== article.slug);
+
   return (
-    <CoquePublique locale={locale} pastille="Blog" enteteSecondaire>
-      {/* Le graphe est rendu CÔTÉ SERVEUR : Google traite les données
-          structurées injectées par JS avec un retard de plusieurs jours, et ne
-          rend pas le JS sur une page en statut non-200. Seul `<` est neutralisé
-          — il pourrait fermer la balise ; la valeur ne vient d'aucune entrée
-          utilisateur. */}
+    <CoqueSite locale={locale} page="blog">
+      {/* Le graphe est rendu CÔTÉ SERVEUR : Google traite les données structurées
+          injectées par JS avec retard. Seul `<` est neutralisé — il pourrait fermer
+          la balise ; la valeur ne vient d'aucune entrée utilisateur. */}
       {graphe === null ? null : (
         <script
           type="application/ld+json"
@@ -82,52 +85,63 @@ export default async function ArticleDuBlog({
         />
       )}
 
-      {/* `blog/index.html#<slug>` du design system. 760 px de texte : au-delà
-          d'environ 90 caractères par ligne, l'œil perd le début de la ligne
-          suivante. */}
-      <main id="contenu" className="mx-auto w-full max-w-[828px] flex-1 px-4 pt-6 pb-12 md:px-[34px] md:pt-10 md:pb-[88px]">
-        <Link
-          href={`/${locale}/blog`}
-          className="-my-3.5 inline-flex min-h-11 items-center gap-2 text-[14px] font-semibold text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
-        >
-          <ArrowLeft aria-hidden="true" size={16} strokeWidth={1.9} />
-          Le blog
-        </Link>
-
-        <div className="mt-[22px]">
-          <span className="inline-flex items-center gap-2 rounded-ds-pill border border-ds-violet-200 bg-ds-surface-teinte px-3.5 py-[7px] text-[12.5px] font-bold text-ds-accent-encre">
-            {article.etiquette}
-          </span>
-        </div>
-
-        <h1 className="mt-5 text-[28px] leading-[1.06] font-extrabold tracking-[-0.045em] text-balance text-ds-texte-fort sm:text-[34px] md:text-[44px]">
-          {article.titre}
-        </h1>
-
-        <div className="mt-5 mb-[26px] border-y border-ds-filet py-3.5">
-          <MetaArticle date={article.date} duree={`${article.minutes} min de lecture`} />
-        </div>
-
-        <CorpsArticle blocs={article.blocs} />
-
-        {/* L'APPEL DE FIN, en bas et une seule fois : il prend le dégradé, et
-            l'en-tête passe en secondaire (règle 3). */}
-        <div className="mt-12 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte px-5 py-7 text-center shadow-ds-card md:p-8">
-          <h2 className="text-[20px] font-extrabold tracking-[-0.03em] text-ds-texte-fort md:text-[22px]">
-            Essayez sur votre prochaine commande
-          </h2>
-          <p className="mt-2 mb-5 text-[15px] leading-[1.6] text-ds-texte-corps">
-            Gratuit pendant le lancement. Aucune carte demandée.
-          </p>
-          <Link
-            href={`/${locale}/inscription`}
-            className="degrade-ds-marque inline-flex h-[52px] min-h-11 w-full items-center justify-center gap-2 rounded-ds-pill border border-transparent px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover md:w-auto"
-          >
-            Créer ma première commande
-            <ArrowRight aria-hidden="true" size={18} strokeWidth={1.9} />
+      {/* LA REFONTE (02/10/2026) suit les articles de la maquette (`.art`) : 760 px de
+          texte, au-delà l'œil perd le début de la ligne suivante. La barre de progression
+          de la maquette n'est pas portée : elle demande un script et ne dit rien que la
+          barre de défilement ne dise. */}
+      <main id="contenu" className="pub">
+        <article className="conteneur art">
+          <Link className="art-retour min-h-11" href={`/${locale}/blog`}>
+            <ArrowLeft aria-hidden="true" className="ic" />
+            Tous les articles
           </Link>
-        </div>
+          <p className="l4-etiquette art-etiquette">
+            <span>
+              <FileText aria-hidden="true" className="ic" />
+            </span>
+            {article.etiquette}
+          </p>
+          <h1 className="pub-titre art-titre">{article.titre}</h1>
+          <p className="art-meta">
+            <MetaArticle date={article.date} duree={`${article.minutes} min de lecture`} />
+          </p>
+
+          <CorpsArticle blocs={article.blocs} />
+
+          {/* L'APPEL DE FIN, une seule fois, et le seul dégradé de l'écran (règle 3).
+              « Gratuit pendant le lancement » n'est plus vrai depuis le plan Pro : le texte
+              de la maquette, juste, le remplace. */}
+          <aside className="pub-cta v4-carte">
+            <h2>Un seul lien pour toute la commande</h2>
+            <p>Compte gratuit, sans carte bancaire, prêt en moins d’une minute.</p>
+            <Link className="bouton bouton--marque bouton--large min-h-11" href={`/${locale}/inscription`}>
+              Créer mon compte
+              <ArrowRight aria-hidden="true" className="ic" />
+            </Link>
+          </aside>
+
+          {suite.length === 0 ? null : (
+            <nav className="art-suite" aria-label="À lire aussi">
+              <p className="art-suite__titre">À lire aussi</p>
+              {suite.map((a) =>
+                a === undefined ? null : (
+                  <Link key={a.slug} className="blog-carte v4-carte" href={`/${locale}/blog/${a.slug}`}>
+                    <span className="blog-carte__etiquette">{a.etiquette}</span>
+                    <h2>{a.titre}</h2>
+                    <span className="blog-carte__pied">
+                      <MetaArticle date={a.date} duree={`${a.minutes} min`} />
+                      <span className="blog-carte__lire">
+                        Lire
+                        <ArrowRight aria-hidden="true" className="ic" />
+                      </span>
+                    </span>
+                  </Link>
+                ),
+              )}
+            </nav>
+          )}
+        </article>
       </main>
-    </CoquePublique>
+    </CoqueSite>
   );
 }

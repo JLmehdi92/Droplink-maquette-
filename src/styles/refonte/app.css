@@ -1866,6 +1866,10 @@ a.action-ligne { color: var(--corps); }
 .leg-article .doc-section:first-child { padding-top: 8px; }
 .leg-encart { position: relative; display: grid; gap: 6px; padding: 18px; border-radius: 16px; border: 1px solid var(--filet); background: var(--surface); }
 .leg-encart b { font-size: 14px; }
+/* Les sommaires (documentation, légal) sans script : la colonne au bureau, le volet au téléphone. */
+.sommaire--telephone { display: none; }
+.leg-chapeau { font-size: 17px; line-height: 1.65; color: var(--encre); text-wrap: pretty; }
+@media (max-width: 980px) { .sommaire--telephone { display: block; } .sommaire--bureau { display: none; } }
 .leg-encart p { font-size: 13px; line-height: 1.5; color: var(--corps); }
 .leg-encart .lien-texte { display: inline-flex; align-items: center; gap: 4px; min-height: 36px; font-size: 13.5px; }
 

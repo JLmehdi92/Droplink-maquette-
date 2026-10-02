@@ -160,7 +160,7 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
           <p className="pub-chapo">{t("intro")}</p>
         </section>
 
-        <section className="conteneur tf-plans" aria-label={t("comparer")}>
+        <section className="conteneur tf-plans">
           <article className="tf-plan v4-carte">
             <header>
               <h2>{p("gratuit")}</h2>
@@ -170,7 +170,7 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
               <p className="tf-sous">{t("gratuitSous")}</p>
             </header>
             {liste(inclusGratuit)}
-            <Link className="bouton bouton--second bouton--large" href={`/${locale}/inscription`}>
+            <Link className="bouton bouton--second bouton--large min-h-11" href={`/${locale}/inscription`}>
               {t("ctaGratuit")}
               <ArrowRight aria-hidden="true" className="ic" />
             </Link>
@@ -189,7 +189,7 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
             </header>
             {liste(inclusPro)}
             <div className="tf-pro-actions">
-              <Link className="bouton bouton--marque bouton--large" href={`/${locale}/inscription`}>
+              <Link className="bouton bouton--marque bouton--large min-h-11" href={`/${locale}/inscription`}>
                 {t("ctaPro")}
                 <ArrowRight aria-hidden="true" className="ic" />
               </Link>
@@ -244,6 +244,10 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
               </tbody>
             </table>
           </div>
+          {/* QUI FACTURE, ET CE QUE DEVIENT LE PLAN À LA RÉSILIATION : la maquette ne la porte
+              pas, le produit la garde (contrainte n° 1, et Lemon Squeezy demande ces
+              conditions sur la page publique de tarifs). */}
+          <p className="tf-note">{p("facture")}</p>
           <p className="tf-question">
             {t("question")}{" "}
             <Link className="lien-texte" href={`/${locale}/docs#plans`}>

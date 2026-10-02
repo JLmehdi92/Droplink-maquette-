@@ -151,7 +151,6 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#f6f2fc", "fond de la page du lien mort — arrêt 100 %"],
   // Le dernier arrêt du fond des pages légales. Il n'était PAS déclaré et la
   // garde n'a rien dit : c'est la couleur que la correction du motif a sortie.
-  ["#f8f3fd", "fond des pages légales — arrêt 100 %, kit legal"],
   /*
    * ⚠️ LE FOND DE L'ESPACE VENDEUR, ET C'EST UN QUATRIÈME LAVANDE. Le design
    * system en pose un par surface, tous voisins et tous différents :

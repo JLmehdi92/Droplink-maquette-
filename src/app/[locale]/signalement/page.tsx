@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Flag, Info } from "lucide-react";
-import { CoquePublique } from "@/components/coque-publique";
+import { CircleAlert, Shield } from "lucide-react";
+import { CoqueSite } from "@/components/public/coque-site";
 import { FormulaireSignalement } from "@/components/formulaire-signalement";
 import { TraductionsClient } from "@/components/traductions-client";
 import { adresseAbus } from "@/lib/contact";
@@ -72,64 +72,43 @@ export default async function Signalement({
     { titre: t("signalement.etape3Titre"), texte: t("signalement.etape3Texte") },
   ];
 
-  const avertissement = (
-    <aside
-      role="note"
-      className="flex gap-[13px] rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte px-[18px] py-4"
-    >
-      <Info aria-hidden="true" size={18} strokeWidth={2} className="mt-px shrink-0 text-ds-texte-sourdine" />
-      <p className="text-[14px] leading-[1.6] text-ds-texte-corps">{t("signalement.avertissement")}</p>
-    </aside>
-  );
-
+  /* LA REFONTE (02/10/2026) suit `signalement.html` : à gauche ce qui se passe après
+     l'envoi (sans ces trois étapes, un signalement part dans le silence, et c'est ce
+     silence qui fait recommencer ou renoncer), à droite le formulaire. */
   return (
-    <CoquePublique locale={locale} pastille={t("pastille")} enteteSecondaire>
-      <main
-        id="contenu"
-        className="mx-auto grid w-full max-w-[1240px] flex-1 grid-cols-[minmax(0,1fr)] items-start gap-8 px-4 pt-6 pb-12 min-[980px]:grid-cols-[minmax(0,1fr)_minmax(0,520px)] min-[980px]:gap-16 min-[980px]:px-[34px] min-[980px]:pt-12 min-[980px]:pb-20"
-      >
-        <div className="min-w-0">
-          <span className="inline-flex items-center gap-2 rounded-ds-pill border border-ds-violet-200 bg-ds-surface-teinte px-3.5 py-[7px] text-[12.5px] font-bold text-ds-accent-encre">
-            <Flag aria-hidden="true" size={14} strokeWidth={2} />
-            {t("signalementSurTitre")}
-          </span>
-          <h1 className="mt-5 text-[27px] leading-[1.06] font-extrabold tracking-[-0.045em] text-balance text-ds-texte-fort sm:text-[32px] md:text-[44px]">
-            {t("signalementTitre")}
-          </h1>
-          <p className="mt-[18px] text-[15.5px] leading-[1.7] text-pretty text-ds-texte-corps">
-            {t("signalement.intro")}
-          </p>
-
-          {/* LES TROIS ÉTAPES DISENT CE QUI SE PASSE APRÈS L'ENVOI. Sans elles,
-              un signalement part dans le silence — et c'est ce silence qui fait
-              recommencer, ou renoncer. */}
-          <ol className="mt-[30px] flex flex-col gap-[18px]">
-            {etapes.map((e, i) => (
-              <li key={e.titre} className="flex gap-3.5">
-                <span
-                  aria-hidden="true"
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-ds-pill border border-ds-violet-200 bg-ds-surface-teinte text-[13px] font-extrabold text-ds-accent-encre"
-                >
-                  {i + 1}
-                </span>
-                <div className="min-w-0 pt-1">
-                  <p className="text-[15.5px] font-bold text-ds-texte-fort">{e.titre}</p>
-                  <p className="mt-[3px] text-[14.5px] leading-[1.6] text-ds-texte-corps">{e.texte}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-
-          <div className="mt-[30px] hidden min-[980px]:block">{avertissement}</div>
-        </div>
-
-        <TraductionsClient espaces={["legal"]}>
-          <div className="flex flex-col gap-[18px]">
-            <FormulaireSignalement adresse={adresse} />
-            <div className="min-[980px]:hidden">{avertissement}</div>
+    <CoqueSite locale={locale} page="signalement">
+      <main id="contenu" className="pub">
+        <div className="conteneur sig">
+          <div className="sig-gauche">
+            <p className="l4-etiquette">
+              <span>
+                <Shield aria-hidden="true" className="ic" />
+              </span>
+              {t("signalementSurTitre")}
+            </p>
+            <h1 className="pub-titre">{t("signalementTitre")}</h1>
+            <p className="pub-chapo">{t("signalement.intro")}</p>
+            <ol className="sig-etapes">
+              {etapes.map((e, i) => (
+                <li key={e.titre}>
+                  <span aria-hidden="true">{i + 1}</span>
+                  <div>
+                    <b>{e.titre}</b>
+                    <p>{e.texte}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <aside className="sig-note" role="note">
+              <CircleAlert aria-hidden="true" className="ic" />
+              <p>{t("signalement.avertissement")}</p>
+            </aside>
           </div>
-        </TraductionsClient>
+          <TraductionsClient espaces={["legal"]}>
+            <FormulaireSignalement adresse={adresse} />
+          </TraductionsClient>
+        </div>
       </main>
-    </CoquePublique>
+    </CoqueSite>
   );
 }

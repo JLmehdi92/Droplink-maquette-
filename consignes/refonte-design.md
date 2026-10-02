@@ -856,6 +856,35 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   console, aucune violation CSP, aucune cible sous 44 px. Cinq clés mortes retirées.
 - **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
 
+### ▶️ 02/10/2026 — étape 6b : blog, articles, pages légales, signalement (session cloud)
+
+- **Blog (`blog.html`)** : en-tête de page, grille de cartes, la plus récente « à la une ». **Articles** :
+  le gabarit `.art` (retour, étiquette, titre, méta, corps sémantique, appel final, « À lire aussi » —
+  les deux articles suivants). La barre de progression n'est pas portée (un script pour ne rien dire
+  que la barre de défilement ne dise). L'appel de fin disait « Gratuit pendant le lancement » : faux
+  depuis le plan Pro, remplacé par le texte juste de la maquette.
+- **Pages légales (`conditions.html`)** : en-tête de page, sommaire et encart de signalement à gauche,
+  sections numérotées « 01 »… Le texte reste celui du kit légal recopié dans les catalogues. **Sommaire
+  sans JavaScript** (arbitrage du § 5) : deux rendus du même contenu, la colonne au bureau, un
+  `<details>` replié au téléphone. La documentation adopte le même procédé — la relecture avait montré
+  qu'un volet replié au montage restait invisible à l'élargissement, et qu'ouvert au rendu il faisait
+  sauter la page.
+- **Signalement (`signalement.html`, décision n° 11)** : « Préparer le signalement » compose le message
+  et le MONTRE (destinataire, objet, corps) avec « Copier le message » et « Ouvrir la messagerie ». Rien
+  ne part d'ici ; un `mailto:` qui ne s'ouvrait pas laissait l'utilisateur devant un bouton muet.
+  Éprouvé au navigateur (build avec `NEXT_PUBLIC_CONTACT_ABUS`, sans lequel la page rend 404 — voulu).
+- **Relecture de Tarifs et Documentation** : 1 HIGH corrigé — la mention de facturation et de
+  résiliation (Lemon Squeezy) avait disparu de /tarifs avec la maquette ; elle revient (contrainte n° 1,
+  et c'est ce que Lemon Squeezy demande sur la page publique). MEDIUM : le sommaire (voir plus haut).
+  LOW : région en double nom, numéros d'étapes lus deux fois (`aria-hidden`).
+- `CoquePublique` et `SommaireRepliable` n'ont plus d'appelant : supprimés. Gardes mises à jour avec
+  leur raison : cibles autonomes (planchers posés dans le balisage, trois nouvelles déclarées),
+  surfaces de marque (6 : la refonte les peint par `.bouton--marque`), une couleur d'exception
+  devenue inutile retirée, dix clés mortes retirées.
+- **Mesuré** : 1280 et 390 px, fr/en/zh-CN selon la page, mouvement réduit ; aucun débordement, aucune
+  erreur console, aucune violation CSP, aucune cible sous 44 px.
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

@@ -39,13 +39,9 @@
       "docs": "使用文档"
     },
     "pied": {
-      "conditions": "使用条款",
-      "confidentialite": "隐私政策",
       "docs": "使用文档"
     },
     "piedCourt": {
-      "conditions": "条款",
-      "confidentialite": "隐私",
       "docs": "使用文档"
     },
     "piedDroits": "© {annee} DropLink. 保留所有权利。",
@@ -101,9 +97,6 @@
     "encartSignalerTexte": "请使用专门的表单：我们会处理每一条举报。",
     "encartSignalerLien": "举报内容",
     "piedTitre": "法律页面",
-    "piedConditions": "使用条款",
-    "piedConfidentialite": "隐私政策",
-    "piedSignaler": "举报内容",
     "signalement": {
       "intro": "如果我们托管的某个页面损害了您的权利，或您认为它违法，请在此描述。每一条举报都会由人工审查。",
       "etape1Titre": "您提交相关链接",
@@ -125,8 +118,16 @@
       "email": "您的邮箱地址",
       "emailExemple": "以便我们回复您",
       "envoyer": "生成举报邮件",
-      "ouvreMessagerie": "此按钮会打开您的邮件客户端，内容已经填好。在您亲自发送之前，什么都不会被发出。",
-      "adresseDirecte": "或直接写信至"
+      "ouvreMessagerie": "此按钮会准备好要发送的消息。在您亲自发送之前，不会发送任何内容。",
+      "adresseDirecte": "或直接写信至",
+      "pretTitre": "您的消息已准备好",
+      "a": "收件人",
+      "objet": "主题",
+      "copier": "复制消息",
+      "copie": "消息已复制",
+      "copieRefusee": "浏览器拒绝了复制",
+      "ouvrir": "打开邮件应用",
+      "rienEnvoye": "在您亲自发送之前，不会发送任何内容。"
     },
     "conditionsMetaTitre": "使用条款 — DropLink",
     "conditionsMetaDescription": "DropLink 的使用条款：服务内容、卖家账户、内容、免费版与专业版、终止与责任。",
@@ -134,11 +135,8 @@
     "confidentialiteMetaDescription": "DropLink 处理哪些数据、为什么、保存多久、使用哪些服务商，以及卖家和其客户享有的权利。",
     "signalementMetaTitre": "举报内容 — DropLink",
     "signalementMetaDescription": "举报 DropLink 上托管的内容。请说明相关链接和原因：每一条举报都会被查看，页面可以被立即关闭。",
-    "pastille": "法律",
-    "accueil": "首页",
     "editeurNom": "Mahfoud SEDDIKI",
     "mentionsTitre": "法律声明",
-    "piedMentions": "法律声明",
     "mentionsMetaTitre": "法律声明 — DropLink",
     "mentionsMetaDescription": "DropLink 的法律声明：发布方、出版负责人、托管服务商和联系方式。",
     "misAJourDate": "最近更新：{date}",

@@ -13,7 +13,7 @@ import { join, relative, sep } from "node:path";
  *
  * ⚠️ IL Y A TROIS PIEDS DE PAGE DISTINCTS, ET C'EST LE PIÈGE QUI A FAILLI ME
  * FAIRE N'EN CORRIGER QU'UN. `app/[locale]/page.tsx` (la landing),
- * `components/coque-publique.tsx` (conditions, confidentialité, signalement,
+ * `components/public/coque-site.tsx` (conditions, confidentialité, signalement,
  * blog, connexion, inscription…) et `components/publique/page-client.tsx` (la page
  * client, sortie de `app/p/[token]/page.tsx` le 26/09/2026 pour servir aussi l'aperçu).
  * Ils ne partagent pas leur dessin — c'est délibéré, la planche fait foi pour
@@ -358,13 +358,6 @@ const AUTONOMES: ReadonlyArray<{
   readonly raison: string;
 }> = [
   {
-    fichier: "src/components/coque-publique.tsx",
-    repere: 'className="inline-flex min-h-11 items-center md:min-h-0"',
-    raison:
-      "Le logo d'en-tête du signalement et du blog, porté sur le design system le " +
-      "14/09/2026 : une IMAGE de 30 px, portée à 44 par son plancher au téléphone.",
-  },
-  {
     fichier: "src/components/public/entete-publique.tsx",
     repere: 'className="logo min-h-11"',
     raison:
@@ -398,32 +391,39 @@ const AUTONOMES: ReadonlyArray<{
   },
   {
     fichier: "src/app/[locale]/blog/[slug]/page.tsx",
-    repere: "gap-2 text-[14px] font-semibold text-ds-texte-corps",
+    repere: 'className="art-retour min-h-11"',
     raison:
-      "« Le blog », le retour en tête de l'article. Les actions d'en-tête propres " +
-      "à chaque page (« Découvrir DropLink », « Le blog ») ont disparu le 14/09/2026 " +
-      "avec la coque de l'ancien canevas : l'en-tête est désormais partagé.",
-  },
-  {
-    fichier: "src/components/coque-publique.tsx",
-    repere: "text-[14.5px] font-medium text-ds-texte-corps",
-    raison:
-      "« Documentation » et « Accueil », l'en-tête partagé du signalement et du " +
-      "blog : 44 px au téléphone, la hauteur du texte au bureau, comme au kit.",
+      "« Tous les articles », le retour en tête de l'article (refonte du 02/10/2026, " +
+      "`.art-retour` de la maquette, qui pose déjà 44 px ; le plancher les tient).",
   },
   {
     fichier: "src/app/[locale]/blog/[slug]/page.tsx",
-    repere: "degrade-ds-marque inline-flex h-[52px]",
+    repere: 'className="bouton bouton--marque bouton--large min-h-11"',
     raison:
-      "« Créer ma première commande », l'appel de fin d'article : 52 px dessinés, " +
-      "et le plancher posé quand même pour qu'une retouche de hauteur ne passe pas sous 44.",
+      "« Créer mon compte », l'appel de fin d'article (refonte du 02/10/2026) : le " +
+      "plancher posé pour qu'une retouche de hauteur du bouton ne passe pas sous 44.",
   },
   {
     fichier: "src/components/page-legale.tsx",
-    repere: "text-[13.5px] font-semibold text-ds-texte-lien",
+    repere: 'className="lien-texte min-h-11"',
     raison:
-      "« Signaler un contenu », l'encart des pages légales, porté sur le kit " +
-      "`legal` le 13/09/2026. 18 px de texte, 44 par son plancher.",
+      "« Signaler un contenu », l'encart des pages légales (refonte du 02/10/2026, " +
+      "`.leg-encart` de la maquette qui le pose à 36 px) : 44 par son plancher.",
+  },
+  {
+    fichier: "src/app/[locale]/tarifs/page.tsx",
+    repere: 'className="bouton bouton--second bouton--large min-h-11"',
+    raison: "« Créer un compte gratuit », la carte du plan gratuit (refonte du 02/10/2026).",
+  },
+  {
+    fichier: "src/app/[locale]/tarifs/page.tsx",
+    repere: 'className="bouton bouton--marque bouton--large min-h-11"',
+    raison: "« Commencer avec Pro », la seule action en dégradé de Tarifs (refonte du 02/10/2026).",
+  },
+  {
+    fichier: "src/app/[locale]/docs/page.tsx",
+    repere: 'className="bouton bouton--marque bouton--large min-h-11"',
+    raison: "« Créer mon compte », l'appel final de la documentation (refonte du 02/10/2026).",
   },
   {
     fichier: "src/components/formulaire-connexion.tsx",

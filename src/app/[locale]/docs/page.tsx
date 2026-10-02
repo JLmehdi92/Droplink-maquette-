@@ -395,7 +395,7 @@ export default async function Documentation({
             <aside className="pub-cta v4-carte">
               <h2>{t("ctaTitre")}</h2>
               <p>{t("ctaTexte")}</p>
-              <LienEcran href={`/${langue}/inscription`} className="bouton bouton--marque bouton--large">
+              <LienEcran href={`/${langue}/inscription`} className="bouton bouton--marque bouton--large min-h-11">
                 {t("ctaBouton")}
                 <ArrowRight aria-hidden="true" className="ic" />
               </LienEcran>

@@ -19,71 +19,41 @@ import type { Bloc } from "@/lib/blog/types";
  * intertitres au 28/800 des pages légales, citation sur la teinte violette.
  */
 export function CorpsArticle({ blocs }: { blocs: readonly Bloc[] }) {
+  // Le vocabulaire de la maquette (`.art-corps`) : la feuille peint des éléments
+  // sémantiques — titre, paragraphe, citation, liste —, sans une classe par bloc.
   return (
-    <>
+    <div className="art-corps">
       {blocs.map((bloc, i) => {
         // L'index suffit comme clé : la liste est FIGÉE à la compilation, elle
         // n'est ni réordonnée, ni filtrée, ni complétée côté client.
         const cle = `${bloc.type}-${i}`;
-
         switch (bloc.type) {
           case "chapeau":
             return (
-              <p key={cle} className="mb-2 text-[17px] leading-[1.65] text-pretty text-ds-texte-fort md:text-[19px]">
+              <p key={cle} className="art-chapeau">
                 {bloc.texte}
               </p>
             );
-
           case "titre":
-            return (
-              <h2
-                key={cle}
-                className="mt-9 mb-3.5 text-[22px] leading-[1.15] font-extrabold tracking-[-0.035em] text-balance text-ds-texte-fort md:mt-11 md:text-[28px]"
-              >
-                {bloc.texte}
-              </h2>
-            );
-
+            return <h2 key={cle}>{bloc.texte}</h2>;
           case "paragraphe":
-            return (
-              <p key={cle} className="mb-[18px] text-[16px] leading-[1.75] text-pretty text-ds-texte-corps md:text-[17px]">
-                {bloc.texte}
-              </p>
-            );
-
+            return <p key={cle}>{bloc.texte}</p>;
           case "citation":
-            return (
-              <div
-                key={cle}
-                className="my-[26px] rounded-r-ds-lg border-l-[3px] border-ds-accent bg-ds-surface-teinte px-[22px] py-[18px]"
-              >
-                <p className="text-[16px] leading-[1.75] text-ds-texte-fort md:text-[17px]">{bloc.texte}</p>
-              </div>
-            );
-
+            return <blockquote key={cle}>{bloc.texte}</blockquote>;
           case "liste":
             return (
-              <ul key={cle} className="mb-[18px] flex flex-col gap-2.5">
+              <ul key={cle}>
                 {bloc.items.map((item, j) => (
-                  <li
-                    key={`${cle}-${j}`}
-                    className="flex gap-3 text-[16px] leading-[1.75] text-ds-texte-corps md:text-[17px]"
-                  >
-                    {/* La puce est décorative : elle ne porte aucune
-                        information que le texte ne porte pas déjà. */}
-                    <span aria-hidden="true" className="mt-3 size-1.5 shrink-0 rounded-ds-pill bg-ds-accent" />
-                    <span>{item}</span>
-                  </li>
+                  <li key={`${cle}-${j}`}>{item}</li>
                 ))}
               </ul>
             );
-
           default: {
             const jamais: never = bloc;
             return jamais;
           }
         }
       })}
-    </>
+    </div>
   );
 }
