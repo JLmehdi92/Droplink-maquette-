@@ -78,6 +78,8 @@ export function LienEcran({
    * qui lit ce fichier pour savoir ce qu'on peut lui donner.
    */
   readonly "data-vue-active"?: "true" | undefined;
+  /** Le jeton de la page client, lu par l'aperçu au survol (`ApercuSurvol`). */
+  readonly "data-jeton"?: string;
   /**
    * `false` sur la surface d'administration : son plafond de requêtes compte
    * les préchargements (voir `tests/unit/admin-sans-prechargement.test.ts`).

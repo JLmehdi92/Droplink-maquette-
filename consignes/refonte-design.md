@@ -590,6 +590,45 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
 - **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
   **Au poste de Mehdi** : `fumee` (connexion et inscription servent un autre HTML).
 
+### ▶️ 02/10/2026 — étape 4a : le tableau de bord (session cloud)
+
+- **Portée de `tableau.html`** : fil d'Ariane (boutique › Tableau de bord), salutation, période en
+  curseur, bande de cinq compteurs, graphique à bascule (douze semaines de commandes / ouvertures
+  des liens jour par jour), dernières commandes, actions rapides, puis répartition, transporteurs et
+  activité. Composants neufs sous `components/tableau/` (`CompteursApp`, `GrapheTableau`,
+  `SelecteurPeriode`, `ApercuSurvol`, `blocs-tableau`), écrits pour être repris par les Analyses.
+- **Décisions de Mehdi appliquées** : n° 6, l'aperçu au survol d'une commande est la VRAIE page
+  (`/p/<jeton>/apercu`, aucune vue comptée), à la souris seulement, après 450 ms ; chaque page
+  ouverte garde son cadre (cinq au plus) pour ne pas recharger une page client à chaque retour.
+  N° 10, la période change sans recharger : navigation du routeur, l'URL reste l'état, le serveur
+  relit les chiffres ; pendant le chargement le groupe porte `aria-busy` et les anciens chiffres
+  s'estompent ; si la navigation n'aboutit pas, le curseur revient sur la période servie.
+- **Couche « v4 »** (`couche-v4.tsx`) : bordure lumineuse des cartes par délégation ; l'entrée
+  (titre révélé, compteurs à rouleaux) ne se joue qu'au premier chargement réel, posée par un
+  script en ligne avant le premier rendu, jamais en naviguant (vérifié : retour par le menu sans
+  entrée). Les rouleaux sont des composants React (`ValeurRoulee`), jamais une réécriture du DOM
+  que React gère ; la valeur est lue dans un texte masqué.
+- **Quittent l'écran** : la carte de lancement et la carte « Passer au Pro » (le bouton de la barre
+  supérieure et l'encart de la barre latérale les portent sur tous les écrans), et leurs clés.
+- **Écart voulu à la maquette** : la répartition empile quatre statuts qui ne se chevauchent pas
+  (préparation, expédiés, en transit, livrés) ; « sans mouvement » est un filtre posé sur eux dans
+  le produit, l'empiler aurait compté deux fois les colis concernés — il est dit sous la légende.
+- **Mesuré** (compte de démo de la base de TESTS, cinq commandes semées sous sa session, sans
+  numéro de suivi pour ne consommer aucune prise en charge 17TRACK) : 1440 et 390 px, fr/en/zh-CN,
+  mouvement réduit ; aucun débordement, aucune erreur console, aucune violation CSP. La seule
+  « cible sous 44 px » relevée au téléphone est le contenu du menu d'alertes FERMÉ (artefact de
+  mesure : ouvert, aucune cible trop petite).
+- **Relecture** (quatre angles) : 2 HIGH, 7 MEDIUM, 7 LOW, tous corrigés sauf le `window.__v4`
+  jugé inoffensif : répartition qui comptait deux fois les colis silencieux, curseur de période qui
+  pouvait afficher une période non servie, trois zéros inventés (ouvertures, délai illisible,
+  « 0 dernières semaines »), points du graphe muets au clavier (annonce `aria-live`), bascule
+  `tablist` sans panneau (devenue boutons pressés), visée décalée sur la courbe, iframe rechargée à
+  chaque survol, rAF non annulé, panne de lecture des dernières commandes sans trace, `data-jeton`
+  non déclaré, flèches qui empilaient l'historique (+ Début/Fin), tracé rejoué au redimensionnement,
+  clés orphelines, code mort.
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
+  **Au poste de Mehdi** : `fumee` (le tableau de bord sert un autre HTML), `couverture`.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

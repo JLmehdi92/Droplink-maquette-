@@ -1189,6 +1189,7 @@
   "analyses": {
     "titre": "Analytics",
     "indisponible": "This section is unreadable right now — this is not “no data”. Try again in a moment.",
+    "indisponibleCourt": "Not available right now",
     "periode": {
       "titre": "Period",
       "7j": "7 days",
@@ -1219,11 +1220,13 @@
     "colis": {
       "titre": "Status breakdown",
       "enTransit": "In transit",
+      "expedie": "Shipped",
       "livre": "Delivered",
       "preparation": "Not scanned yet",
       "silencieux": "No movement",
       "vide": "No tracked parcel yet.",
-      "aide": "Current status of your shipments."
+      "aide": "Current status of your shipments.",
+      "dontSilencieux": "{n, plural, one {Including # parcel with no movement for over 10 days} other {Including # parcels with no movement for over 10 days}}"
     },
     "consultees": {
       "titre": "Your most viewed orders",
@@ -2621,10 +2624,6 @@
     "bonjour": "Hello!",
     "bonjourNom": "Hello {nom}!",
     "sousTitre": "Here is a quick overview of your activity on DropLink.",
-    "lancement": {
-      "titre": "Ready to grow your business?",
-      "texte": "Create an order, drop in your photos and share a single link: your customer follows everything on their own, with no account."
-    },
     "dernieres": {
       "titre": "Latest orders",
       "voirTout": "See all",
@@ -2637,14 +2636,23 @@
       "envois": "View my shipments",
       "analyses": "Open analytics"
     },
-    "pro": {
-      "titre": "Go Pro",
-      "lien": "The link under your name",
-      "marque": "Without the “Powered by DropLink” card",
-      "plafond": "Monthly cap, not lifetime",
-      "colis": "Parcels tracked per month",
-      "bouton": "See the plans"
-    }
+    "graphe": {
+      "bascule": "Chart shown",
+      "commandes": "Orders",
+      "liens": "Customer links",
+      "aideSemaines": "Orders created per week, over the last {n} weeks.",
+      "voirValeurs": "Show the values",
+      "semaineDu": "Week of",
+      "semaineDuDate": "Week of {date}",
+      "cetteSemaine": "This wk",
+      "creees": "Orders created",
+      "jour": "Day",
+      "ouvertures": "Opens",
+      "zoneSemaines": "Orders over {n} weeks. Use the left and right arrows to read each week.",
+      "zoneLiens": "Customer links: {n} opens. Use the left and right arrows to read each day."
+    },
+    "colisTotal": "{n, plural, one {# parcel} other {# parcels}}",
+    "silenceJours": "No movement · {n} d"
   },
   "parametres": {
     "titre": "Settings",

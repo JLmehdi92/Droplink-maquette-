@@ -1,21 +1,19 @@
 import { redirect } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
-import { LienEcran } from "@/components/lien-ecran";
-import { CompteursAnalyses } from "@/components/analyses/compteurs-analyses";
-import { FriseSemaines } from "@/components/analyses/frise-semaines";
-import { RepartitionColis } from "@/components/analyses/repartition-colis";
-import { ActiviteRecente } from "@/components/analyses/activite-recente";
-import { LiensParJour } from "@/components/analyses/liens-par-jour";
-import { PartsTransporteurs } from "@/components/analyses/parts-transporteurs";
-import { ActionsRapides } from "@/components/tableau/actions-rapides";
-import { CarteLancement } from "@/components/tableau/carte-lancement";
-import { CartePro } from "@/components/tableau/carte-pro";
+import { ChevronRight } from "lucide-react";
+import { SelecteurPeriode } from "@/components/tableau/selecteur-periode";
+import { CompteursApp } from "@/components/tableau/compteurs-app";
+import { GrapheTableau, type PointGraphe } from "@/components/tableau/graphe-tableau";
 import {
+  ActionsRapidesBloc,
+  ActiviteBloc,
+  BlocIndisponible,
   DERNIERES_COMMANDES,
-  DernieresCommandes,
-} from "@/components/tableau/dernieres-commandes";
+  DernieresCommandesBloc,
+  RepartitionBloc,
+  TransporteursBloc,
+} from "@/components/tableau/blocs-tableau";
 import { onboardingAFaire } from "@/lib/comptes/profil";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
 import {
@@ -26,6 +24,7 @@ import {
   lireSemaines,
   lireTransporteurs,
   PERIODES,
+  SEMAINES_FRISE,
 } from "@/lib/analyses/activite";
 import { lireActiviteRecente } from "@/lib/analyses/recente";
 import {
@@ -63,12 +62,20 @@ export async function generateMetadata({
  * écran d'aperçu à chaque connexion lui coûterait un clic de plus, deux cents
  * fois par semaine. Le tableau de bord est une entrée de navigation.
  *
- * CE QUE LE KIT DESSINE ET QUI N'EST PAS RENDU :
- *  - « Bonjour Nassim » : le produit ne stocke aucun nom de vendeur, seulement
- *    celui de sa boutique — c'est lui qui est salué, ou personne ;
- *  - les pourcentages d'évolution « +12 % ce mois-ci » : les compteurs sont
- *    ceux des analyses, qui ne portent qu'un seul écart vérifié ;
- *  - les drapeaux de pays des dernières commandes : aucun pays n'est stocké.
+ * ⚠️ LA REFONTE (02/10/2026) suit la maquette, `tableau.html` : compteurs en
+ * une bande, graphique à bascule (semaines / liens clients), dernières commandes
+ * avec l'aperçu de la vraie page au survol, actions rapides, puis répartition,
+ * transporteurs et activité. La période change sans recharger (décision n° 10
+ * de Mehdi). La carte de lancement et la carte « Passer au Pro » quittent cet
+ * écran : le bouton « Nouvelle commande » de la barre supérieure et l'encart
+ * Pro de la barre latérale les portent sur TOUS les écrans.
+ *
+ * CE QUE LA MAQUETTE DESSINE ET QUI N'EST PAS RENDU :
+ *  - le prénom du vendeur : le produit ne stocke que le nom qu'il s'est donné,
+ *    sinon celui de sa boutique — c'est lui qui est salué, ou personne ;
+ *  - un écart à la période précédente sur chaque compteur : seul celui des
+ *    commandes créées est vérifié ;
+ *  - les drapeaux de pays : aucun pays n'est stocké.
  */
 export default async function TableauDeBord({
   params,
@@ -98,127 +105,119 @@ export default async function TableauDeBord({
       lireDelaiLivraison(supabase, periode, maintenant),
       lireOuverturesParJour(supabase, periode, maintenant),
       lireActiviteRecente(supabase, periode, maintenant),
-      lireCommandes(analyserParametresListe({})).catch(() => null),
+      lireCommandes(analyserParametresListe({})).catch((erreur: unknown) => {
+        console.error("[tableau] dernières commandes illisibles", erreur);
+        return null;
+      }),
     ]);
 
   const t = await getTranslations("tableau");
   const ta = await getTranslations("analyses");
+  const nav = await getTranslations("navigation");
+  const format = await getFormatter();
   const base = `/${langue}/tableau-de-bord`;
+  const nom = profil.nomAffiche ?? profil.nomBoutique;
 
-  /* ⚠️ CHAQUE PANNEAU SE REND OU SE NOMME, JAMAIS N'INVENTE : une lecture qui
-     échoue affiche « indisponible », pas zéro — la règle des analyses. */
-  const INDISPONIBLE =
-    "rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 text-[14px] text-ds-texte-corps shadow-ds-card lg:p-6";
-
-  const pilule = (actif: boolean): string =>
-    "inline-flex h-11 items-center rounded-ds-sm border px-[15px] text-[13px] leading-4 transition-colors lg:h-[38px] " +
-    (actif
-      ? "border-transparent bg-ds-accent font-bold text-ds-texte-sur-marque"
-      : "border-ds-filet bg-ds-surface-carte font-medium text-ds-texte-corps shadow-ds-xs hover:bg-ds-surface-teinte");
+  /* Les deux séries du graphique arrivent au client prêtes : dates formatées ici,
+     dans la langue de l'écran, pour que le composant ne compte ni ne formate rien. */
+  const courtJour = (d: Date) => format.dateTime(d, { day: "numeric", month: "short", timeZone: "UTC" });
+  const longJour = (d: Date) => format.dateTime(d, { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+  const pointsSemaines: readonly PointGraphe[] | null =
+    semaines?.map((s) => ({
+      valeur: s.total,
+      court: courtJour(s.debut),
+      long: t("graphe.semaineDuDate", { date: format.dateTime(s.debut, { day: "numeric", month: "long", timeZone: "UTC" }) }),
+    })) ?? null;
+  const pointsOuvertures: readonly PointGraphe[] | null =
+    ouvertures?.map((o) => {
+      const d = new Date(`${o.jour}T12:00:00Z`);
+      return { valeur: o.total, court: courtJour(d), long: longJour(d) };
+    }) ?? null;
+  const n = semaines?.length ?? SEMAINES_FRISE;
+  const totalOuvertures = ouvertures?.reduce((somme, o) => somme + o.total, 0) ?? 0;
 
   return (
-    <>
-      <EnTeteEcranDs
-        titre={
-          /* Le nom que le vendeur s'est donné dans ses paramètres, sinon celui de
-             sa boutique, sinon personne. */
-          (profil.nomAffiche ?? profil.nomBoutique) === null
-            ? t("bonjour")
-            : t("bonjourNom", { nom: profil.nomAffiche ?? profil.nomBoutique ?? "" })
-        }
-        sousTitre={t("sousTitre")}
-        actions={
-          <nav aria-label={ta("periode.titre")} className="flex flex-wrap gap-2">
-            {PERIODES.map((p) => (
-              <LienEcran
-                key={p}
-                href={p === "30j" ? base : `${base}?periode=${p}`}
-                aria-current={periode === p ? "true" : undefined}
-                className={pilule(periode === p)}
-              >
-                {ta(`periode.${p}`)}
-              </LienEcran>
-            ))}
-          </nav>
-        }
-      />
-
-      <main
-        id="contenu"
-        className="flex flex-col gap-3 px-margin-mobile pt-3.5 pb-6 lg:gap-[18px] lg:px-8 lg:pt-0 lg:pb-8"
-      >
-        {activite === null ? (
-          <p className={INDISPONIBLE}>{ta("indisponible")}</p>
-        ) : (
-          <CompteursAnalyses activite={activite} delai={delai} />
-        )}
-
-        {/* LA PREMIÈRE RANGÉE DU KIT : 1,35fr / 1fr / 0,82fr, alignée en haut.
-
-            ⚠️ EN GRILLE À PARTIR DE `2xl` SEULEMENT, comme la seconde rangée.
-            Posées dès `xl`, les trois colonnes laissaient ~286 px aux dernières
-            commandes (« il y a 1 s » SORTAIT de la carte) et ~270 au graphique,
-            dont les douze dates SE CHEVAUCHAIENT à 1 280 px (balayage du
-            18/09/2026). En dessous, les panneaux s'empilent pleine largeur. */}
-        <div className="flex flex-col gap-3 lg:gap-[18px] 2xl:grid 2xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,0.82fr)] 2xl:items-start">
-          <div className="flex min-w-0 flex-col gap-3 lg:gap-[18px]">
-            <CarteLancement langue={langue} />
-            {semaines === null ? (
-              <p className={INDISPONIBLE}>{ta("indisponible")}</p>
-            ) : (
-              <FriseSemaines semaines={semaines} taille="section" />
+    <main id="contenu" className="tableau">
+      <div className="tableau__tete">
+        <div>
+          <p className="v4-fil">
+            {nom === null ? null : (
+              <>
+                <span>{nom}</span>
+                <ChevronRight aria-hidden="true" className="ic" />
+              </>
             )}
-          </div>
+            <b>{nav("tableauDeBord")}</b>
+          </p>
+          <h1>{nom === null ? t("bonjour") : t("bonjourNom", { nom })}</h1>
+          <p>{t("sousTitre")}</p>
+        </div>
+        <SelecteurPeriode
+          etiquette={ta("periode.titre")}
+          actif={periode}
+          periodes={PERIODES.map((p) => ({
+            cle: p,
+            libelle: ta(`periode.${p}`),
+            href: p === "30j" ? base : `${base}?periode=${p}`,
+          }))}
+        />
+      </div>
 
+      {/* ⚠️ CHAQUE PANNEAU SE REND OU SE NOMME, JAMAIS N'INVENTE : une lecture qui
+          échoue affiche « indisponible », pas zéro — la règle des analyses. */}
+      {activite === null ? (
+        <p className="bloc bloc__vide">{ta("indisponible")}</p>
+      ) : (
+        <CompteursApp activite={activite} delai={delai} />
+      )}
+
+      <div className="tableau__haut">
+        <GrapheTableau
+          semaines={pointsSemaines}
+          ouvertures={pointsOuvertures}
+          textes={{
+            bascule: t("graphe.bascule"),
+            commandes: t("graphe.commandes"),
+            liens: t("graphe.liens"),
+            titreSemaines: ta("frise.titre"),
+            aideSemaines: t("graphe.aideSemaines", { n }),
+            titreLiens: ta("liens.titre"),
+            aideLiens: ta("liens.aide"),
+            voirValeurs: t("graphe.voirValeurs"),
+            semaineDu: t("graphe.semaineDu"),
+            creees: t("graphe.creees"),
+            jour: t("graphe.jour"),
+            ouvertures: t("graphe.ouvertures"),
+            cetteSemaine: t("graphe.cetteSemaine"),
+            zoneSemaines: t("graphe.zoneSemaines", { n }),
+            zoneLiens: t("graphe.zoneLiens", { n: totalOuvertures }),
+            videSemaines: semaines === null ? ta("indisponible") : ta("frise.vide"),
+            videLiens: ouvertures === null ? ta("indisponible") : ta("liens.aucun"),
+          }}
+        />
+        <div className="pile">
           {commandes === null ? (
-            <p className={INDISPONIBLE}>{ta("indisponible")}</p>
+            <BlocIndisponible titre={t("dernieres.titre")} />
           ) : (
-            <DernieresCommandes
-              commandes={commandes.lignes.slice(0, DERNIERES_COMMANDES)}
-              langue={langue}
-            />
+            <DernieresCommandesBloc commandes={commandes.lignes.slice(0, DERNIERES_COMMANDES)} langue={langue} />
           )}
-
-          <div className="flex min-w-0 flex-col gap-3 lg:gap-[18px]">
-            <ActionsRapides langue={langue} />
-            {colis === null ? (
-              <p className={INDISPONIBLE}>{ta("indisponible")}</p>
-            ) : (
-              <RepartitionColis compteurs={colis} taille="section" />
-            )}
-          </div>
+          <ActionsRapidesBloc langue={langue} />
         </div>
+      </div>
 
-        {/* LA SECONDE RANGÉE : quatre panneaux au dessin du kit — la carte « Passez
-            au Pro », quatrième, n'est rendue qu'à un compte gratuit (audit du
-            24/09/2026 : elle manquait depuis que l'offre existe). Pour un compte
-            Pro, les trois autres se partagent la rangée. */}
-        <div
-          className={
-            "flex flex-col gap-3 lg:gap-[18px] 2xl:grid 2xl:items-start " +
-            (profil.planPro
-              ? "2xl:grid-cols-3"
-              : "2xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,0.95fr)]")
-          }
-        >
-          {ouvertures === null || activite === null ? (
-            <p className={INDISPONIBLE}>{ta("indisponible")}</p>
-          ) : (
-            <LiensParJour jours={ouvertures} total={activite.vuesTotales} taille="section" />
-          )}
-          {transporteurs === null ? (
-            <p className={INDISPONIBLE}>{ta("indisponible")}</p>
-          ) : (
-            <PartsTransporteurs parts={transporteurs} taille="section" voirTout={`/${langue}/envois`} />
-          )}
-          {recente === null ? (
-            <p className={INDISPONIBLE}>{ta("indisponible")}</p>
-          ) : (
-            <ActiviteRecente faits={recente} langue={langue} variante="tableau" />
-          )}
-          {profil.planPro ? null : <CartePro langue={langue} />}
-        </div>
-      </main>
-    </>
+      <div className="tableau__bas">
+        {colis === null ? <BlocIndisponible titre={ta("colis.titre")} /> : <RepartitionBloc compteurs={colis} />}
+        {transporteurs === null ? (
+          <BlocIndisponible titre={ta("transporteurs.titre")} />
+        ) : (
+          <TransporteursBloc parts={transporteurs} voirTout={`/${langue}/envois`} />
+        )}
+        {recente === null ? (
+          <BlocIndisponible titre={ta("activite.titre")} />
+        ) : (
+          <ActiviteBloc faits={recente} langue={langue} />
+        )}
+      </div>
+    </main>
   );
 }

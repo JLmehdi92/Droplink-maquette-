@@ -1189,6 +1189,7 @@
   "analyses": {
     "titre": "数据分析",
     "indisponible": "此板块暂时无法读取——这不等于「没有数据」。请稍后重试。",
+    "indisponibleCourt": "暂时无法读取",
     "periode": {
       "titre": "时间范围",
       "7j": "7 天",
@@ -1219,11 +1220,13 @@
     "colis": {
       "titre": "状态分布",
       "enTransit": "运输中",
+      "expedie": "已发货",
       "livre": "已送达",
       "preparation": "尚未扫描",
       "silencieux": "无更新",
       "vide": "目前没有跟踪中的包裹。",
-      "aide": "当前发货状态。"
+      "aide": "当前发货状态。",
+      "dontSilencieux": "其中 {n} 个包裹超过 10 天没有动态"
     },
     "consultees": {
       "titre": "浏览最多的订单",
@@ -2621,10 +2624,6 @@
     "bonjour": "您好！",
     "bonjourNom": "{nom}，您好！",
     "sousTitre": "这里是您在 DropLink 上的业务概览。",
-    "lancement": {
-      "titre": "准备好扩展您的业务了吗？",
-      "texte": "创建订单、上传照片，只需分享一个链接：客户无需注册即可自行查看全部信息。"
-    },
     "dernieres": {
       "titre": "最新订单",
       "voirTout": "查看全部",
@@ -2637,14 +2636,23 @@
       "envois": "查看物流",
       "analyses": "查看数据分析"
     },
-    "pro": {
-      "titre": "升级专业版",
-      "lien": "以你的名义生成链接",
-      "marque": "不显示「由 DropLink 提供支持」卡片",
-      "plafond": "按月重置的上限，而非终身额度",
-      "colis": "按月计算的包裹跟踪",
-      "bouton": "查看套餐"
-    }
+    "graphe": {
+      "bascule": "显示的图表",
+      "commandes": "订单",
+      "liens": "客户链接",
+      "aideSemaines": "最近 {n} 周每周创建的订单数。",
+      "voirValeurs": "查看数值",
+      "semaineDu": "周起始日",
+      "semaineDuDate": "{date} 这一周",
+      "cetteSemaine": "本周",
+      "creees": "创建的订单",
+      "jour": "日期",
+      "ouvertures": "打开次数",
+      "zoneSemaines": "{n} 周的订单走势。用左右方向键逐周查看。",
+      "zoneLiens": "客户链接：共 {n} 次打开。用左右方向键逐日查看。"
+    },
+    "colisTotal": "{n} 个包裹",
+    "silenceJours": "无更新 · {n} 天"
   },
   "parametres": {
     "titre": "设置",

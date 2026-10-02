@@ -9,6 +9,7 @@ import { ArrowRight, ChevronsUpDown, Zap } from "lucide-react";
 import { LienEcran } from "@/components/lien-ecran";
 import { BarreSuperieure } from "@/components/app/barre-superieure";
 import { CoqueTiroir } from "@/components/app/coque-tiroir";
+import { CoucheV4, ScriptEntreeV4 } from "@/components/app/couche-v4";
 import { DetailsFermable } from "@/components/app/details-fermable";
 import { LogoDropLink } from "@/components/logo-droplink";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
@@ -147,7 +148,9 @@ export default async function LayoutApplication({
    * les bords : l'encadrer coûterait seize pixels de chaque côté sur 390.
    */
   return (
-    <div className="page-app">
+    <div className="page-app v4">
+      <ScriptEntreeV4 />
+      <CoucheV4 />
       {/*
         Le lien d'évitement : sans lui, un vendeur au clavier retraverse les six
         destinations du menu à CHAQUE changement d'écran. Chaque écran déclare

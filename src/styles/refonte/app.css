@@ -12,7 +12,7 @@
 :root {
   --sol: #F4F4F8; --feuille: #FFFFFF; --survol-ligne: #F8F8FC; --sol-onglet: #FAFAFD;
   --avert-encre: var(--color-ds-alerte-encre);
-  --st-transit: var(--color-ds-accent); --st-livre: var(--color-ds-succes); --st-silence: var(--color-ds-alerte); --st-attente: var(--color-ds-texte-tenu); --st-refus: var(--color-ds-erreur);
+  --st-transit: var(--color-ds-accent); --st-livre: var(--color-ds-succes); --st-silence: var(--color-ds-alerte); --st-attente: var(--color-ds-texte-tenu); --st-expedie: color-mix(in srgb, var(--color-ds-accent) 45%, var(--color-ds-surface-carte)); --st-refus: var(--color-ds-erreur);
 }
 
 .page-app { background: var(--sol); font-size: 14px; }
@@ -146,13 +146,35 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 .bloc__tete h2 { font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
 .bloc__meta { font-size: 12.5px; color: var(--corps); font-variant-numeric: tabular-nums; }
 .bloc__aide { margin: -8px 16px 0; font-size: 12.5px; color: var(--sourdine); }
+/* Ajouts du produit : la maquette ne dessine aucun état vide ni illisible. Le
+   produit en a (compte neuf, lecture en panne) : un texte posé dans la carte,
+   au même corps que l'aide, jamais un zéro inventé. */
+.bloc__vide { margin: 0; padding: 18px 16px 20px; font-size: 13.5px; color: var(--corps); }
+/* Une commande sans photo : la case de la vignette reste, teintée, avec l'icône d'image */
+.derniere__vide { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 9px; background: var(--creux); box-shadow: inset 0 0 0 1px var(--filet); color: var(--sourdine); }
+.derniere__vide .ic { width: 16px; height: 16px; }
+.graphe__vide { position: absolute; inset: 0 0 26px 30px; display: grid; place-items: center; margin: 0; padding: 0 16px; text-align: center; font-size: 13.5px; color: var(--corps); pointer-events: none; }
+.legende__silence { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; font-size: 12.5px; color: var(--avert-encre); }
+.legende__silence i { flex: none; width: 8px; height: 8px; border-radius: 2px; }
+/* Pendant qu'une autre période se charge, les chiffres encore affichés sont ceux
+   de l'ANCIENNE : ils s'estompent, pour ne jamais passer pour les nouveaux. */
+.tableau:has(.periodes[aria-busy="true"]) :is(.compteurs, .tableau__haut, .tableau__bas) { opacity: .5; transition: opacity 160ms var(--ease); }
+/* « Créer une commande » est un formulaire (le brouillon naît côté serveur) : le
+   bouton prend exactement le dessin des liens voisins. */
+.actions-rapides form { display: contents; }
+.actions-rapides__bouton { display: flex; width: 100%; align-items: center; gap: 11px; min-height: 42px; padding: 0 10px; border-radius: 9px; font: inherit; font-size: 13.5px; font-weight: 500; color: inherit; text-align: left; background: none; border: 0; cursor: pointer; transition: background-color 100ms var(--ease); }
+.actions-rapides__bouton .ic { width: 16px; height: 16px; color: var(--corps); }
+.actions-rapides__bouton .ic:last-child { margin-left: auto; width: 14px; height: 14px; color: var(--sourdine); transition: transform 160ms var(--ease-sortie); }
+/* L'aperçu est la VRAIE page client, dessinée à 390 px puis réduite à l'échelle du téléphone */
+.apercu-flottant__page { display: block; width: 390px; height: calc(100% / var(--z)); border: 0; transform: scale(var(--z)); transform-origin: 0 0; }
+.apercu-flottant__page[hidden] { display: none; }
 .bloc__lien { display: inline-flex; align-items: center; gap: 2px; min-height: 32px; font-size: 13px; font-weight: 500; color: var(--corps); transition: color 120ms var(--ease); }
 .bloc__lien .ic { width: 14px; height: 14px; }
 @media (hover: hover) and (pointer: fine) { .bloc__lien:hover { color: var(--encre); } }
 
 .bascule { display: inline-flex; padding: 2px; border-radius: 8px; background: color-mix(in srgb, var(--encre) 5%, transparent); }
 .bascule button { height: 28px; padding: 0 10px; border-radius: 6px; font-size: 12.5px; font-weight: 500; color: var(--corps); transition: background-color 150ms var(--ease), color 150ms var(--ease), box-shadow 150ms var(--ease); }
-.bascule button[aria-selected="true"] { background: var(--feuille); color: var(--encre); box-shadow: var(--ombre-xs), 0 0 0 1px var(--filet); }
+.bascule button:is([aria-selected="true"], [aria-pressed="true"]) { background: var(--feuille); color: var(--encre); box-shadow: var(--ombre-xs), 0 0 0 1px var(--filet); }
 
 /* le graphique */
 .bloc--graphe { display: flex; flex-direction: column; padding-bottom: 4px; }
@@ -204,7 +226,7 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 .actions-rapides a { display: flex; align-items: center; gap: 11px; min-height: 42px; padding: 0 10px; border-radius: 9px; font-size: 13.5px; font-weight: 500; transition: background-color 100ms var(--ease); }
 .actions-rapides a .ic { width: 16px; height: 16px; color: var(--corps); }
 .actions-rapides a .ic:last-child { margin-left: auto; width: 14px; height: 14px; color: var(--sourdine); transition: transform 160ms var(--ease-sortie); }
-@media (hover: hover) and (pointer: fine) { .actions-rapides a:hover { background: var(--survol-ligne); } .actions-rapides a:hover .ic:last-child { transform: translateX(2px); } }
+@media (hover: hover) and (pointer: fine) { .actions-rapides a:hover, .actions-rapides__bouton:hover { background: var(--survol-ligne); } .actions-rapides a:hover .ic:last-child, .actions-rapides__bouton:hover .ic:last-child { transform: translateX(2px); } }
 
 /* répartition, transporteurs */
 .envois { display: grid; gap: 14px; padding: 16px; }
@@ -306,13 +328,13 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
   .graphe { flex: none; height: 210px; min-height: 0; }
   .bascule button { height: 40px; }
   .table-vue summary, .bloc__lien { min-height: 44px; }
-  .actions-rapides a { min-height: 48px; }
+  .actions-rapides a, .actions-rapides__bouton { min-height: 48px; }
 }
 @media (pointer: coarse) {
   .periodes button, .bascule button, .table-vue summary, .bloc__lien, .app__nav a { min-height: 44px; }
   .recherche, .bouton-app, .alertes__bouton { height: 44px; }
   .alertes__bouton { width: 44px; }
-  .actions-rapides a { min-height: 48px; }
+  .actions-rapides a, .actions-rapides__bouton { min-height: 48px; }
 }
 
 /* =====================================================================

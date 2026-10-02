@@ -1189,6 +1189,7 @@
   "analyses": {
     "titre": "Analyses",
     "indisponible": "Cette section est illisible pour l’instant — ce n’est pas « aucune donnée ». Réessayez dans un instant.",
+    "indisponibleCourt": "Lecture indisponible",
     "periode": {
       "titre": "Période",
       "7j": "7 jours",
@@ -1219,11 +1220,13 @@
     "colis": {
       "titre": "Répartition des statuts",
       "enTransit": "En transit",
+      "expedie": "Expédiés",
       "livre": "Livrés",
       "preparation": "Pas encore scannés",
       "silencieux": "Sans mouvement",
       "vide": "Aucun colis suivi pour le moment.",
-      "aide": "Statut actuel de vos envois."
+      "aide": "Statut actuel de vos envois.",
+      "dontSilencieux": "{n, plural, one {Dont # colis sans mouvement depuis plus de 10 jours} other {Dont # colis sans mouvement depuis plus de 10 jours}}"
     },
     "consultees": {
       "titre": "Vos commandes les plus consultées",
@@ -2621,10 +2624,6 @@
     "bonjour": "Bonjour !",
     "bonjourNom": "Bonjour {nom} !",
     "sousTitre": "Voici un aperçu rapide de votre activité sur DropLink.",
-    "lancement": {
-      "titre": "Prêt à faire grandir votre activité ?",
-      "texte": "Créez une commande, déposez vos photos et partagez un seul lien : votre client suit tout lui-même, sans compte."
-    },
     "dernieres": {
       "titre": "Dernières commandes",
       "voirTout": "Voir tout",
@@ -2637,14 +2636,23 @@
       "envois": "Voir mes envois",
       "analyses": "Accéder aux analyses"
     },
-    "pro": {
-      "titre": "Passez au Pro",
-      "lien": "Le lien à votre nom",
-      "marque": "Sans la carte DropLink",
-      "plafond": "Plafond mensuel, pas à vie",
-      "colis": "Colis suivis au mois",
-      "bouton": "Découvrir les offres"
-    }
+    "graphe": {
+      "bascule": "Graphique affiché",
+      "commandes": "Commandes",
+      "liens": "Liens clients",
+      "aideSemaines": "Nombre de commandes créées par semaine, sur les {n} dernières semaines.",
+      "voirValeurs": "Voir les valeurs",
+      "semaineDu": "Semaine du",
+      "semaineDuDate": "Semaine du {date}",
+      "cetteSemaine": "Cette sem.",
+      "creees": "Commandes créées",
+      "jour": "Jour",
+      "ouvertures": "Ouvertures",
+      "zoneSemaines": "Évolution des commandes sur {n} semaines. Flèches gauche et droite pour lire chaque semaine.",
+      "zoneLiens": "Liens clients : {n} ouvertures. Flèches gauche et droite pour lire chaque jour."
+    },
+    "colisTotal": "{n, plural, one {# colis} other {# colis}}",
+    "silenceJours": "Sans mouvement · {n} j"
   },
   "parametres": {
     "titre": "Paramètres",
