@@ -14,7 +14,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { LigneHistorique } from "@/lib/commandes/historique";
-import { Panneau } from "@/components/app/panneau";
 
 /**
  * UNE ICONE PAR TYPE D EVENEMENT — c est ce que le kit dessine, et il n en
@@ -52,10 +51,8 @@ const ICONES: Record<LigneHistorique["type"], LucideIcon> = {
  * un type sans libellé est écarté en amont, dans `lireHistorique`, plutôt que
  * rendu par sa clé — une clé brute à l'écran est une chaîne en dur déguisée.
  *
- * LES DATES SONT ABSOLUES, en deux lignes dans une colonne de 92 px. Voir
- * `jour` et `heure` plus bas pour la raison : ce bloc les a rendues relatives
- * pendant des semaines, sur l argument d une planche qui n est plus la
- * reference.
+ * LES DATES SONT ABSOLUES, sous le libellé comme dans la maquette (`.ed-histo`),
+ * année comprise. Voir `jour` et `heure` plus bas pour la raison.
  */
 
 export async function HistoriqueCommande({
@@ -71,8 +68,8 @@ export async function HistoriqueCommande({
    *
    * Ce bloc affichait « il y a 2 h » sur la premiere semaine, au motif qu on
    * le lit d un coup d oeil. L argument citait « la planche » — le canevas
-   * abandonne le 11/09 —, et le design system, lui, ecrit la date ET l heure
-   * en deux lignes dans une colonne de 92 px. C est le bon choix ici pour une
+   * abandonne le 11/09 —, et le design system, lui, ecrit la date ET l heure.
+   * C est le bon choix ici pour une
    * raison qui n est pas esthetique : l historique est la piece qu on
    * demanderait en cas de litige avec un client, et « il y a 2 h » cesse
    * d etre vrai a la lecture suivante.
@@ -110,92 +107,46 @@ export async function HistoriqueCommande({
     CHAMPS.has(detail) ? tEditeur("nomChamp." + detail) : detail;
 
   return (
-    <Panneau titre={t("titre")}>
-      {/*
-        ⚠️ LA CONSULTATION DU CLIENT A QUITTE CE PANNEAU, elle n a pas disparu.
-        Elle en occupait la premiere ligne — donc le BAS de la page, apres un
-        defilement — alors que « le client a-t-il ouvert le lien » est la
-        question qu on se pose en ouvrant l ecran. Elle est desormais la
-        troisieme tuile de la rangee de resume, en haut, avec sa date en
-        sous-titre. Le kit ne dessine rien a cet endroit-ci : c est donc aussi
-        un bloc en trop de moins.
-      */}
+    <section className="bloc ed-carte ed-carte--historique" aria-labelledby="ed-historique">
+      <header className="ed-carte__tete">
+        <h2 id="ed-historique">{t("titre")}</h2>
+      </header>
       {lignes.length === 0 ? (
-        // ÉTAT VIDE DISTINCT : une commande neuve n'a rien à montrer, et ce
-        // n'est pas une anomalie. Afficher un bloc vide sans le dire laisserait
-        // croire à un échec de chargement.
-        <p className="text-[13px] text-ds-texte-sourdine">{t("aucun")}</p>
+        // ÉTAT VIDE DISTINCT : une commande neuve n'a rien à montrer, et ce n'est pas
+        // une anomalie. Un bloc vide sans le dire laisserait croire à un échec.
+        <p className="ed-histo__vide">{t("aucun")}</p>
       ) : (
-        /*
-          ⚠️ UNE REQUÊTE DE CONTENEUR, PAS D'ÉCRAN. À 1 024 px, ce panneau est si
-          étroit que la colonne de date (92 px, icône en plus) ne laissait que
-          11 px au titre : « Commande modifiée » débordait de la carte et élargissait
-          la page (balayage du 18/09/2026). Sous 280 px de liste, la date passe
-          sous le titre ; au-dessus — téléphone et bureau des planches — rien ne change.
-        */
-        <ol className="@container">
-          {lignes.map((ligne, index) => {
+        <ol className="ed-histo">
+          {lignes.map((ligne) => {
             const Icone = ICONES[ligne.type];
             return (
-              /*
-                LA LIGNE DU KIT : ecart 14, `13px 0`, et un filet EN HAUT sauf
-                sur la premiere. Le filet du haut plutot que du bas evite le
-                trait orphelin sous la derniere ligne, que le kit n a pas.
-              */
-              <li
-                key={ligne.id}
-                className={
-                  "grid grid-cols-[34px_minmax(0,1fr)] gap-x-3.5 gap-y-1 py-[13px] @[280px]:flex @[280px]:gap-3.5" +
-                  (index === 0 ? "" : " border-t border-ds-filet")
-                }
-              >
-                {/* `IconTile` taille `sm` : 34 au rayon `sm`, fond teinte,
-                    icone 16 a l accent au trait 1,9. */}
-                <span className="row-span-2 inline-flex h-[34px] w-[34px] flex-none items-center justify-center rounded-ds-sm bg-ds-surface-teinte text-ds-accent">
-                  <Icone aria-hidden="true" size={16} strokeWidth={1.9} />
-                </span>
-                {/* LA COLONNE DE DATE FAIT 92 px ET NE SE COMPRIME PAS : c est
-                    ce qui aligne les titres des quatre lignes entre eux. */}
-                <time
-                  dateTime={ligne.quand}
-                  className="col-start-2 row-start-2 flex flex-none flex-col text-[12px] leading-[normal] text-ds-texte-sourdine @[280px]:w-[92px]"
-                >
-                  {jour(ligne.quand)}
-                  <span>{t("aHeure", { heure: heure(ligne.quand) })}</span>
-                </time>
-                <span className="col-start-2 row-start-1 flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="text-[14px] leading-[normal] font-bold text-ds-texte-fort">
-                    {t(`types.${ligne.type}`)}
-                  </span>
-                  {/* LE DETAIL SE CASSE N IMPORTE OU (`overflowWrap: anywhere`),
-                      comme dans le kit : il peut porter une URL de lien client,
-                      qui n a aucune espace ou se couper. */}
-                  {ligne.detail !== null && (
-                    <span className="text-[13px] leading-[normal] break-words text-ds-texte-corps">
-                      {lisible(ligne.detail)}
-                    </span>
-                  )}
-                  {/*
-                    LE COMMENTAIRE DU CLIENT, sous son arbitrage, entre
-                    guillemets : c'est SA phrase, pas la nôtre. Il ne passe pas
-                    par `lisible` — un texte tiers ne se traduit pas — et React
-                    l'échappe. `break-words` : un client colle parfois un lien.
-                  */}
-                  {/* `unicode-bidi: isolate` : si un caractère de direction
-                      survivait un jour à l'assainissement de la base (mesuré
-                      le 18/09/2026 : les dix-sept testés sont retirés), il ne
-                      déborderait pas sur le libellé voisin. */}
-                  {ligne.commentaire !== null && (
-                    <span className="text-[13px] leading-[normal] break-words text-ds-texte-corps [unicode-bidi:isolate]">
+              <li key={ligne.id}>
+                <i aria-hidden="true">
+                  <Icone className="ic" />
+                </i>
+                <p>
+                  {t(`types.${ligne.type}`)}
+                  {/* LE DÉTAIL SE CASSE N'IMPORTE OÙ : il peut porter une URL de lien client. */}
+                  {ligne.detail === null ? null : <span className="ed-histo__detail">{lisible(ligne.detail)}</span>}
+                  {/* LE COMMENTAIRE DU CLIENT, entre guillemets : c'est SA phrase. Il ne passe
+                      pas par `lisible` — un texte tiers ne se traduit pas —, React l'échappe, et
+                      `unicode-bidi: isolate` l'empêche de déborder sur le libellé voisin. */}
+                  {ligne.commentaire === null ? null : (
+                    <span className="ed-histo__detail ed-histo__commentaire">
                       {t("commentaire", { texte: ligne.commentaire })}
                     </span>
                   )}
-                </span>
+                  <small>
+                    <time dateTime={ligne.quand}>
+                      {jour(ligne.quand)} {t("aHeure", { heure: heure(ligne.quand) })}
+                    </time>
+                  </small>
+                </p>
               </li>
             );
           })}
         </ol>
       )}
-    </Panneau>
+    </section>
   );
 }

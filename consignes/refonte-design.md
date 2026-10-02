@@ -748,6 +748,34 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
 - **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1 268/1 269 — seule l'alarme
   Railway. **Au poste de Mehdi** : `fumee`, `test:rls`, `couverture`.
 
+### ▶️ 02/10/2026 — étape 4h : la fiche commande (session cloud)
+
+- **Portée de `commande.html`** : fil d'Ariane (boutique › Commandes › titre), titre = nom du client,
+  « Nouvelle commande » sans lui (décision n° 7 : la maquette ; même règle `titreDeCommande` que
+  l'onglet), témoin d'enregistrement, date de création et référence courte sur la même ligne, résumé en
+  quatre compteurs (« Non renseigné » en gris, « Jamais ouvert » en alerte), puis la grille par zones :
+  la commande et l'aperçu, les médias et le lien, le suivi et l'historique. Sous 1 100 px, une colonne
+  dans l'ordre du travail (photos d'abord, lien en dernier) ; sous 900 px, la bande collée en bas.
+- **Gardé du produit, contre la maquette** : l'aperçu reste la VRAIE page en cadre
+  (`/p/<jeton>/apercu`, arbitrage du § 5), posé dans le téléphone de la maquette, avec la bascule
+  Desktop (fonction du produit) ; aucun « Colissimo reconnu » deviné dans le navigateur (§ 5,
+  contrainte 8) ; la poignée de déplacement des vignettes (décision 19, clavier) ; le menu « ••• »
+  (dupliquer, archiver — seul chemin au téléphone) ; l'encart d'échec qui nomme les champs et relance ;
+  la note du transporteur sous l'étape datée ; les vraies photos en `object-fit: cover` (la maquette
+  détoure des produits). Retiré avec la maquette : le panneau « Informations » — tout y était ailleurs
+  sur l'écran, sauf la date de dernière modification, que l'historique remplace (`updated_at` n'est
+  plus lu). `panneau.tsx` et `panneau-outil.ts` supprimés (plus aucun appelant).
+- **Gardes adaptées honnêtement** : `encres-etat-lisibles` relève désormais aussi chaque `color:` des
+  feuilles de la refonte qui désigne une couleur d'état (alias résolus), plancher par moitié — falsifiée
+  (`--color-ds-erreur` posé en texte → rouge) ; `apercu-client-cadre` mesure l'échelle sur l'écran du
+  téléphone (254 px) ; `carte-medias-enregistre` simule `t.rich`.
+- **Mesuré** : 1440, 1024, 390 px, fr/en/zh-CN, mouvement réduit ; aucun débordement, aucune erreur
+  console, aucune violation CSP. Comportements au navigateur : le titre et le fil suivent la frappe et
+  reviennent, le menu s'ouvre dans l'écran (390 et 1440), la révocation reste désactivée sans la case,
+  l'aperçu desktop sert la page à 1 180 px réduite.
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway. La
+  relecture sur quatre angles tourne ; ses corrections feront l'objet du commit suivant.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

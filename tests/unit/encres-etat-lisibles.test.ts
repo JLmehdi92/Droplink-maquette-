@@ -61,9 +61,40 @@ function relever(): Array<{ ou: string; famille: string; jeton: string }> {
 
 const CARTE = JETONS.get("ds-surface-carte") ?? "";
 
+/*
+ * LA REFONTE (02/10/2026) PEINT SES TEXTES PAR SES FEUILLES : les utilitaires fondent
+ * écran après écran, et une garde qui ne lirait qu'eux finirait par ne plus rien voir.
+ * Elle relève donc aussi chaque `color:` des feuilles de la refonte qui désigne une
+ * couleur d'état — directement (`--color-ds-erreur…`) ou par un alias (`--erreur-encre`).
+ */
+const FEUILLES = ["socle", "app", "client"].map((f) => ({
+  nom: f,
+  css: readFileSync(join(RACINE, "styles", "refonte", f + ".css"), "utf8"),
+}));
+const ALIAS: ReadonlyMap<string, string> = new Map(
+  FEUILLES.flatMap(({ css }) =>
+    [...css.matchAll(/(--[a-z-]+)\s*:\s*var\(--color-(ds-[a-z0-9-]+)\)/g)].map((m) => [m[1] ?? "", m[2] ?? ""] as const),
+  ),
+);
+function releverFeuilles(): Array<{ ou: string; famille: string; jeton: string }> {
+  return FEUILLES.flatMap(({ nom, css }) =>
+    [...css.matchAll(/(?<![-\w])color:\s*var\((--[a-z0-9-]+)\)/g)].flatMap((m) => {
+      const variable = m[1] ?? "";
+      const jeton = variable.startsWith("--color-") ? variable.slice("--color-".length) : (ALIAS.get(variable) ?? "");
+      const famille = new RegExp(`^ds-(${FAMILLES.join("|")})(?:-encre)?$`).exec(jeton)?.[1];
+      if (famille === undefined) return [];
+      return [{ ou: `refonte/${nom}.css:${css.slice(0, m.index).split("\n").length} (${variable})`, famille, jeton }];
+    }),
+  );
+}
+/** Relevés le 02/10/2026 ; un plancher PAR MOITIÉ, pour qu'aucune ne masque la disparition de l'autre. */
+const PLANCHER_UTILITAIRES = 70;
+const PLANCHER_FEUILLES = 80;
+
 describe("les encres des couleurs d'état", () => {
   test("CONTRE-TEST : la garde voit les utilitaires, résout les jetons, et reproduit les contrastes relevés", () => {
-    expect(relever().length, "aucun utilitaire relevé : la garde ne regarde plus rien").toBeGreaterThanOrEqual(100);
+    expect(relever().length, "aucun utilitaire relevé : la moitié Tailwind ne regarde plus rien").toBeGreaterThanOrEqual(PLANCHER_UTILITAIRES);
+    expect(releverFeuilles().length, "aucune couleur d'état relevée dans les feuilles de la refonte").toBeGreaterThanOrEqual(PLANCHER_FEUILLES);
     for (const f of FAMILLES) {
       expect(JETONS.get(`ds-${f}`), `ds-${f} absent de globals.css`).toMatch(/^#[0-9a-f]{6}$/);
       expect(JETONS.get(`ds-${f}-fond`), `ds-${f}-fond absent de globals.css`).toMatch(/^#[0-9a-f]{6}$/);
@@ -75,7 +106,7 @@ describe("les encres des couleurs d'état", () => {
   });
 
   test("chaque texte aux couleurs d'état tient 4,5:1 sur la carte et sur son fond teinté", () => {
-    const fautes = relever().flatMap(({ ou, famille, jeton }) => {
+    const fautes = [...relever(), ...releverFeuilles()].flatMap(({ ou, famille, jeton }) => {
       const valeur = JETONS.get(jeton);
       const fond = JETONS.get(`ds-${famille}-fond`) ?? "";
       if (valeur === undefined) return [`${ou} — text-${jeton} : jeton non résolu, donc non mesuré`];

@@ -1,45 +1,44 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { ChevronDown, Link as LienIcone, RefreshCw } from "lucide-react";
 import { revoquerLienPublic } from "@/lib/commandes/actions";
 import { BoutonAction } from "@/components/bouton-action";
+import { BoutonCopierFiche } from "./copier-fiche";
 
 /**
- * « Révoquer le lien » — la carte en alerte du bas de la colonne d'édition.
+ * LA CARTE « LIEN CLIENT » (maquette, `commande.html` : `.ed-carte--lien`).
  *
- * LA RÉVOCATION EST VOLONTAIREMENT INCONFORTABLE, et l'inconfort EST le
- * mécanisme, pas un effet secondaire. Elle coupe définitivement un lien déjà
- * envoyé à quelqu'un : la seule erreur possible est irréversible, et elle se
- * découvre chez le destinataire.
+ * LE LIEN EN CLAIR, copiable : un vendeur qui veut VÉRIFIER quel lien il s'apprête à
+ * envoyer n'a pas à le coller ailleurs pour le voir — après une révocation, c'est la
+ * question qu'on se pose.
  *
- *   - DEUX GESTES SÉPARÉS : cocher, puis presser. Le bouton reste inerte tant
- *     que la case ne l'est pas ;
- *   - AUCUN FORMULAIRE, donc aucune soumission par Entrée — c'est la façon la
- *     plus courante de valider ce qu'on n'a pas lu ;
- *   - aucun raccourci clavier vers l'action.
+ * LA RÉVOCATION VIT DANS UN `<details>` FERMÉ : une action irréversible ne se rencontre
+ * pas en passant. Elle exige la case « je comprends », appelle le serveur, et
+ * l'interface n'affirme rien avant sa réponse : en cas d'échec, l'ancien lien reste
+ * affiché, la case reste cochée, et l'échec est dit (« l'ancien lien reste actif »).
+ * Réussie, elle referme le volet et le NOUVEAU lien apparaît, copiable aussitôt.
  *
- * ⚠️ ELLE VIVAIT DANS UNE BOÎTE MODALE, les deux planches la dessinent EN
- * LIGNE. Ce qui change : il n'y a plus de premier geste « ouvrir », et Échap n'a
- * plus rien à fermer. Ce qui ne change pas, et qui portait l'essentiel : la case
- * à cocher décochée par défaut, l'absence de formulaire, et le texte qui dit ce
- * qui se passe AVANT que ça se passe. La case reste le verrou.
- *
- * LE NOUVEAU LIEN EST UTILISABLE IMMÉDIATEMENT, sans rechargement — c'est
- * l'appelant qui le reçoit et le propage à la barre haute. Un vendeur qui doit
- * rafraîchir pour retrouver son lien hésitera à révoquer, et le lien fuité
- * restera actif.
+ * ⚠️ LE BOUTON N'EST PAS DANS UN `<form action={…}>` : il attend une promesse lancée à
+ * la main, donc `useFormStatus` y rendrait toujours `false` ; il passe son propre
+ * `enAttente`. Ni « réussi » ni « échoué » ne s'y annoncent : la carte entière change,
+ * ou le paragraphe `role="alert"` dit ce qui reste vrai.
  */
 export function CarteRevocation({
   orderId,
   jeton,
+  lienPublic,
   onNouveauJeton,
 }: {
   readonly orderId: string;
   readonly jeton: string;
+  readonly lienPublic: string;
   readonly onNouveauJeton: (jeton: string) => void;
 }) {
   const t = useTranslations("actions");
+  const te = useTranslations("editeur");
+  const volet = useRef<HTMLDetailsElement>(null);
 
   const [compris, setCompris] = useState(false);
   const [enCours, setEnCours] = useState(false);
@@ -48,74 +47,72 @@ export function CarteRevocation({
   const revoquer = useCallback(async (): Promise<void> => {
     setEnCours(true);
     setEchec(null);
-    const resultat = await revoquerLienPublic(orderId, jeton);
+    const resultat = await revoquerLienPublic(orderId, jeton).catch(() => null);
     setEnCours(false);
 
-    if (resultat.statut !== "ok") {
-      // L'interface n'affirme jamais ce que la base n'a pas enregistré :
-      // l'ancien lien reste affiché, la case reste cochée, et l'échec est dit.
+    if (resultat === null || resultat.statut !== "ok") {
       setEchec(t("revocation.echec"));
       return;
     }
 
     onNouveauJeton(resultat.nouveauJeton);
     setCompris(false);
+    if (volet.current !== null) volet.current.open = false;
   }, [orderId, jeton, onNouveauJeton, t]);
 
+  // L'adresse se lit sans son protocole, et sa DERNIÈRE partie — le jeton — en gras :
+  // c'est elle qui change à la révocation.
+  const lisible = lienPublic.replace(/^https?:\/\//, "");
+  const coupure = lisible.lastIndexOf("/") + 1;
+
   return (
-    <section className="rounded-ds-card-lg border border-transparent bg-ds-erreur-fond p-5 lg:p-6">
-      <h2 className="mb-1.5 text-[18px] font-bold tracking-[-0.025em] text-ds-erreur-encre">
-        {t("revocation.titre")}
-      </h2>
-      <p className="mb-3 text-[13px] leading-5 text-ds-texte-corps lg:mb-3.5 lg:leading-[21px]">
-        {t("revocation.explication")}
-      </p>
-
-      <label className="mb-3 flex cursor-pointer items-start gap-2.5 lg:mb-3.5">
-        <input
-          type="checkbox"
-          checked={compris}
-          onChange={(e) => setCompris(e.target.checked)}
-          className="mt-px h-[18px] w-[18px] shrink-0 accent-ds-erreur"
-        />
-        <span className="text-[13px] leading-5 text-ds-texte-fort">
-          {t("revocation.jeComprends")}
-        </span>
-      </label>
-
-      {echec !== null ? (
-        <p role="alert" className="mb-3 text-[13px] font-semibold text-ds-erreur-encre">
-          {echec}
-        </p>
-      ) : null}
-
-      {/*
-        ⚠️ CE BOUTON N'EST PAS DANS UN `<form action={…}>` : il attend une
-        promesse déclenchée à la main, donc `useFormStatus` y rendrait toujours
-        `false`. Il passe son propre `enAttente` — et c'est précisément pour ces
-        actions-là que `BoutonAction` l'accepte.
-
-        ⚠️ NI « RÉUSSI » NI « ÉCHOUÉ » NE SONT ANNONCÉS PAR LE BOUTON, et les
-        deux libellés répètent donc celui du repos. En cas de succès, c'est la
-        carte entière qui change — le nouveau lien apparaît, copiable
-        immédiatement ; en cas d'échec, le paragraphe `role="alert"` ci-dessus
-        le dit, et il dit AUSSI ce qui reste vrai : « l'ancien lien reste
-        actif ». Un « Échec » sur le bouton ne porterait pas cette seconde
-        moitié, qui est la seule qui compte pour décider quoi faire ensuite.
-      */}
-      <BoutonAction
-        type="button"
-        enAttente={enCours}
-        disabled={!compris}
-        onClick={() => void revoquer()}
-        libelles={{
-          repos: t("revocation.confirmer"),
-          enCours: t("revocation.enCours"),
-          reussi: t("revocation.confirmer"),
-          echoue: t("revocation.confirmer"),
-        }}
-        className="flex min-h-12 w-full items-center justify-center rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-erreur-encre shadow-ds-xs transition-shadow hover:shadow-ds-md disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-ds-xs lg:h-12 lg:min-h-0 lg:w-auto"
-      />
+    <section className="bloc ed-carte ed-carte--lien" aria-labelledby="ed-lien">
+      <header className="ed-carte__tete">
+        <h2 id="ed-lien">{te("lienClient")}</h2>
+      </header>
+      <div className="ed-lien-zone">
+        <div className="ed-url">
+          <LienIcone aria-hidden="true" className="ic" />
+          <span>
+            {lisible.slice(0, coupure)}
+            <b>{lisible.slice(coupure)}</b>
+          </span>
+          <BoutonCopierFiche lien={lienPublic} className="ed-url__copier" />
+        </div>
+        <p className="ed-aide">{te("lienClientAide")}</p>
+        <details ref={volet} className="ed-revoquer">
+          <summary>
+            <RefreshCw aria-hidden="true" className="ic" />
+            {t("revocation.titre")}
+            <ChevronDown aria-hidden="true" className="ic ed-revoquer__chevron" />
+          </summary>
+          <div className="ed-revoquer__corps">
+            <p>{t("revocation.explication")}</p>
+            <label className="ed-coche">
+              <input type="checkbox" checked={compris} onChange={(e) => setCompris(e.target.checked)} />
+              <span>{t("revocation.jeComprends")}</span>
+            </label>
+            {echec === null ? null : (
+              <p role="alert" className="ed-revoquer__echec">
+                {echec}
+              </p>
+            )}
+            <BoutonAction
+              type="button"
+              enAttente={enCours}
+              disabled={!compris}
+              onClick={() => void revoquer()}
+              libelles={{
+                repos: t("revocation.confirmer"),
+                enCours: t("revocation.enCours"),
+                reussi: t("revocation.confirmer"),
+                echoue: t("revocation.confirmer"),
+              }}
+              className="ed-danger"
+            />
+          </div>
+        </details>
+      </div>
     </section>
   );
 }

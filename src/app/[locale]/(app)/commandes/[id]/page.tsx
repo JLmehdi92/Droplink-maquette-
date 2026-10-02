@@ -47,7 +47,7 @@ const lireCommandeEditee = cache(async (id: string) => {
       // ouverture porte sur un brouillon encore vide ou sur une commande déjà
       // remplie — la distinction que portait le second point d'émission qu'on
       // vient de retirer.
-      "id, public_token, customer_label, product_ref, tracking_number, carrier_code, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at, views_count, last_viewed_at, created_at, updated_at",
+      "id, public_token, customer_label, product_ref, tracking_number, carrier_code, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at, views_count, last_viewed_at, created_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -315,7 +315,7 @@ export default async function EditeurCommande({
   const jourLong = (iso: string): string => format.dateTime(new Date(iso), { dateStyle: "long" });
 
   return (
-    <main id="contenu" className="flex min-h-dvh flex-col">
+    <main id="contenu" className="tableau fiche">
       <TraductionsClient espaces={["editeur", "medias", "actions", "blocageVendeur"]}>
         <Editeur
           // UNE CLÉ PAR COMMANDE (revue ECC du 23/09/2026) : l'éditeur et sa carte
@@ -325,6 +325,7 @@ export default async function EditeurCommande({
           key={data.id}
           id={data.id}
           langue={langue}
+          boutique={profil.nomAffiche ?? profil.nomBoutique}
           jeton={data.public_token}
           // Le menu « ••• » de la fiche (dupliquer, archiver, sortir des
           // archives), rendu ici côté serveur : voir `menu-gestes-fiche.tsx`.
@@ -389,10 +390,7 @@ export default async function EditeurCommande({
             quand: quandFormatees,
             notes: notesEtapes,
           }}
-          dates={{
-            creeLe: instant(data.created_at),
-            misAJourLe: instant(data.updated_at),
-          }}
+          dates={{ creeLe: instant(data.created_at) }}
           /*
            * LE NOM DU TRANSPORTEUR EST RÉSOLU ICI, côté serveur : le catalogue
            * pèse 157 Ko et il est `server-only`. L'îlot d'édition ne reçoit

@@ -79,7 +79,6 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   /* Le commentaire du client sous son arbitrage (18/09/2026) : SA phrase, entre
      les guillemets du chinois simplifié. Le gabarit n'a rien d'autre à dire. */
   ["editeur.historique.commentaire", "Les guillemets chinois “ ” autour du texte du client, seuls."],
-  ["editeur.tuileVide", "Le tiret d'une valeur absente, identique dans les trois langues."],
   /* La documentation emploie trois mots qui ne se traduisent pas : « Logo » est
      international, et les unités de stockage s'écrivent en lettres latines en
      chinois comme ailleurs. */

@@ -2,8 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ExternalLink, Monitor, Smartphone, type LucideIcon } from "lucide-react";
-import { Panneau } from "@/components/app/panneau";
+import { ArrowUpRight, Monitor, Smartphone, type LucideIcon } from "lucide-react";
 import { cheminApercuPageClient } from "@/lib/liens/page-client";
 
 /**
@@ -32,6 +31,12 @@ import { cheminApercuPageClient } from "@/lib/liens/page-client";
  * à 390 ou 1 180 px — la largeur de référence du téléphone, et le conteneur du kit —,
  * puis RÉDUIT à l'affichage par `transform`, qui ne change pas la fenêtre de la page.
  *
+ * LA REFONTE (02/10/2026) le pose dans le téléphone de `commande.html` (`.telephone--fiche`),
+ * avec la mention « en direct ». La maquette ne garde que le téléphone ; la bascule
+ * Desktop reste, parce que c'est une fonction du produit (l'aperçu desktop), et la
+ * maquette de « Ma marque » dessine la même. Les dimensions du cadre sont MESURÉES sur
+ * l'écran du téléphone : c'est la feuille qui les décide, plus des constantes d'ici.
+ *
  * ⚠️ PAS DE `sandbox`, ET C'EST UNE DÉCISION. La page cadrée est la nôtre, sur notre
  * origine : elle a besoin de ses scripts et de son origine pour hydrater ses îlots,
  * et `allow-scripts` + `allow-same-origin` réunis ne forment plus une frontière — le
@@ -50,19 +55,11 @@ interface Chargement {
 
 const cle = (charge: Chargement): string => charge.source + ":" + String(charge.version);
 
-/** La hauteur visible, identique dans les deux modes : basculer ne fait pas sauter la colonne. */
-const HAUTEUR = 616;
-/** Le téléphone de `BrandPreview` : 300 px, 8 de bord noir. */
-const TELEPHONE = 300;
-const BORD = 8;
-/** 1 px de filet autour du cadre desktop, de chaque côté. */
-const FILET = 1;
 const LARGEUR_PAGE: Readonly<Record<Mode, number>> = { mobile: 390, desktop: 1180 };
 
 /**
- * UN ENREGISTREMENT EN APPELLE SOUVENT UN AUTRE — un champ, puis le suivant. Recharger
- * à chaque réponse ferait tourner deux documents pour rien ; on attend que la saisie se
- * pose.
+ * Le rechargement attend un temps de repos : une rafale de sauvegardes (six champs
+ * saisis à la suite) ne recharge la page qu'une fois, sur la dernière version.
  */
 const DELAI_RECHARGE_MS = 350;
 
@@ -76,63 +73,41 @@ export function ApercuClient({
   versPageClient,
   version,
 }: {
-  /** Le jeton COURANT : il change quand le vendeur révoque, et l'aperçu doit suivre. */
   readonly jeton: string;
-  /** Vers la vraie page, pour l'action d'en-tête du kit. */
   readonly versPageClient: string;
-  /**
-   * Avance à chaque écriture CONFIRMÉE par la base — champ ou média. L'aperçu se
-   * recharge alors : il montre ce que la base porte, pas ce qu'on vient de taper
-   * (contrainte n° 8 — l'interface n'affirme pas ce qui n'est pas enregistré).
-   */
+  /** Avance à chaque écriture CONFIRMÉE par la base : l'aperçu se recharge sur elle. */
   readonly version: number;
 }) {
   const t = useTranslations("editeur");
-
-  /*
-   * MOBILE PAR DÉFAUT : c'est ce que le client ouvre, au téléphone, depuis un message
-   * privé. Le desktop est à un clic.
-   */
   const [mode, setMode] = useState<Mode>("mobile");
 
-  /*
-   * LA LARGEUR DE LA ZONE, MESURÉE AVANT LE PREMIER AFFICHAGE CÔTÉ NAVIGATEUR. Le
-   * serveur ne la connaît pas : il rend le téléphone à sa largeur de planche, VIDE, et
-   * le cadre ne naît qu'une fois la zone mesurée avec une largeur.
-   *
-   * ⚠️ C'EST AUSSI CE QUI EMPÊCHE LE TÉLÉPHONE DE LE CHARGER. L'éditeur cache ce panneau
-   * sous `lg` (`hidden lg:block`), et le premier montage posait `loading="lazy"` en
-   * croyant que ça suffisait. Mesuré au navigateur à 390 px le 26/09/2026 : DEUX
-   * demandes de l'aperçu par ouverture de fiche — Chrome ne diffère PAS un cadre caché,
-   * il le charge d'emblée. Une zone non affichée mesure 0 : pas de cadre, pas de rendu
-   * serveur payé pour une page que personne ne regarde. L'observateur le fait naître si
-   * la fenêtre s'élargit.
-   */
-  const zone = useRef<HTMLDivElement>(null);
-  const [largeurZone, setLargeurZone] = useState<number | null>(null);
+  // L'écran (téléphone ou fenêtre desktop) est mesuré : la page y est posée à
+  // l'échelle exacte de sa largeur, sur toute sa hauteur.
+  const ecran = useRef<HTMLDivElement>(null);
+  const [taille, setTaille] = useState<{ readonly l: number; readonly h: number } | null>(null);
   useLayoutEffect(() => {
-    const element = zone.current;
+    const element = ecran.current;
     if (element === null) return;
-    const mesurer = (): void => setLargeurZone(element.clientWidth);
+    const mesurer = (): void =>
+      setTaille((a) =>
+        a !== null && a.l === element.clientWidth && a.h === element.clientHeight
+          ? a
+          : { l: element.clientWidth, h: element.clientHeight },
+      );
     mesurer();
     const observateur = new ResizeObserver(mesurer);
     observateur.observe(element);
     return () => observateur.disconnect();
-  }, []);
+  }, [mode]);
 
   /*
-   * DEUX CADRES LE TEMPS D'UN RECHARGEMENT. Le nouveau se charge SOUS l'ancien,
-   * invisible ; il ne le remplace qu'une fois chargé, à la même hauteur de défilement.
-   * Recharger le cadre visible le ferait blanchir à chaque champ enregistré, et le
-   * remonterait en haut de page pendant que le vendeur regarde sa galerie.
-   */
-  /*
-   * ⚠️ CHAQUE CADRE RETIENT L'ADRESSE AVEC LAQUELLE IL A ÉTÉ CHARGÉ, ET PAS SEULEMENT SA
-   * VERSION (revue ECC du 26/09/2026). La clé du cadre affiché lisait le jeton COURANT :
-   * révoquer le lien changeait donc la clé du cadre DÉJÀ chargé, React le remontait à
-   * vide, et l'aperçu blanchissait — sur l'action la plus sensible de l'écran, en
-   * contournant le double tampon. Un nouveau jeton est désormais un rechargement comme
-   * un autre : il se charge dessous, et l'ancien reste affiché jusqu'au relais.
+   * DEUX CADRES LE TEMPS D'UN RECHARGEMENT. Le nouveau se charge invisible derrière
+   * l'ancien, qui reste affiché ; il ne prend sa place qu'une fois chargé, au même
+   * défilement. Recharger le seul cadre faisait clignoter une page blanche à chaque
+   * champ enregistré.
+   *
+   * ⚠️ L'ADRESSE SUIT LE JETON COURANT : après une révocation, l'ancien jeton ne
+   * répond plus, et un aperçu qui le garderait montrerait une page introuvable.
    */
   const source = cheminApercuPageClient(jeton);
   const [affichee, setAffichee] = useState<Chargement>({ version, source });
@@ -140,17 +115,12 @@ export function ApercuClient({
 
   useEffect(() => {
     if (version === affichee.version && source === affichee.source) return;
-    const minuterie = window.setTimeout(
-      () => setEnChargement({ version, source }),
-      DELAI_RECHARGE_MS,
-    );
+    const minuterie = window.setTimeout(() => setEnChargement({ version, source }), DELAI_RECHARGE_MS);
     return () => window.clearTimeout(minuterie);
   }, [version, source, affichee]);
 
   const surChargement = (charge: Chargement, cadre: HTMLIFrameElement): void => {
     if (enChargement === null || cle(charge) !== cle(enChargement)) return;
-    // L'ANCIEN CADRE EST L'AUTRE `iframe` DU MÊME CONTENEUR : il n'y en a jamais que deux,
-    // et seulement le temps de ce chargement.
     const ancien = Array.from(cadre.parentElement?.querySelectorAll("iframe") ?? []).find(
       (autre) => autre !== cadre,
     );
@@ -160,119 +130,74 @@ export function ApercuClient({
   };
 
   const largeurPage = LARGEUR_PAGE[mode];
-  const cadreMobile = Math.min(TELEPHONE, largeurZone ?? TELEPHONE);
-  const echelle =
-    mode === "mobile"
-      ? (cadreMobile - 2 * BORD) / largeurPage
-      : ((largeurZone ?? 0) - 2 * FILET) / largeurPage;
-  const hauteurVisible = mode === "mobile" ? HAUTEUR - 2 * BORD : HAUTEUR - 2 * FILET;
-  // Plus large que son propre filet : en deçà, l'échelle du desktop serait nulle ou négative.
-  const zoneAffichee = largeurZone !== null && largeurZone > 2 * FILET;
-
+  const echelle = taille === null || taille.l === 0 ? null : taille.l / largeurPage;
   const charges = enChargement === null ? [affichee] : [affichee, enChargement];
 
-  const lesCadres = !zoneAffichee
-    ? null
-    : charges.map((charge) => (
-        <iframe
-          /* LE MODE FAIT PARTIE DE LA CLÉ : en changer charge un document neuf, sans rien à
-             préserver — la largeur de la page n'est plus la même. L'ADRESSE ET LA VERSION
-             sont celles du chargement, jamais le jeton courant (voir plus haut). */
-          key={mode + ":" + cle(charge)}
-          src={charge.source}
-          title={mode === "mobile" ? t("apercuCadreMobile") : t("apercuCadreDesktop")}
-          /* HORS DE LA TABULATION, comme les aperçus de `BrandPreview` (revue ECC du
-             26/09/2026). Sans lui, Tab entrait dans la page encadrée et en traversait tous
-             les liens avant de revenir à l'éditeur. La souris y garde la main — défiler,
-             ouvrir une photo — et la vraie page reste à un lien, juste au-dessus. */
-          tabIndex={-1}
-          onLoad={(evenement) => surChargement(charge, evenement.currentTarget)}
-          className={
-            "absolute top-0 left-0 block border-0 bg-ds-surface-carte " +
-            (enChargement !== null && cle(charge) === cle(enChargement) ? "invisible" : "")
-          }
-          style={{
-            width: largeurPage,
-            height: Math.ceil(hauteurVisible / echelle),
-            transform: `scale(${echelle})`,
-            transformOrigin: "top left",
-          }}
-        />
-      ));
+  const lesCadres =
+    echelle === null || taille === null
+      ? null
+      : charges.map((charge) => (
+          <iframe
+            // La CLÉ porte le mode : basculer recrée le cadre, dont le défilement n'a
+            // plus de sens — la largeur de la page n'est plus la même.
+            key={mode + ":" + cle(charge)}
+            src={charge.source}
+            title={mode === "mobile" ? t("apercuCadreMobile") : t("apercuCadreDesktop")}
+            // HORS DE L'ORDRE DE TABULATION (26/09/2026) : sans lui, Tab traversait tous
+            // les liens de la page encadrée avant de revenir à l'éditeur.
+            tabIndex={-1}
+            onLoad={(evenement) => surChargement(charge, evenement.currentTarget)}
+            className={
+              "ed-apercu__cadre" +
+              (enChargement !== null && cle(charge) === cle(enChargement) ? " est-en-chargement" : "")
+            }
+            style={{
+              width: largeurPage,
+              height: Math.ceil(taille.h / echelle),
+              transform: `scale(${echelle})`,
+            }}
+          />
+        ));
 
   return (
-    <Panneau
-      titre={t("apercuTitre")}
-      action={
-        <div role="group" aria-label={t("apercuFormat")} className="flex items-center gap-2">
-          {MODES.map(({ mode: valeur, icone: Icone }) => {
-            const actif = mode === valeur;
-            return (
-              <button
-                key={valeur}
-                type="button"
-                aria-pressed={actif}
-                onClick={() => setMode(valeur)}
-                className={
-                  "inline-flex h-10 items-center gap-2 rounded-ds-sm border px-3.5 text-[13px] leading-[normal] transition-colors duration-160 ease-ds-standard focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ds-accent " +
-                  (actif
-                    ? "border-transparent bg-ds-accent font-bold text-ds-texte-sur-marque"
-                    : "border-ds-filet bg-ds-surface-carte font-medium text-ds-texte-corps hover:text-ds-texte-fort")
-                }
-              >
-                <Icone aria-hidden="true" size={16} strokeWidth={1.9} />
-                {valeur === "mobile" ? t("apercuMobile") : t("apercuDesktop")}
-              </button>
-            );
-          })}
-          <a
-            href={versPageClient}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-ds-sm border border-ds-filet text-ds-accent transition-colors duration-160 ease-ds-standard hover:text-ds-accent-survol focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ds-accent"
-          >
-            <ExternalLink aria-hidden="true" size={16} strokeWidth={1.9} />
-            <span className="sr-only">{t("voirPage")}</span>
-          </a>
-        </div>
-      }
-    >
-      <div ref={zone} className="w-full">
+    <section className="bloc ed-carte ed-carte--apercu" aria-labelledby="ed-apercu">
+      <header className="ed-carte__tete">
+        <h2 id="ed-apercu">{t("apercuTitre")}</h2>
+        <p className="direct">
+          <i aria-hidden="true" />
+          {t("apercuDirect")}
+        </p>
+      </header>
+      <div className="apercu-format" role="group" aria-label={t("apercuFormat")}>
+        {MODES.map(({ mode: valeur, icone: Icone }) => (
+          <button key={valeur} type="button" aria-pressed={mode === valeur} onClick={() => setMode(valeur)}>
+            <Icone aria-hidden="true" className="ic" />
+            {valeur === "mobile" ? t("apercuMobile") : t("apercuDesktop")}
+          </button>
+        ))}
+        <a href={versPageClient} target="_blank" rel="noopener noreferrer" className="apercu-format__lien">
+          <ArrowUpRight aria-hidden="true" className="ic" />
+          <span className="sr">{t("voirPage")}</span>
+        </a>
+      </div>
+      <div className="ed-apercu">
         {mode === "mobile" ? (
-          <div className="flex justify-center">
-            <div
-              className="rounded-[40px] bg-ds-ink-900 shadow-ds-window"
-              style={{ width: cadreMobile, padding: BORD }}
-            >
-              <div
-                className="relative overflow-hidden rounded-[33px] bg-ds-surface-carte"
-                style={{ height: hauteurVisible }}
-              >
-                {lesCadres}
-              </div>
+          <div className="telephone telephone--fiche">
+            <div ref={ecran} className="telephone__ecran">
+              {lesCadres}
             </div>
           </div>
         ) : (
-          <div
-            className="relative overflow-hidden rounded-ds-card border border-ds-filet bg-ds-surface-page"
-            style={{ height: HAUTEUR }}
-          >
+          <div ref={ecran} className="ed-apercu__bureau">
             {lesCadres}
           </div>
         )}
       </div>
-    </Panneau>
+    </section>
   );
 }
 
-/**
- * La hauteur de défilement d'un cadre, pour que le suivant reprenne au même endroit.
- *
- * ⚠️ LA LECTURE PEUT LEVER, et 0 est alors la bonne réponse. Le cadre est sur notre
- * origine ; il n'en sortirait que si un lien s'y ouvrait au lieu d'un nouvel onglet,
- * et le navigateur refuse alors de dire où en est une page étrangère. Repartir du haut
- * est exactement ce qu'un cadre neuf ferait de toute façon.
- */
+/** Le défilement d'un cadre de même origine ; 0 s'il est illisible. */
 function defilementDe(cadre: HTMLIFrameElement | undefined): number {
   if (cadre === undefined) return 0;
   try {

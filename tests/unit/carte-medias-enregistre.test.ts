@@ -23,7 +23,9 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
  * composant confie à `DndContext` — la fonction même qui réordonne et qui appelle la base.
  */
 
-vi.mock("next-intl", () => ({ useTranslations: () => (cle: string) => cle }));
+vi.mock("next-intl", () => ({
+  useTranslations: () => Object.assign((cle: string) => cle, { rich: (cle: string) => cle }),
+}));
 
 const actions = vi.hoisted(() => ({
   retirerMedia: vi.fn(),

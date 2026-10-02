@@ -1671,6 +1671,61 @@ a.action-ligne { color: var(--corps); }
   .ed-vignette__geste:not(.ed-vignette__geste--suppr) { right: 34px; }
 }
 .fiche__resume [data-vide] { color: var(--sourdine); font-weight: 500; }
+/* ---- Fiche : ce que le produit porte et que la maquette ne dessine pas (02/10/2026) ---- */
+.temoin[data-etat="echec"] { color: var(--erreur-encre); }
+.temoin[data-etat="echec"] i { background: var(--color-ds-erreur); }
+.fiche__actions-mobile { display: none; }
+.bouton-outil--icone { justify-content: center; width: 36px; height: 36px; padding: 0; }
+.bouton-outil.est-copie .ic { color: var(--succes-encre); }
+.bouton-outil.est-echec, .bouton-outil.est-echec .ic { color: var(--erreur-encre); }
+.ed-url__copier.est-copie, .ed-barre-mobile__copier.est-copie { color: var(--succes-encre); }
+.ed-url__copier.est-echec, .ed-barre-mobile__copier.est-echec { color: var(--erreur-encre); }
+.fiche__gestes .pop { min-width: 240px; }
+.ed-champ [aria-invalid="true"] { border-color: var(--color-ds-erreur); }
+.ed-carte--apercu .apercu-format { margin: 12px 18px 0; }
+.ed-apercu__cadre { position: absolute; top: 0; left: 0; display: block; border: 0; background: #fff; transform-origin: top left; }
+.ed-apercu__cadre.est-en-chargement { visibility: hidden; }
+.ed-apercu__bureau { position: relative; justify-self: stretch; height: 520px; overflow: hidden; border: 1px solid var(--filet); border-radius: 14px; background: #fff; }
+.telephone--fiche .telephone__ecran { width: 100%; }
+.ed-avis { margin: 12px 18px 0; padding: 11px 13px; border-radius: 11px; background: var(--color-ds-alerte-fond); color: var(--avert-encre); font-size: 13px; line-height: 1.5; font-weight: 500; }
+.ed-avis__lien { font-weight: 700; color: inherit; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.ed-frise__note { max-width: 18ch; color: var(--corps); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.ed-histo__vide { padding: 8px 18px 18px; font-size: 13px; color: var(--sourdine); }
+.ed-histo__detail { font-size: 13px; font-weight: 400; color: var(--corps); overflow-wrap: anywhere; }
+.ed-histo__commentaire { unicode-bidi: isolate; }
+.ed-compteur b { color: var(--encre); font-weight: 650; }
+.ed-medias__echec { padding: 11px 13px; border-radius: 11px; background: var(--color-ds-erreur-fond); color: var(--erreur-encre); font-size: 13px; line-height: 1.5; }
+.ed-medias__plein { padding: 11px 13px; border-radius: 11px; background: var(--creux); color: var(--avert-encre); font-size: 13px; }
+.ed-vignette > .ed-vignette__photo { width: 100%; height: 100%; object-fit: cover; }
+.ed-vignette__vide { width: 22px; height: 22px; color: var(--sourdine); }
+.ed-vignette--envoi { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; padding: 10px; cursor: default; text-align: center; }
+.ed-vignette--envoi > .ic { width: 20px; height: 20px; color: var(--sourdine); }
+.ed-vignette__barre { width: 100%; height: 6px; border-radius: 99px; background: var(--filet); overflow: hidden; }
+.ed-vignette__barre i { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width 200ms var(--ease); }
+.ed-vignette__pourcent { font-size: 11.5px; color: var(--sourdine); font-variant-numeric: tabular-nums; }
+.ed-vignette--envoi .ed-vignette__alerte { color: var(--erreur-encre); }
+.ed-vignette__refus { font-size: 11.5px; line-height: 1.35; color: var(--erreur-encre); }
+.ed-vignette__geste.ed-vignette__poignee { left: 6px; right: auto; cursor: grab; touch-action: none; }
+.ed-vignette.est-saisie { z-index: 2; opacity: .85; box-shadow: var(--ombre-lg); }
+.ed-aide--doigt { display: none; }
+@media (pointer: coarse) { .ed-aide--souris { display: none; } .ed-aide--doigt { display: block; } }
+.ed-revoquer__echec { font-weight: 600; color: var(--erreur-encre); }
+.ed-echec { position: fixed; right: 24px; bottom: 24px; z-index: 40; display: grid; gap: 6px; max-width: 420px; padding: 14px 16px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--erreur-encre) 22%, var(--filet)); background: var(--color-ds-erreur-fond); color: var(--erreur-encre); font-size: 13px; line-height: 1.5; box-shadow: var(--ombre-lg); }
+.ed-echec__titre { font-size: 14px; font-weight: 700; }
+.ed-echec .bouton-app { justify-self: start; margin-top: 4px; }
+@media (max-width: 900px) {
+  .fiche__tete { position: relative; }
+  .fiche__tete h1 { padding-right: 52px; }
+  .fiche__actions-mobile { position: absolute; top: 0; right: 0; display: flex; align-items: center; }
+  .fiche__actions-mobile .bouton-outil--icone { width: 44px; height: 44px; }
+  .ed-echec { left: 12px; right: 12px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); max-width: none; }
+}
+@media (max-width: 640px) {
+  .ed-vignette__geste.ed-vignette__poignee { left: 0; top: 0; }
+}
+@media (max-width: 900px) {
+  .ed-vignette__geste.ed-vignette__poignee { left: 0; right: auto; top: 0; }
+}
 @media (max-width: 900px) {
   .fiche .v4-fil a { display: inline-flex; align-items: center; min-height: 44px; margin-block: -11px; }
   .ed-champ input, .ed-champ select { height: 46px; font-size: 16px; }

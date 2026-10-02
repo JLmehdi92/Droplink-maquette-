@@ -4,18 +4,19 @@ import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Check, ChevronDown, Clock, ExternalLink, Share2, TriangleAlert } from "lucide-react";
+import { ArrowUpRight, ChevronDown, ChevronRight, Lock } from "lucide-react";
 import { enregistrerChamp, type ResultatEnregistrement } from "@/lib/commandes/actions";
 import { lienPageClient } from "@/lib/liens/page-client";
 import type { QuotaAtteint } from "@/lib/commandes/quota-atteint";
 import { referenceCourte } from "@/lib/commandes/reference";
 import { ETAPES, type Etape } from "@/lib/tracking/normalize";
-import { Panneau, LienRetour, LigneInfo } from "@/components/app/panneau";
 import { FriseDetail } from "./frise-detail";
 import { CarteMedias, type MediaAffiche } from "./carte-medias";
 import { CarteRevocation } from "./carte-revocation";
 import { ApercuClient } from "./apercu-client";
 import { TuilesResume } from "./tuiles-resume";
+import { BoutonCopierFiche } from "./copier-fiche";
+import { titreDeCommande } from "@/lib/commandes/titre";
 
 /**
  * L'éditeur d'une commande — sauvegarde automatique, sans bouton « enregistrer ».
@@ -35,23 +36,17 @@ import { TuilesResume } from "./tuiles-resume";
  * laisse à l'écran une valeur que personne n'a gardée — le vendeur envoie alors
  * un lien dont il croit connaître le contenu.
  *
- * ⚠️ CE COMPOSANT PORTE SON EN-TÊTE, ce qui n'était pas le cas. Le témoin de
- * sauvegarde vit dans l'îlot d'édition ; une barre rendue par le serveur ne peut
- * pas partager son état. Soit l'en-tête descend ici, soit le témoin remonte par
- * un mécanisme qu'il faudrait inventer. Il descend.
+ * ⚠️ CE COMPOSANT PORTE SON EN-TÊTE : le témoin de sauvegarde vit dans l'îlot
+ * d'édition, et une barre rendue par le serveur ne pourrait pas partager son état.
  *
- * ⚠️ ET IL A CESSÉ D'ÊTRE UNE BARRE COLLANTE LE 12/09/2026. Il était rendu en
- * `sticky` sous la barre supérieure de l'espace vendeur — donc DEUX barres
- * empilées, dont une que le kit ne dessine pas. Dans le kit, le retour, le titre
- * et les actions sont du CONTENU de page : ils défilent avec le reste, et les
- * 89 px de la barre supérieure restent la seule chose qui ne bouge pas.
- *
- * ⚠️ LE TITRE EST DEVENU LA RÉFÉRENCE COURTE, pas le nom du client. C'est ce que
- * le kit écrit (« #DLK7842 »), et c'est ce que la liste des commandes affiche
- * depuis sa reprise : deux écrans qui nomment la même commande autrement forcent
- * à retraduire mentalement à chaque aller-retour. Le nom du client n'est pas
- * perdu — il est le premier champ de la carte, et il reste le titre de l'ONGLET,
- * qui sert à retrouver une fenêtre parmi dix et non à identifier une ligne.
+ * LA REFONTE (02/10/2026) suit `commande.html` : fil d'Ariane, titre, témoin et
+ * référence dans la même ligne, résumé en quatre compteurs, puis la grille de six
+ * cartes. LE TITRE EST REDEVENU LE NOM DU CLIENT (« Nouvelle commande » sans lui) :
+ * c'est la décision n° 7 de Mehdi, la maquette — la référence courte reste à côté
+ * du témoin. Le panneau « Informations » disparaît avec elle : la référence, la
+ * création, le numéro, le transporteur et le lien sont chacun à leur place
+ * ailleurs sur l'écran ; seule la date de dernière modification n'y est plus, et
+ * l'historique dit chaque modification avec son heure.
  */
 
 type Etat = "repos" | "encours" | "echec";
@@ -74,6 +69,7 @@ const DELAI_TEXTE_MS = 800;
 export function Editeur({
   id,
   langue,
+  boutique,
   jeton,
   menusGestes,
   bandeau,
@@ -92,6 +88,8 @@ export function Editeur({
 }: {
   readonly id: string;
   readonly langue: string;
+  /** Le nom affiché de la boutique, premier maillon du fil d'Ariane ; `null` s'il n'y en a pas. */
+  readonly boutique: string | null;
   readonly jeton: string;
   /**
    * Le menu « ••• » (dupliquer, archiver), rendu CÔTÉ SERVEUR par la page
@@ -143,7 +141,6 @@ export function Editeur({
   /** Les deux dates de la commande, formatées côté serveur pour la même raison. */
   readonly dates: {
     readonly creeLe: string;
-    readonly misAJourLe: string;
   };
   /**
    * CE QUE LA RANGÉE DE TUILES MONTRE ET QUE LE FORMULAIRE NE PORTE PAS.
@@ -290,264 +287,126 @@ export function Editeur({
   // formes. Voir `lib/liens/page-client.ts`.
   const lienPublic = lienPageClient(origine, jetonCourant, nomDeLien);
 
+  const titre = titreDeCommande(valeurs.customer_label, t("titre"));
+
   return (
     <>
-      <div className="px-margin-mobile pt-4 pb-6 lg:px-8 lg:pt-[26px] lg:pb-8">
-        <EnTeteDetail
-          langue={langue}
-          reference={referenceCourte(id)}
-          creeLe={dates.creeLe}
-          etat={etat}
-          lienPublic={lienPublic}
-          versPageClient={versPageClient}
-          menusGestes={menusGestes}
-        />
-
-        {/* Le lien bloqué d'abord : c'est ce qui a changé pour le client (planche
-            `#commande-bloquee`, entre l'en-tête et le résumé). */}
-        {bandeau ?? null}
-
-        {/*
-          LA RANGÉE DE RÉSUMÉ DU KIT, et elle manquait entièrement. Elle vient
-          AVANT les panneaux, comme dans `OrderDetail.jsx` : quatre faits d'un
-          coup d'œil, sans avoir à lire un formulaire pour les retrouver.
-        */}
-        <TuilesResume
-          client={valeurs.customer_label}
-          reference={valeurs.product_ref}
-          numeroSuivi={valeurs.tracking_number}
-          transporteur={resume.transporteur}
-          vues={resume.vues}
-          derniereVueLe={resume.derniereVueLe}
-        />
-
-        {/*
-          LES TROIS RANGÉES DU KIT, ET LEURS GRILLES EXACTES : deux rangées en
-          `minmax(0,1.35fr) minmax(0,1fr)` encadrant une rangée à trois colonnes
-          égales, toutes à l'écart de 18 px. Mesuré à 1690 px sur le kit servi :
-          1347 px de contenu, soit 763 + 18 + 566, et 437 × 3 + 18 × 2.
-
-          ⚠️ CHAQUE RANGÉE EST EN `display: contents` AU TÉLÉPHONE, et c'est ce
-          qui permet l'ordre mobile. Les cartes deviennent alors les enfants
-          directs de la colonne, donc `order` les classe une à une : les photos
-          d'abord — sur 390 px, le vendeur qui ouvre une commande vient en
-          déposer —, le lien à révoquer en dernier, une action irréversible ne se
-          rencontrant pas au milieu d'un formulaire. Une grille par rangée aurait
-          figé les cartes d'une même rangée l'une derrière l'autre.
-        */}
-        <div className="flex flex-col gap-3 lg:flex lg:flex-col lg:gap-[18px]">
-          <div className="contents lg:grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-start lg:gap-[18px]">
-            <div className="order-2 lg:order-none">
-              <CarteCommande
-                valeurs={valeurs}
-                statuts={statuts}
-                qcs={qcs}
-                transporteurs={transporteurs}
-                champsEnEchec={champsEnEchec}
-                onChanger={changer}
-              />
-            </div>
-
-            {/*
-              L'APERÇU NE SE REND PAS AU TÉLÉPHONE. Sur 390 px, une miniature de
-              la page publique posée sous les champs serait une seconde page à
-              faire défiler avant d'atteindre quoi que ce soit — et la vraie page
-              est à un bouton, en bas de l'écran.
-            */}
-            <div className="hidden lg:block">
-              <ApercuClient
-                jeton={jetonCourant}
-                versPageClient={versPageClient}
-                version={versionApercu}
-              />
-            </div>
-          </div>
-
-          <div className="contents lg:grid lg:grid-cols-3 lg:items-start lg:gap-[18px]">
-            <div className="order-3 lg:order-none">
-              <PanneauSuivi
-                suivi={suivi}
-                bloque={suiviBloque}
-                versPasserPro={"/" + langue + "/passer-pro"}
-                statut={valeurs.status}
-              />
-            </div>
-
-            <div className="order-4 lg:order-none">
-              <PanneauInformations
-                reference={referenceCourte(id)}
-                dates={dates}
-                numeroSuivi={valeurs.tracking_number}
-                transporteur={resume.transporteur}
-                lienPublic={lienPublic}
-                versPageClient={versPageClient}
-              />
-            </div>
-
-            <div className="order-5 lg:order-none">{historique}</div>
-          </div>
-
-          <div className="contents lg:grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-start lg:gap-[18px]">
-            <div className="order-1 lg:order-none">
-              <CarteMedias
-                orderId={id}
-                initiaux={medias.initiaux}
-                plafondMedias={medias.plafondMedias}
-                plafondVideos={medias.plafondVideos}
-                typesAcceptes={medias.typesAcceptes}
-                onEnregistre={apercuPerime}
-              />
-            </div>
-
-            <div className="order-6 lg:order-none">
-              <CarteRevocation orderId={id} jeton={jetonCourant} onNouveauJeton={setJetonCourant} />
-            </div>
-          </div>
+      <div className="tableau__tete fiche__tete">
+        <div>
+          <p className="v4-fil">
+            {boutique === null ? null : (
+              <>
+                <span>{boutique}</span>
+                <ChevronRight aria-hidden="true" className="ic" />
+              </>
+            )}
+            <Link href={"/" + langue + "/commandes"}>{t("filCommandes")}</Link>
+            <ChevronRight aria-hidden="true" className="ic" />
+            <b>{titre}</b>
+          </p>
+          {/* LE TITRE SUIT LE NOM DU CLIENT, à la frappe (décision n° 7 de Mehdi :
+              la maquette). Sans nom, « Nouvelle commande » — la même règle que
+              l'onglet du navigateur, `titreDeCommande`, écrite une seule fois. */}
+          <h1>{titre}</h1>
+          <p className="fiche__meta">
+            <TemoinSauvegarde etat={etat} />
+            <span aria-hidden="true">·</span>
+            <span>{t("creeeLe", { quand: dates.creeLe })}</span>
+            <span aria-hidden="true">·</span>
+            <span className="fiche__ref">{referenceCourte(id)}</span>
+          </p>
         </div>
+        <div className="fiche__actions">
+          {/* Le menu « ••• » (dupliquer, archiver, sortir des archives) : la maquette
+              n'en dessine pas, mais ces gestes n'ont pas d'autre chemin au téléphone. */}
+          {menusGestes.bureau}
+          <BoutonCopierFiche lien={lienPublic} className="bouton-outil" avecTexte />
+          <a className="ed-voir" href={versPageClient} target="_blank" rel="noopener noreferrer">
+            <span>{t("voirPage")}</span>
+            <ArrowUpRight aria-hidden="true" className="ic" />
+          </a>
+        </div>
+        <div className="fiche__actions-mobile">{menusGestes.telephone}</div>
       </div>
 
-      {/* LA BANDE D'ACTION DU TÉLÉPHONE, collée en bas comme sur la planche : à
-          390 px, la barre haute a déjà le titre et le témoin, et « voir la page
-          publique » est le geste qui termine le travail. */}
-      <div className="sticky bottom-0 z-10 flex gap-2.5 border-t border-ds-filet bg-ds-surface-carte px-4 pt-3 pb-5 lg:hidden">
-        <BoutonCopier lien={lienPublic} compact />
-        <a
-          href={versPageClient}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="degrade-ds-marque flex min-h-12 flex-grow items-center justify-center gap-2 rounded-ds-card text-[15px] font-semibold text-ds-texte-sur-marque shadow-ds-brand"
-        >
+      {/* Le lien bloqué d'abord : c'est ce qui a changé pour le client. */}
+      {bandeau ?? null}
+
+      <TuilesResume
+        client={valeurs.customer_label}
+        reference={valeurs.product_ref}
+        numeroSuivi={valeurs.tracking_number}
+        transporteur={resume.transporteur}
+        vues={resume.vues}
+        derniereVueLe={resume.derniereVueLe}
+      />
+
+      {/*
+        LA GRILLE DE LA MAQUETTE (`.fiche__grille`, par zones) : la commande et
+        l'aperçu, les médias et le lien, le suivi et l'historique. Sous 1 100 px elle
+        passe sur une colonne, dans l'ordre du travail au téléphone : les photos
+        d'abord — le vendeur qui ouvre une commande vient en déposer —, le lien à
+        révoquer en dernier. L'aperçu n'y est plus : la vraie page est à un bouton,
+        dans la bande du bas.
+      */}
+      <div className="fiche__grille">
+        <CarteCommande
+          valeurs={valeurs}
+          statuts={statuts}
+          qcs={qcs}
+          transporteurs={transporteurs}
+          champsEnEchec={champsEnEchec}
+          onChanger={changer}
+        />
+        <ApercuClient jeton={jetonCourant} versPageClient={versPageClient} version={versionApercu} />
+        <CarteMedias
+          orderId={id}
+          initiaux={medias.initiaux}
+          plafondMedias={medias.plafondMedias}
+          plafondVideos={medias.plafondVideos}
+          typesAcceptes={medias.typesAcceptes}
+          onEnregistre={apercuPerime}
+        />
+        <CarteRevocation
+          orderId={id}
+          jeton={jetonCourant}
+          lienPublic={lienPublic}
+          onNouveauJeton={setJetonCourant}
+        />
+        <PanneauSuivi
+          suivi={suivi}
+          bloque={suiviBloque}
+          versPasserPro={"/" + langue + "/passer-pro"}
+          statut={valeurs.status}
+        />
+        {historique}
+      </div>
+
+      {/* LA BANDE D'ACTION DU TÉLÉPHONE, collée en bas : « voir la page client » est
+          le geste qui termine le travail, et le pouce l'atteint sans remonter. */}
+      <div className="ed-barre-mobile">
+        <BoutonCopierFiche lien={lienPublic} className="ed-barre-mobile__copier" />
+        <a className="ed-barre-mobile__voir" href={versPageClient} target="_blank" rel="noopener noreferrer">
           {t("voirPage")}
-          <ExternalLink aria-hidden="true" size={16} strokeWidth={1.9} />
+          <ArrowUpRight aria-hidden="true" className="ic" />
         </a>
       </div>
 
-      {/* L'ÉCHEC NOMME LES CHAMPS ET PROPOSE DE REFAIRE. Sans le bouton, la
-          seule façon de réessayer est de retoucher chaque champ en échec — donc
-          de deviner lesquels, ce que le message vient justement d'éviter. */}
+      {/* L'ÉCHEC NOMME LES CHAMPS ET PROPOSE DE REFAIRE. Sans le bouton, la seule
+          façon de réessayer serait de retoucher chaque champ en échec — donc de
+          deviner lesquels, ce que le message vient justement d'éviter. */}
       {etat === "echec" ? (
-        <div
-          role="alert"
-          className="fixed inset-x-0 bottom-0 z-20 border-t border-transparent bg-ds-erreur-fond px-4 py-3.5 lg:inset-x-auto lg:right-6 lg:bottom-6 lg:max-w-[420px] lg:rounded-ds-card-lg lg:border lg:shadow-ds-lg"
-        >
-          <p className="text-[14px] font-bold text-ds-erreur-encre">
+        <div role="alert" className="ed-echec">
+          <p className="ed-echec__titre">
             {t("echec", { champs: champsEnEchec.map((c) => t("nomChamp." + c)).join(", ") })}
           </p>
-          <p className="mt-1 text-[13px] leading-5 text-ds-erreur-encre">{t("echecReste")}</p>
-          <button
-            type="button"
-            onClick={relancer}
-            className="mt-3 min-h-11 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[13px] font-semibold text-ds-erreur-encre shadow-ds-xs transition-shadow hover:shadow-ds-md lg:h-10 lg:min-h-0"
-          >
+          <p>{t("echecReste")}</p>
+          <button type="button" onClick={relancer} className="bouton-app bouton-app--second">
             {t("reessayer")}
           </button>
         </div>
       ) : null}
     </>
-  );
-}
-
-/**
- * L'EN-TÊTE DE L'ÉCRAN DE DÉTAIL — relevé au pixel sur le kit servi à 1690 px.
- *
- * Le retour est un LIEN EN TEXTE posé au-dessus du titre (14/500, écart 9),
- * puis 14 px, puis le titre à 40/800 en -0,045em sur une interligne de 1,05,
- * puis 8 px et la date de création à 15/400. À droite, les actions à 48 px de
- * haut, à l'écart de 12, alignées sur le HAUT du titre.
- *
- * LE DÉGRADÉ EST SUR « VOIR LA PAGE PUBLIQUE » et sur rien d'autre. Une seule
- * action principale par écran : c'est celle qui termine le travail, celle qu'on
- * fait avant d'envoyer le lien à son client.
- *
- * ⚠️ LE BOUTON « ··· » Y EST, DEPUIS LE 18/09/2026, ET CE BLOC DISAIT L'INVERSE.
- * Il l'écartait au motif que dupliquer et archiver « vivent sur la ligne de la
- * liste » : or cette ligne n'existe qu'à partir de 1024 px, et au téléphone ces
- * trois gestes (dupliquer, archiver, sortir des archives) n'avaient plus AUCUN
- * chemin. Le menu n'est donc plus vide, et la fiche est la seule page d'une
- * commande servie à toutes les largeurs.
- *
- * ⚠️ DEUX CHOSES DU KIT NE SONT PAS ICI, ET CHACUNE POUR UNE RAISON :
- *
- *  1. LA PILULE D'ÉTAT sous les actions (« En transit », chevron). Chez nous
- *     l'état est une liste déroulante du formulaire, 200 px plus bas. Deux
- *     contrôles pour la même valeur, sur un écran qui enregistre à la frappe,
- *     c'est deux endroits où lire un état qui peut momentanément différer.
- *  2. « MODIFIER LA COMMANDE ». Le kit sépare une vue de lecture d'un
- *     formulaire (`CreateOrder.jsx`, avec son bouton « Enregistrer en
- *     brouillon »). La décision 16 interdit le bouton d'enregistrement : notre
- *     écran EST le formulaire, et son bouton « modifier » n'aurait mené qu'à
- *     lui-même.
- */
-function EnTeteDetail({
-  langue,
-  reference,
-  creeLe,
-  etat,
-  lienPublic,
-  versPageClient,
-  menusGestes,
-}: {
-  readonly langue: string;
-  readonly reference: string;
-  readonly creeLe: string;
-  readonly etat: Etat;
-  readonly lienPublic: string;
-  readonly menusGestes: { readonly bureau: ReactNode; readonly telephone: ReactNode };
-  readonly versPageClient: string;
-}) {
-  const t = useTranslations("editeur");
-
-  return (
-    <header className="mb-[26px]">
-      <LienRetour href={"/" + langue + "/commandes"} libelle={t("retour")} />
-
-      <div className="mt-3.5 flex flex-col items-start gap-4 lg:flex-row lg:gap-5">
-        <div className="min-w-0">
-          <h1 className="flex items-center gap-3 text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre max-[560px]:text-[24px] lg:text-[40px]">
-            {reference}
-            {/* L'ICÔNE DU TITRE OUVRE LA PAGE CLIENT, elle n'est pas décorative :
-                c'est ce que le kit dessine, et une icône de lien qui ne lie pas
-                serait une promesse creuse. Elle porte donc son propre nom. */}
-            <a
-              href={versPageClient}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="-m-3 inline-flex min-h-11 min-w-11 items-center justify-center p-3 text-ds-accent transition-colors hover:text-ds-accent-survol lg:min-h-0 lg:min-w-0"
-            >
-              <ExternalLink aria-hidden="true" size={22} strokeWidth={2} />
-              <span className="sr-only">{t("voirPage")}</span>
-            </a>
-          </h1>
-          <p className="mt-2 text-[15px] leading-[1.55] text-ds-texte-corps">
-            {t("creeeLe", { quand: creeLe })}
-          </p>
-        </div>
-
-        <span className="hidden flex-1 lg:block" />
-
-        <div className="hidden flex-wrap items-center gap-3 lg:flex">
-          <TemoinSauvegarde etat={etat} />
-          {menusGestes.bureau}
-          <BoutonCopier lien={lienPublic} />
-          <a
-            href={versPageClient}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="degrade-ds-marque flex h-12 items-center gap-2 rounded-ds-card px-[18px] text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
-          >
-            {t("voirPage")}
-            <ExternalLink aria-hidden="true" size={16} strokeWidth={1.9} />
-          </a>
-        </div>
-
-        {/* AU TÉLÉPHONE, LE TÉMOIN SEUL : les deux actions vivent dans la bande
-            collée en bas, là où le pouce les atteint sans remonter. */}
-        <div className="flex items-center gap-3 lg:hidden">
-          <TemoinSauvegarde etat={etat} />
-          {menusGestes.telephone}
-        </div>
-      </div>
-    </header>
   );
 }
 
@@ -588,31 +447,27 @@ function PanneauSuivi({
     : "preparation";
 
   return (
-    <Panneau titre={t("suiviTitre")}>
-      {/* LE FOURNISSEUR A CESSÉ DE SUIVRE CE NUMÉRO, ET C'EST DIT. Un suivi qui
-          s'arrête sans le dire se lit comme un suivi qui ne marche pas. */}
-      {/* ET LA CAUSE EST NOMMÉE : « non reconnu » appelle un geste (préciser le
-          transporteur, qui relance le suivi) ; « arrêté » n'en appelle aucun. */}
+    <section className="bloc ed-carte ed-carte--suivi" aria-labelledby="ed-suivi-titre">
+      <header className="ed-carte__tete">
+        <h2 id="ed-suivi-titre">{t("suiviTitre")}</h2>
+      </header>
+      {/* LE FOURNISSEUR A CESSÉ DE SUIVRE CE NUMÉRO, ET LA CAUSE EST NOMMÉE :
+          « non reconnu » appelle un geste (préciser le transporteur, qui relance le
+          suivi) ; « arrêté » n'en appelle aucun. */}
       {suivi.abandonne ? (
-        <p className="mb-4 rounded-ds-sm bg-ds-alerte-fond p-3 text-[13px] font-medium text-ds-alerte-encre">
-          {suivi.nonReconnu ? t("suiviNonReconnu") : t("suiviArrete")}
-        </p>
+        <p className="ed-avis">{suivi.nonReconnu ? t("suiviNonReconnu") : t("suiviArrete")}</p>
       ) : null}
 
-      {/* LE SUIVI N'A PAS DÉMARRÉ, ET LA CAUSE EST NOMMÉE (planche `OrderDetail`,
-          `#suivi-bloque`). Sans cet avis, la frise disait « en attente » pour toujours
-          à un vendeur dont le numéro ne serait jamais suivi. En gratuit, le quota est à
-          vie : le seul geste est le Pro. En Pro, il se recharge le 1er. */}
+      {/* LE SUIVI N'A PAS DÉMARRÉ (quota de colis, 199), ET C'EST DIT : sans cet avis,
+          la frise dirait « en attente » pour toujours. En gratuit le quota est à vie,
+          le seul geste est le Pro ; en Pro il se recharge le 1er. */}
       {bloque !== null ? (
-        <p
-          role="status"
-          className="mb-4 rounded-ds-sm bg-ds-alerte-fond p-3 text-[13px] leading-[1.5] font-medium text-ds-alerte-encre"
-        >
+        <p role="status" className="ed-avis">
           {bloque === "gratuit" ? (
             <>
               {t("suiviBloqueGratuit")}{" "}
               {/* INSÉCABLE : coupé en « Passer au » / « Pro », le geste se lisait en deux morceaux. */}
-              <Link href={versPasserPro} className="font-bold whitespace-nowrap text-ds-alerte-encre underline">
+              <Link href={versPasserPro} className="ed-avis__lien">
                 {t("suiviBloquePasserPro")}
               </Link>
             </>
@@ -632,221 +487,44 @@ function PanneauSuivi({
           note: suivi.notes[etape] ?? null,
         }))}
       />
-    </Panneau>
+    </section>
   );
 }
 
 /**
- * LE PANNEAU D'INFORMATIONS — `Panel` + `InfoRow` du kit.
+ * LE TÉMOIN DE SAUVEGARDE (maquette, `.temoin`), à TROIS états.
  *
- * ⚠️ IL MET LE LIEN CLIENT EN CLAIR, et c'est le vrai apport de ce panneau. Le
- * lien n'existait à l'écran que derrière un bouton « copier » : un vendeur qui
- * veut VÉRIFIER quel lien il s'apprête à envoyer devait donc le coller quelque
- * part pour le voir. Après une révocation, c'est exactement la question qu'on
- * se pose.
- *
- * ⚠️ IL EST DANS L'ÎLOT CLIENT, pas rendu par le serveur, et ce n'est pas une
- * commodité : le numéro de suivi et le lien changent SOUS LES YEUX du vendeur —
- * l'un à la frappe, l'autre à la révocation. Rendu au serveur, ce panneau
- * afficherait la valeur du chargement, c'est-à-dire un lien mort au moment
- * précis où l'on vient le vérifier.
- *
- * ⚠️ CE BLOC AFFIRMAIT DEUX IMPOSSIBILITÉS, ET L'UNE ÉTAIT FAUSSE. Il disait
- * que « Méthode d'expédition » nommerait « un transporteur que la base porte en
- * identifiant NUMÉRIQUE 17TRACK, jamais traduit ». Le raisonnement tenait, la
- * conclusion non : 17TRACK PUBLIE son catalogue, il est figé dans le dépôt
- * depuis le 12/09 (3 502 entrées, `lib/tracking/transporteurs.json`), et la
- * ligne existe donc désormais. C'est L-014 dans sa forme la plus coûteuse — un
- * commentaire de code qui affirme un état que personne n'a exécuté, et qui a
- * servi d'excuse pour ne pas faire.
- *
- * CE QUI RESTE VRAI : « Pays de livraison » n'existe nulle part. Le destinataire
- * est un texte libre sans compte ni adresse (principe III) ; il n'y a aucune
- * adresse d'où tirer un pays, et une ligne de repli répétée à chaque commande
- * vaudrait moins que rien.
- */
-function PanneauInformations({
-  reference,
-  dates,
-  numeroSuivi,
-  transporteur,
-  lienPublic,
-  versPageClient,
-}: {
-  readonly reference: string;
-  readonly dates: { readonly creeLe: string; readonly misAJourLe: string };
-  readonly numeroSuivi: string;
-  /** Le NOM du transporteur, résolu côté serveur, ou `null` s'il est inconnu. */
-  readonly transporteur: string | null;
-  readonly lienPublic: string;
-  readonly versPageClient: string;
-}) {
-  const t = useTranslations("editeur");
-
-  return (
-    <Panneau titre={t("infosTitre")}>
-      <LigneInfo libelle={t("infosReference")} valeur={reference} href={versPageClient} />
-      <LigneInfo libelle={t("infosCreee")} valeur={dates.creeLe} />
-      <LigneInfo libelle={t("infosModifiee")} valeur={dates.misAJourLe} />
-      <LigneInfo
-        libelle={t("infosExpedition")}
-        valeur={transporteur ?? t("infosSansTransporteur")}
-      />
-      {/* UNE VALEUR ABSENTE EST NOMMÉE, pas laissée à un tiret. « Aucun numéro »
-          se lit ; « – » demande de deviner si la donnée manque ou si l'écran a
-          échoué. */}
-      <LigneInfo
-        libelle={t("suivi")}
-        valeur={numeroSuivi.trim() === "" ? t("infosSansSuivi") : numeroSuivi}
-      />
-      <LigneInfo libelle={t("infosLien")} valeur={lienPublic} href={versPageClient} />
-    </Panneau>
-  );
-}
-
-/**
- * Le témoin de sauvegarde, à TROIS états, EN PILULE.
- *
- * Le troisième n'est pas décoratif : « échec » sans nommer le champ oblige à
- * relire tout le formulaire pour trouver ce qui n'est pas passé, et la plupart
- * des gens ne le font pas — ils supposent que c'était secondaire. Ici la pilule
- * ne porte que l'état ; le détail vit dans le bandeau, où il y a la place de le
- * dire et un bouton pour refaire.
+ * Le troisième n'est pas décoratif : « échec » sans nommer le champ oblige à relire
+ * tout le formulaire. Ici le témoin ne porte que l'état ; le détail vit dans
+ * l'encart d'échec, où il y a la place de le dire et un bouton pour refaire.
+ * `polite` et non `assertive` : il change à chaque frappe temporisée, une annonce
+ * impérative couperait la parole en continu.
  */
 function TemoinSauvegarde({ etat }: { readonly etat: Etat }) {
   const t = useTranslations("editeur");
-
-  const contenu =
-    etat === "encours"
-      ? { Icone: Clock, texte: t("enregistrement"), classe: "bg-ds-surface-creux text-ds-texte-corps" }
-      : etat === "echec"
-        ? { Icone: TriangleAlert, texte: t("nonEnregistre"), classe: "bg-ds-erreur-fond text-ds-erreur-encre" }
-        : { Icone: Check, texte: t("enregistre"), classe: "bg-ds-succes-fond text-ds-succes-encre" };
-
+  const texte = etat === "encours" ? t("enregistrement") : etat === "echec" ? t("nonEnregistre") : t("enregistre");
   return (
     <span
-      // `polite` et non `assertive` : le témoin change à chaque frappe
-      // temporisée, une annonce impérative couperait la parole en continu.
+      className="temoin"
+      data-etat={etat === "encours" ? "cours" : etat === "echec" ? "echec" : "ok"}
+      role="status"
       aria-live="polite"
-      className={
-        // `Badge` du design system : rayon pilule, 12 px, gras, `padding: 5px 11px`.
-        // 12 px et non 11 : la règle 5 pose 11,5 px comme plancher au téléphone,
-        // et cette pilule y est rendue.
-        "flex shrink-0 items-center gap-1.5 rounded-ds-pill px-[11px] py-[5px] text-[12px] font-bold whitespace-nowrap " +
-        contenu.classe
-      }
     >
-      <contenu.Icone aria-hidden="true" size={13} strokeWidth={2.2} />
-      {contenu.texte}
+      <i aria-hidden="true" />
+      <span>{texte}</span>
     </span>
   );
 }
 
-/** L'icône du bouton de copie — trois états, un seul endroit où ils sont écrits. */
-function IconeCopie({ etat }: { readonly etat: "repos" | "copie" | "echec" }) {
-  if (etat === "copie")
-    return <Check aria-hidden="true" size={16} strokeWidth={2.2} className="text-ds-succes-encre" />;
-  if (etat === "echec") return <TriangleAlert aria-hidden="true" size={16} strokeWidth={2} />;
-  // À L'ACCENT, comme toutes les icônes de `DetailAction` : c'est ce qui
-  // distingue ces boutons des boutons neutres du reste du produit, et la mesure
-  // du kit servi le confirme — `color: var(--accent)` sur l'icône seule.
-  //
-  // `share-2` ET NON `copy` : c'est celle que le kit pose sur ce bouton, et
-  // elle suit le libellé. Une icône de copie sous le mot « Partager » dirait
-  // deux gestes différents pour un seul bouton.
-  return <Share2 aria-hidden="true" size={17} strokeWidth={1.9} className="text-ds-accent" />;
-}
-
-/** Copier le lien public. Le presse-papiers n'a pas d'équivalent en HTML. */
-function BoutonCopier({ lien, compact = false }: { readonly lien: string; readonly compact?: boolean }) {
-  const t = useTranslations("editeur");
-  const [etat, setEtat] = useState<"repos" | "copie" | "echec">("repos");
-
-  const copier = async (): Promise<void> => {
-    try {
-      await navigator.clipboard.writeText(lien);
-      setEtat("copie");
-      window.setTimeout(() => setEtat("repos"), 2000);
-    } catch {
-      // L'ÉTAT « COPIÉ » N'EST AFFICHÉ QU'APRÈS SUCCÈS. Un retour optimiste ici
-      // est un pari sur le presse-papiers : refusé par le navigateur — ce qui
-      // arrive hors contexte sécurisé et dans certaines vues intégrées — le
-      // vendeur collerait le contenu précédent dans sa conversation, en croyant
-      // envoyer le lien de son client.
-      setEtat("echec");
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={() => void copier()}
-      title={etat === "echec" ? t("copieEchouee") : t("copierLien")}
-      className={
-        // `DetailAction` du kit : 48 px, `padding: 0 18px`, rayon de carte,
-        // filet, fond carte, 14/600, ombre xs, icône à l'accent.
-        "flex items-center justify-center gap-2.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte " +
-        "text-[14px] font-semibold shadow-ds-xs transition-colors hover:bg-ds-surface-teinte lg:h-12 " +
-        (compact ? "min-h-12 w-[52px] shrink-0 lg:w-auto lg:px-[18px] " : "h-12 px-[18px] ") +
-        (etat === "echec" ? "text-ds-erreur-encre" : "text-ds-texte-fort")
-      }
-    >
-      {/* L'icône est NOMMÉE quand elle est seule, muette quand un texte
-          l'accompagne — sinon un lecteur d'écran annonce deux fois la même
-          chose. */}
-      <IconeCopie etat={etat} />
-      {/*
-        ⚠️ LE LIBELLE VISIBLE EST CELUI DU KIT — « Partager » —, MAIS LE NOM
-        ACCESSIBLE ET L'INFOBULLE DISENT LE GESTE EXACT.
-
-        Le kit pose « Partager » sur ce bouton ; le nôtre copie le lien dans le
-        presse-papiers, ce qui EST le geste de partage de ce produit — on envoie
-        un lien dans une conversation, il n'y a rien d'autre à partager. Mais
-        « Partager » ne dit pas ce qui va se passer, et c'est précisément ce
-        qu'un lecteur d'écran doit annoncer : l'infobulle et le nom accessible
-        gardent donc « Copier le lien ». Le retour de succès, lui, reste
-        « Lien copié » — l'interface n'affirme que ce qui a eu lieu.
-      */}
-      {/*
-        ⚠️ LE LIBELLÉ EST UN NŒUD DE TEXTE DU BOUTON, PAS UN `<span>`. Le kit
-        écrit `<button>…Partager</button>` ; enveloppé, le texte devient un
-        élément de 58 × 21 sans fond ni filet, et c'est LUI que la sonde
-        apparie au bouton de 123 × 48 du kit. Huit propriétés d'écart sur un
-        bouton parfaitement conforme : l'inventaire relève l'élément qui PORTE
-        le texte, donc le balisage change ce qu'on compare.
-      */}
-      {compact ? (
-        <span className="sr-only">{t("copierLien")}</span>
-      ) : etat === "copie" ? (
-        t("lienCopie")
-      ) : (
-        t("partager")
-      )}
-    </button>
-  );
-}
-
 /**
- * LE CHEVRON D'UNE LISTE DÉROULANTE, DANS LE BALISAGE ET NON DANS UNE IMAGE DE
- * FOND — c'est ce que fait `SelectControl` dans le kit.
- *
- * L'ancienne façon peignait un SVG encodé en `background-image`, avec sa couleur
- * écrite EN DUR dans l'URL : elle ne pouvait suivre aucun token, et personne
- * n'aurait vu sa dérive. Ici il porte la couleur tenue du design system, comme
- * tous les autres chevrons de l'écran.
+ * UNE LISTE DÉROULANTE DE LA MAQUETTE (`.ed-liste`) : le chevron dans le balisage,
+ * en icône Lucide, jamais en image de fond à la couleur écrite en dur.
  */
-const CLASSE_LISTE = "cursor-pointer appearance-none pe-11 font-semibold";
-
 function ChampListe({ children }: { readonly children: React.ReactNode }) {
   return (
-    <span className="relative block">
+    <span className="ed-liste">
       {children}
-      <ChevronDown
-        aria-hidden="true"
-        size={17}
-        strokeWidth={1.8}
-        className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-ds-texte-tenu"
-      />
+      <ChevronDown aria-hidden="true" className="ic" />
     </span>
   );
 }
@@ -883,133 +561,99 @@ function CarteCommande({
   readonly onChanger: (champ: keyof ValeursCommande, valeur: string, immediat: boolean) => void;
 }) {
   const t = useTranslations("editeur");
-
-  /* `Field` du kit : 13 px, graisse moyenne, couleur de CORPS — pas d'encre
-     forte. L'ancien libellé était en 12 px gras ardoise ; le design system fait
-     du libellé une indication et du contenu la matière. */
-  const etiquette = "mb-[9px] block text-[13px] font-medium text-ds-texte-corps";
-  /*
-   * ⚠️ PLUS DE `champ-editeur` NI DE `champ-liste`, ET POUR LA MÊME RAISON QUE
-   * `champ-app` SUR L'ÉCRAN VOISIN. Ces classes sont déclarées HORS de toute
-   * `@layer` dans `globals.css` ; Tailwind range ses utilitaires dans
-   * `@layer utilities`, et une règle sans couche l'emporte sur une règle en
-   * couche. Elles auraient écrasé le fond, le filet, la taille et la marge
-   * droite du design system sans que rien ne le signale : les classes existent,
-   * sont servies, et les gardes restent vertes. Le chevron de la liste
-   * déroulante redescend donc dans le balisage, en icône Lucide — ce que fait
-   * d'ailleurs `SelectControl` dans le kit.
-   *
-   * `CONTROL` du kit : 48 px, `padding: 0 16px`, rayon de contrôle, filet
-   * appuyé, fond carte, 14 px en graisse moyenne.
-   */
-  const base =
-    "w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-4 text-[14px] " +
-    "font-medium text-ds-texte-fort transition-shadow outline-none placeholder:font-normal " +
-    "placeholder:text-ds-texte-corps focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]";
-  const hauteur = "h-12";
-  const enEchec = "border-ds-erreur focus:border-ds-erreur";
-
-  const classe = (champ: keyof ValeursCommande): string =>
-    base + " " + hauteur + (champsEnEchec.includes(champ) ? " " + enEchec : "");
+  // Un champ dont l'écriture a échoué se marque (`aria-invalid`), et la feuille le
+  // peint : le témoin dit « non enregistré », le champ dit lequel.
+  const enEchec = (champ: keyof ValeursCommande): true | undefined =>
+    champsEnEchec.includes(champ) ? true : undefined;
 
   return (
-    <Panneau titre={t("sectionCommande")}>
-      <div className="grid grid-cols-1 gap-3.5 lg:grid-cols-2 lg:gap-4">
-        <div>
-          <label className={etiquette} htmlFor="customer_label">
-            {t("client")}
-          </label>
+    <section className="bloc ed-carte ed-carte--commande" aria-labelledby="ed-commande">
+      <header className="ed-carte__tete">
+        <h2 id="ed-commande">{t("sectionCommande")}</h2>
+      </header>
+      <div className="ed-champs">
+        <div className="ed-champ">
+          <label htmlFor="customer_label">{t("client")}</label>
           <input
             id="customer_label"
             type="text"
-            className={classe("customer_label")}
+            autoComplete="off"
             placeholder={t("clientExemple")}
             value={valeurs.customer_label}
+            aria-invalid={enEchec("customer_label")}
+            aria-describedby="customer_label-aide"
             onChange={(e) => onChanger("customer_label", e.target.value, false)}
           />
-          <p className="mt-1.5 text-[13px] text-ds-texte-sourdine">{t("clientAide")}</p>
+          {/* UN TEXTE LIBRE, et le formulaire le dit : le destinataire n'a JAMAIS de
+              compte, et une recherche laisserait croire à un annuaire d'utilisateurs. */}
+          <p className="ed-aide" id="customer_label-aide">
+            {t("clientAide")}
+          </p>
         </div>
 
-        <div>
-          <label className={etiquette} htmlFor="product_ref">
-            {t("reference")}
-          </label>
+        <div className="ed-champ">
+          <label htmlFor="product_ref">{t("reference")}</label>
           <input
             id="product_ref"
             type="text"
-            className={classe("product_ref")}
+            autoComplete="off"
             placeholder={t("referenceExemple")}
             value={valeurs.product_ref}
+            aria-invalid={enEchec("product_ref")}
             onChange={(e) => onChanger("product_ref", e.target.value, false)}
           />
         </div>
 
-        <div>
-          <label className={etiquette} htmlFor="tracking_number">
-            {t("suivi")}
-          </label>
-          <input
-            id="tracking_number"
-            type="text"
-            className={classe("tracking_number")}
-            placeholder={t("suiviExemple")}
-            value={valeurs.tracking_number}
-            onChange={(e) => onChanger("tracking_number", e.target.value, false)}
-            aria-describedby="tracking_number-aide"
-          />
+        <div className="ed-champ">
+          <label htmlFor="tracking_number">{t("suivi")}</label>
           {/*
-            ⚠️ CETTE PHRASE EXISTAIT SUR L'ÉCRAN DES ENVOIS ET PAS ICI — c'est-à-dire
-            partout SAUF à l'endroit où le vendeur colle son numéro. Il collait,
-            ne voyait rien pendant des semaines, et n'avait aucun moyen de savoir
-            si c'était normal. La décision 7 du brief l'impose pourtant : on dit
-            « pas encore d'information du transporteur », JAMAIS « introuvable ».
-
-            La seconde phrase vient d'une observation de Wassim : un numéro
-            Colissimo remis par un fournisseur étranger n'existe dans AUCUN
-            système avant la prise en charge locale — le colis a voyagé sous un
-            autre identifiant. Aucun fournisseur de suivi ne peut montrer des
-            événements qu'aucun transporteur n'a enregistrés sous ce numéro.
-            C'est une limite du NUMÉRO, pas de la nôtre, et le vendeur a une
-            action utile : réclamer le numéro d'expédition d'origine.
-
-            ⚠️ ELLE EST ÉCRITE AU CONDITIONNEL, ET C'EST DÉLIBÉRÉ. On ne SAIT pas
-            de quel type est le numéro collé : le savoir exigerait une réponse du
-            fournisseur de suivi, qui n'arrive qu'APRÈS le premier scan —
-            c'est-à-dire quand le vendeur a cessé de s'inquiéter. Affirmer
-            « ce numéro n'est suivi qu'à l'arrivée » serait affirmer ce que la
-            base n'a pas enregistré.
+            ⚠️ AUCUN « Colissimo reconnu » DEVINÉ DANS LE NAVIGATEUR, contrairement à la
+            maquette (arbitrage du § 5) : la détection réelle est serveur, et afficher
+            une supposition serait affirmer ce que la base n'a pas (contrainte 8). Le
+            transporteur reconnu s'affiche dans le résumé, une fois lu en base.
           */}
-          <p
-            id="tracking_number-aide"
-            className="mt-2 text-[13px] leading-[18px] text-ds-texte-sourdine"
-          >
+          <span className="ed-suivi">
+            <input
+              id="tracking_number"
+              type="text"
+              autoComplete="off"
+              spellCheck={false}
+              placeholder={t("suiviExemple")}
+              value={valeurs.tracking_number}
+              aria-invalid={enEchec("tracking_number")}
+              aria-describedby="tracking_number-aide"
+              onChange={(e) => onChanger("tracking_number", e.target.value, false)}
+            />
+          </span>
+          {/*
+            LA PHRASE EST AU CONDITIONNEL, ET C'EST DÉLIBÉRÉ (décision 7 : « pas encore
+            d'information », jamais « introuvable »). On ne SAIT pas de quel type est le
+            numéro collé avant le premier scan ; un numéro remis par un fournisseur
+            étranger peut n'exister chez aucun transporteur avant la prise en charge
+            locale — une limite du NUMÉRO, et le vendeur a un geste utile : réclamer le
+            numéro d'expédition d'origine.
+          */}
+          <p className="ed-aide" id="tracking_number-aide">
             {t("suiviAide")}
           </p>
         </div>
 
-        <div>
-          <label className={etiquette} htmlFor="carrier_code">
-            {t("transporteur")}
-          </label>
+        <div className="ed-champ">
+          <label htmlFor="carrier_code">{t("transporteur")}</label>
           {/*
-            ⚠️ CE CHAMP AVAIT DISPARU À LA REFONTE DE L'ÉDITEUR (28/08), et
-            c'était le seul geste qui répare un numéro que le fournisseur ne
-            reconnaît pas : il abandonne alors le suivi sur-le-champ et attend
-            qu'on lui nomme le transporteur. La base relance la prise en charge
-            quand un transporteur NOUVEAU est choisi (migration 164).
-
-            UNE LISTE, PAS UN TEXTE LIBRE : la base attend un code du
-            fournisseur, et « DHL » tapé à la main ne désigne rien. Le choix part
-            immédiatement, comme le statut — c'est une décision, pas de la
-            saisie.
+            LE SEUL GESTE QUI RÉPARE UN NUMÉRO NON RECONNU : le fournisseur abandonne
+            alors le suivi et attend qu'on lui nomme le transporteur ; la base relance
+            la prise en charge quand un transporteur NOUVEAU est choisi (164). Une liste
+            et pas un texte libre : la base attend un code du fournisseur. Le choix part
+            immédiatement — c'est une décision, pas de la saisie.
           */}
           <ChampListe>
             <select
               id="carrier_code"
-              className={classe("carrier_code") + " " + CLASSE_LISTE}
               value={valeurs.carrier_code}
-              onChange={(e) => onChanger("carrier_code", e.target.value, true)}
+              aria-invalid={enEchec("carrier_code")}
               aria-describedby="carrier_code-aide"
+              onChange={(e) => onChanger("carrier_code", e.target.value, true)}
             >
               <option value="">{t("transporteurAuto")}</option>
               {transporteurs.map((tr) => (
@@ -1019,44 +663,39 @@ function CarteCommande({
               ))}
             </select>
           </ChampListe>
-          <p id="carrier_code-aide" className="mt-1.5 text-[13px] text-ds-texte-sourdine">
+          <p className="ed-aide" id="carrier_code-aide">
             {t("transporteurAide")}
           </p>
         </div>
 
-        <div>
-          <label className={etiquette} htmlFor="status">
-            {t("sectionExpedition")}
-          </label>
-          {/* UNE LISTE DÉROULANTE, PAS QUATRE BOUTONS RADIO. Le statut est une
-              valeur parmi quatre, et la planche lui donne la place d'un champ —
-              pas d'une carte. Le changement part IMMÉDIATEMENT : c'est une
-              décision, pas de la saisie. */}
+        <div className="ed-champ">
+          <label htmlFor="status">{t("sectionExpedition")}</label>
           <ChampListe>
             <select
               id="status"
-              className={classe("status") + " " + CLASSE_LISTE}
               value={valeurs.status}
+              aria-invalid={enEchec("status")}
               onChange={(e) => onChanger("status", e.target.value, true)}
             >
-              {statuts.map((s) => (
-                <option key={s} value={s}>
-                  {t("statut." + s)}
+              {statuts.map((st) => (
+                <option key={st} value={st}>
+                  {t("statut." + st)}
                 </option>
               ))}
             </select>
           </ChampListe>
         </div>
 
-        <div>
-          <label className={etiquette} htmlFor="qc_status">
-            {t("sectionQc")}
-          </label>
+        {/* L'ÉTAT DES PHOTOS : le vendeur reçoit aussi des réponses en message privé,
+            et `qc_status` porte alors SA décision. */}
+        <div className="ed-champ">
+          <label htmlFor="qc_status">{t("sectionQc")}</label>
           <ChampListe>
             <select
               id="qc_status"
-              className={classe("qc_status") + " " + CLASSE_LISTE}
               value={valeurs.qc_status}
+              aria-invalid={enEchec("qc_status")}
+              aria-describedby="qc_status-aide"
               onChange={(e) => onChanger("qc_status", e.target.value, true)}
             >
               {qcs.map((q) => (
@@ -1066,27 +705,30 @@ function CarteCommande({
               ))}
             </select>
           </ChampListe>
-          <p className="mt-1.5 text-[13px] text-ds-texte-sourdine">{t("qcAide")}</p>
+          <p className="ed-aide" id="qc_status-aide">
+            {t("qcAide")}
+          </p>
+        </div>
+
+        <div className="ed-champ ed-champ--large">
+          <label htmlFor="internal_notes">
+            {t("notes")}
+            <Lock aria-hidden="true" className="ic" />
+          </label>
+          <textarea
+            id="internal_notes"
+            rows={3}
+            placeholder={t("notesExemple")}
+            value={valeurs.internal_notes}
+            aria-invalid={enEchec("internal_notes")}
+            aria-describedby="internal_notes-aide"
+            onChange={(e) => onChanger("internal_notes", e.target.value, false)}
+          />
+          <p className="ed-aide" id="internal_notes-aide">
+            {t("notesPrivees")}
+          </p>
         </div>
       </div>
-
-      <div className="mt-3.5 lg:mt-4">
-        <label className={etiquette} htmlFor="internal_notes">
-          {t("notes")}
-        </label>
-        <textarea
-          id="internal_notes"
-          className={
-            base +
-            " h-[84px] resize-none py-3 leading-[22px]" +
-            (champsEnEchec.includes("internal_notes") ? " " + enEchec : "")
-          }
-          placeholder={t("notesExemple")}
-          value={valeurs.internal_notes}
-          onChange={(e) => onChanger("internal_notes", e.target.value, false)}
-        />
-        <p className="mt-1.5 text-[13px] text-ds-texte-sourdine">{t("notesPrivees")}</p>
-      </div>
-    </Panneau>
+    </section>
   );
 }

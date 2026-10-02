@@ -96,13 +96,14 @@ describe("Le cadre de l'aperçu", () => {
 
   test("une zone affichée produit UN cadre, vers l'aperçu du jeton, à la largeur du téléphone", () => {
     monter(0);
-    redimensionner(520);
+    // L'écran du téléphone de la refonte (`.telephone--fiche`) : 270 px moins 2 × 8 de bord.
+    redimensionner(254);
     const [cadre] = cadres();
     expect(cadres()).toHaveLength(1);
     expect(cadre?.getAttribute("src")).toBe(`/p/${JETON}/apercu`);
     expect(cadre?.style.width).toBe("390px");
-    expect(cadre?.style.transform).toMatch(/^scale\(0\.72/);
-    expect(cadre?.className).not.toContain("invisible");
+    expect(cadre?.style.transform).toBe(`scale(${254 / 390})`);
+    expect(cadre?.className).not.toContain("est-en-chargement");
   });
 
   test("la zone qui se masque retire le cadre, celle qui réapparaît le recrée", () => {
@@ -123,8 +124,8 @@ describe("Le cadre de l'aperçu", () => {
     expect(desktop?.getAttribute("aria-pressed")).toBe("true");
     expect(cadre?.style.width).toBe("1180px");
     expect(cadre?.getAttribute("title")).toBe("apercuCadreDesktop");
-    // (520 - 2 px de filet) / 1180
-    expect(cadre?.style.transform).toBe(`scale(${518 / 1180})`);
+    // `clientWidth` exclut déjà le filet : l'échelle est la largeur MESURÉE de la fenêtre.
+    expect(cadre?.style.transform).toBe(`scale(${520 / 1180})`);
   });
 
   test("une nouvelle version se charge DESSOUS, puis remplace l'ancienne à son chargement", () => {
@@ -139,13 +140,13 @@ describe("Le cadre de l'aperçu", () => {
     });
     expect(cadres()).toHaveLength(2);
     const nouveau = cadres().find((c) => c !== ancien);
-    expect(nouveau?.className).toContain("invisible");
-    expect(ancien?.className).not.toContain("invisible");
+    expect(nouveau?.className).toContain("est-en-chargement");
+    expect(ancien?.className).not.toContain("est-en-chargement");
     act(() => {
       nouveau?.dispatchEvent(new Event("load"));
     });
     expect(cadres()).toEqual([nouveau]);
-    expect(nouveau?.className).not.toContain("invisible");
+    expect(nouveau?.className).not.toContain("est-en-chargement");
   });
 
   test("RÉVOQUER le lien ne blanchit pas l'aperçu : le nouveau jeton se charge dessous", () => {
@@ -170,7 +171,7 @@ describe("Le cadre de l'aperçu", () => {
     const nouveau = cadres().find((c) => c !== ancien);
     expect(cadres()).toHaveLength(2);
     expect(nouveau?.getAttribute("src")).toBe("/p/NouveauJeton00000001/apercu");
-    expect(nouveau?.className).toContain("invisible");
+    expect(nouveau?.className).toContain("est-en-chargement");
     act(() => {
       nouveau?.dispatchEvent(new Event("load"));
     });
