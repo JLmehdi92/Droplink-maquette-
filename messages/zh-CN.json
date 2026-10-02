@@ -1415,7 +1415,8 @@
       "silence": "已 {jours} 天没有动态"
     },
     "resume": "概览",
-    "nbPhotos": "{n} 张照片"
+    "nbPhotos": "{n} 张照片",
+    "lienCopie": "已复制 {client} 的链接"
   },
   "editeur": {
     "historique": {
@@ -1560,7 +1561,9 @@
     "echecOrdre": "新的排序未能保存。已恢复为之前的顺序。",
     "videos": "{n, plural, other {# 个视频}} / {max}",
     "aideOrdre": "拖动缩略图上的手柄即可调整顺序。封面是您客户看到的第一张图。",
-    "aideOrdreTelephone": "长按手柄即可移动照片。"
+    "aideOrdreTelephone": "长按手柄即可移动照片。",
+    "annonceSuppression": "媒体已删除。",
+    "annonceCouverture": "已设为封面。"
   },
   "actions": {
     "revocation": {
@@ -1886,7 +1889,9 @@
         "refuse": "该账户无法被停用。",
         "introuvable": "找不到该账户。",
         "ecriture": "没有任何改动。请重试。"
-      }
+      },
+      "annonceSuspendu": "已完成。账户已停用，已连同原因写入审计日志。",
+      "annonceReactive": "已完成。账户已恢复，已连同原因写入审计日志。"
     },
     "plan": {
       "titre": "套餐",
@@ -1909,7 +1914,8 @@
         "deja": "该账号已是此套餐。请重新加载页面。",
         "introuvable": "找不到该账号。",
         "ecriture": "无法保存套餐，未作任何更改。"
-      }
+      },
+      "annonce": "已完成。套餐变更已写入审计日志。"
     },
     "panneau": {
       "titre": "总览",
@@ -2341,7 +2347,9 @@
         "introuvable": "找不到该订单。",
         "ecriture": "没有任何改动。请重试。"
       },
-      "motifAideBlocage": "至少 {n} 个字符。卖家会在其订单中看到，并写入日志。"
+      "motifAideBlocage": "至少 {n} 个字符。卖家会在其订单中看到，并写入日志。",
+      "annonceBloque": "链接已封禁。卖家会在订单中看到原因。",
+      "annonceDebloque": "链接已解封。页面恢复为原链接。"
     },
     "contestation": {
       "pastille": "申诉",
@@ -2362,7 +2370,10 @@
         "saisie": "回复太短。",
         "deja": "此申诉已得到回复。",
         "ecriture": "回复未能保存，未作任何更改。"
-      }
+      },
+      "annonceAcceptee": "申诉已接受：链接已解封，回复已发送给卖家。",
+      "annonceRefusee": "申诉已驳回。卖家会看到您的回复；链接仍处于封禁状态。",
+      "reponseCourte": "回复太短。"
     },
     "doublons": {
       "titre": "重复账户",

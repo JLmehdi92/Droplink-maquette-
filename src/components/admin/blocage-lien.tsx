@@ -3,7 +3,7 @@
 import { useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BoutonAction } from "@/components/bouton-action";
-import { DialogueAdmin, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
+import { DialogueAdmin, confirmerEtRecharger, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
 import { bloquerLien, debloquerLien, type EtatBlocage } from "@/app/[locale]/admin/commandes/actions";
 
 /**
@@ -79,7 +79,7 @@ export function BlocageLien({
     const resultat = await (bloque ? debloquerLien : bloquerLien)(INITIAL, donnees);
     setEtat(resultat);
     setTravaille(false);
-    if (resultat.statut === "ok") window.location.reload();
+    if (resultat.statut === "ok") confirmerEtRecharger(dialogue.current, t(bloque ? "annonceDebloque" : "annonceBloque"));
   }
 
   // `leading-[normal]` comme la planche (15 px) : hérité du `label`, l'interligne montait à

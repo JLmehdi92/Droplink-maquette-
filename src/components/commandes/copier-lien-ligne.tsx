@@ -1,5 +1,6 @@
 "use client";
 
+import { annoncer } from "@/components/app/annonce";
 import { useState } from "react";
 import { Check, Copy, TriangleAlert } from "lucide-react";
 
@@ -17,13 +18,15 @@ export function CopierLienLigne({
   libelles,
 }: {
   readonly lien: string;
-  readonly libelles: { readonly copier: string; readonly echec: string };
+  /** `copie` : « Lien de {client} copié », dit par la bulle (maquette `commandes.js`). */
+  readonly libelles: { readonly copier: string; readonly echec: string; readonly copie?: string };
 }) {
   const [etat, setEtat] = useState<"repos" | "copie" | "echec">("repos");
   const copier = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(lien);
       setEtat("copie");
+      if (libelles.copie !== undefined) annoncer(libelles.copie);
       window.setTimeout(() => setEtat("repos"), 1600);
     } catch {
       setEtat("echec");

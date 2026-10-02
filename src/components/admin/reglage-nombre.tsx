@@ -44,8 +44,13 @@ export interface ReglageVu {
 export function ReglageNombre({ reglage }: { reglage: ReglageVu }) {
   const t = useTranslations("admin.parametres");
   const [etat, setEtat] = useState<EtatParametre>(INITIAL);
-  const [modifie, setModifie] = useState(false);
   const [enCours, setEnCours] = useState(false);
+  // LA SAISIE EN COURS, pour la comparer à la valeur affichée (maquette `admin.js`) :
+  // « Enregistrer » ne vaut que pour une valeur CHANGÉE et non vide — revenir à la valeur
+  // initiale le regrise. Et la frappe suivante efface le retour précédent.
+  const [saisie, setSaisie] = useState<string | null>(null);
+  const [retourMasque, setRetourMasque] = useState(false);
+  const [horsBornes, setHorsBornes] = useState(false);
   const champRef = useRef<HTMLInputElement>(null);
 
   const champ = `parametre-${reglage.cle}`;
@@ -55,25 +60,50 @@ export function ReglageNombre({ reglage }: { reglage: ReglageVu }) {
   const apres = etat.statut === "ok" ? etat.apres : null;
   const ecrit = apres === null ? reglage.ecrit : apres.ecrit;
   const origine = apres === null ? reglage.origine : apres.origine;
+  const affichee = String(apres === null ? reglage.valeur : apres.valeur);
+  const modifie = saisie !== null && saisie !== "" && saisie !== affichee;
+
+  // CE QUE DIT LE RETOUR — rien après une frappe (la maquette l'efface), sinon le refus
+  // des bornes, puis la réponse du serveur.
+  const retour = retourMasque
+    ? null
+    : horsBornes
+      ? t("erreur.bornes")
+      : etat.statut === "ok"
+        ? etat.avant === null
+          ? t("fait")
+          : t("faitDetail", { avant: etat.avant, apres: etat.apres.valeur })
+        : etat.statut === "erreur"
+          ? t(`erreur.${etat.motif}`)
+          : null;
 
   const enregistrer = async (): Promise<void> => {
-    const saisie = champRef.current?.value ?? "";
+    const valeur = champRef.current?.value ?? "";
+    // Les bornes, dites sur place comme la maquette ; le serveur les refait de toute façon.
+    const n = Number(valeur);
+    if (!Number.isInteger(n) || n < reglage.min || n > reglage.max) {
+      setHorsBornes(true);
+      setRetourMasque(false);
+      return;
+    }
+    setHorsBornes(false);
+    setRetourMasque(false);
     setEnCours(true);
     const donnees = new FormData();
     donnees.set("cle", reglage.cle);
-    donnees.set("valeur", saisie);
+    donnees.set("valeur", valeur);
 
     const resultat = await enregistrerParametre(INITIAL, donnees);
     setEtat(resultat);
     setEnCours(false);
     // LE BOUTON DISPARAÎT PARCE QUE LA VALEUR EST DÉSORMAIS CELLE DU SERVEUR,
     // pas parce qu'on a cliqué : sur un échec il reste, et la saisie avec lui.
-    if (resultat.statut === "ok") setModifie(false);
+    if (resultat.statut === "ok") setSaisie(null);
   };
 
   return (
     <form
-      className={"adm-reglage" + (etat.statut === "erreur" ? " est-erreur" : "")}
+      className={"adm-reglage" + (!retourMasque && (horsBornes || etat.statut === "erreur") ? " est-erreur" : "")}
       noValidate
       onSubmit={(e) => {
         e.preventDefault();
@@ -105,7 +135,11 @@ export function ReglageNombre({ reglage }: { reglage: ReglageVu }) {
           max={reglage.max}
           step={1}
           defaultValue={apres === null ? reglage.valeur : apres.valeur}
-          onChange={() => setModifie(true)}
+          onChange={(e) => {
+            setSaisie(e.target.value);
+            setRetourMasque(true);
+            setHorsBornes(false);
+          }}
         />
         {/* ENREGISTRER N'EXISTE QUE SUR UNE VALEUR MODIFIÉE : grisé sinon. */}
         <button type="submit" className="bouton-outil" disabled={!modifie || enCours}>
@@ -115,13 +149,7 @@ export function ReglageNombre({ reglage }: { reglage: ReglageVu }) {
       <p className="adm-reglage__retour" role="status" aria-live="polite">
         {/* « 300 → 400 » comme la maquette : les deux valeurs sont relues en base, et la
             trace est écrite par le déclencheur `tracer_parametre`, dans la même transaction. */}
-        {etat.statut === "ok"
-          ? etat.avant === null
-            ? t("fait")
-            : t("faitDetail", { avant: etat.avant, apres: etat.apres.valeur })
-          : etat.statut === "erreur"
-            ? t(`erreur.${etat.motif}`)
-            : null}
+        {retour}
       </p>
     </form>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { annoncer } from "@/components/app/annonce";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
@@ -411,6 +412,7 @@ export function CarteMedias({
         if (retire !== null && apercusLocaux.current.delete(retire)) URL.revokeObjectURL(retire);
         return liste.filter((m) => m.id !== id);
       });
+      annoncer(t("annonceSuppression"));
       onEnregistre?.();
     },
     [orderId, onEnregistre, t],
@@ -427,6 +429,7 @@ export function CarteMedias({
       setMedias((liste) =>
         liste.map((m) => ({ ...m, estCouverture: m.id === id })),
       );
+      annoncer(t("annonceCouverture"));
       onEnregistre?.();
     },
     [orderId, onEnregistre, t],

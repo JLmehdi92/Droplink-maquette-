@@ -328,6 +328,11 @@ export function Editeur({
   const lienPublic = lienPageClient(origine, jetonCourant, nomDeLien);
 
   const titre = titreDeCommande(valeurs.customer_label, t("titre"));
+  // L'ONGLET SUIT LA FRAPPE, comme le titre (maquette `commande.js`) : la même règle
+  // (`titreDeCommande`) que les métadonnées du serveur, donc le même texte au rechargement.
+  useEffect(() => {
+    document.title = titre;
+  }, [titre]);
 
   return (
     <>

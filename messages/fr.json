@@ -1415,7 +1415,8 @@
       "silence": "Sans mouvement depuis {jours, plural, one {# jour} other {# jours}}"
     },
     "resume": "Résumé",
-    "nbPhotos": "{n, plural, one {# photo} other {# photos}}"
+    "nbPhotos": "{n, plural, one {# photo} other {# photos}}",
+    "lienCopie": "Lien de {client} copié"
   },
   "editeur": {
     "historique": {
@@ -1560,7 +1561,9 @@
     "echecOrdre": "Le nouvel ordre n'a pas pu être enregistré. L'ordre précédent a été rétabli.",
     "videos": "{n, plural, one {# vidéo} other {# vidéos}} sur {max}",
     "aideOrdre": "Glissez une vignette par sa poignée pour changer l’ordre. La couverture est la première image que voit votre client.",
-    "aideOrdreTelephone": "Appuyez longuement sur la poignée pour déplacer une photo."
+    "aideOrdreTelephone": "Appuyez longuement sur la poignée pour déplacer une photo.",
+    "annonceSuppression": "Média supprimé.",
+    "annonceCouverture": "Nouvelle couverture."
   },
   "actions": {
     "revocation": {
@@ -1886,7 +1889,9 @@
         "refuse": "Ce compte ne peut pas être suspendu.",
         "introuvable": "Compte introuvable.",
         "ecriture": "Rien n'a été modifié. Réessayez."
-      }
+      },
+      "annonceSuspendu": "Effectué. Compte suspendu, écrit au journal avec le motif.",
+      "annonceReactive": "Effectué. Compte réactivé, écrit au journal avec le motif."
     },
     "plan": {
       "titre": "Plan",
@@ -1909,7 +1914,8 @@
         "deja": "Ce compte est déjà dans ce plan. Rechargez la fiche.",
         "introuvable": "Ce compte est introuvable.",
         "ecriture": "Le plan n'a pas pu être enregistré. Rien n'a changé."
-      }
+      },
+      "annonce": "Effectué. Changement de plan écrit au journal."
     },
     "panneau": {
       "titre": "Vue d'ensemble",
@@ -2341,7 +2347,9 @@
         "introuvable": "Commande introuvable.",
         "ecriture": "Rien n'a été modifié. Réessayez."
       },
-      "motifAideBlocage": "Au moins {n} caractères. Le vendeur le lit dans sa commande, et il s'écrit au journal."
+      "motifAideBlocage": "Au moins {n} caractères. Le vendeur le lit dans sa commande, et il s'écrit au journal.",
+      "annonceBloque": "Lien bloqué. Le vendeur voit le motif dans sa commande.",
+      "annonceDebloque": "Lien débloqué. La page revient sur le même lien."
     },
     "contestation": {
       "pastille": "Contestation",
@@ -2362,7 +2370,10 @@
         "saisie": "La réponse est trop courte.",
         "deja": "Cette contestation a déjà reçu une réponse.",
         "ecriture": "La réponse n’a pas pu être enregistrée. Rien n’a changé."
-      }
+      },
+      "annonceAcceptee": "Contestation acceptée : lien débloqué, réponse envoyée au vendeur.",
+      "annonceRefusee": "Contestation refusée. Le vendeur lit votre réponse ; le lien reste bloqué.",
+      "reponseCourte": "La réponse est trop courte."
     },
     "doublons": {
       "titre": "Comptes en doublon",

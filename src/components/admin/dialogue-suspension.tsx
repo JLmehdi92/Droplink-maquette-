@@ -1,6 +1,6 @@
 "use client";
 
-import { DialogueAdmin, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
+import { DialogueAdmin, confirmerEtRecharger, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
 import { useId, useRef, useState } from "react";
 import { BoutonAction } from "@/components/bouton-action";
 import { useTranslations } from "next-intl";
@@ -164,7 +164,7 @@ export function DialogueSuspension({
     setTravaille(false);
     // ON NE RECHARGE QU'APRÈS UNE CONFIRMATION DE LA BASE. Recharger sur un
     // échec effacerait le message d'erreur ET la saisie.
-    if (resultat.statut === "ok") window.location.reload();
+    if (resultat.statut === "ok") confirmerEtRecharger(dialogue.current, t(suspendu ? "annonceReactive" : "annonceSuspendu"));
   }
 
   const titre = suspendu ? t("titreReactivation") : t("titreSuspension");

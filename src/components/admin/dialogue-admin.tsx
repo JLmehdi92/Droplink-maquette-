@@ -2,6 +2,7 @@
 
 import { useRef, type ReactNode, type RefObject } from "react";
 import { X } from "lucide-react";
+import { annoncerApresRechargement } from "@/components/app/annonce";
 
 /**
  * LE DIALOGUE MODAL DE L'ADMINISTRATION — refonte du 02/10/2026 (maquette,
@@ -35,6 +36,25 @@ export function fermerDialogue(d: HTMLDialogElement | null | undefined): void {
     d.classList.remove("sort");
     d.close();
   }, 160);
+}
+
+/**
+ * APRÈS UNE CONFIRMATION DE LA BASE (maquette `admin.js` : le dialogue SORT, puis une bulle
+ * dit ce qui a été fait). Le produit recharge la page pour relire l'état — c'est la mesure
+ * du 29/08 qui l'impose (voir `DialogueSuspension`) : la bulle traverse donc le rechargement
+ * (`annoncerApresRechargement`), le dialogue sort d'abord (160 ms), et l'écran rechargé ne
+ * rejoue pas son entrée (`dl-sans-entree`, comme un geste de liste).
+ */
+export function confirmerEtRecharger(d: HTMLDialogElement | null | undefined, annonce: string): void {
+  annoncerApresRechargement(annonce);
+  try {
+    window.sessionStorage.setItem("dl-sans-entree", "1");
+  } catch {
+    // Stockage refusé : l'écran rejouera son entrée, rien de plus.
+  }
+  fermerDialogue(d);
+  const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.setTimeout(() => window.location.reload(), reduit ? 0 : 170);
 }
 
 /**

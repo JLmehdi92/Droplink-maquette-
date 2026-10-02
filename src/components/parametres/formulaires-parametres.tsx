@@ -61,7 +61,15 @@ function useMessage(etat: EtatParametres, succes: string): Message | null {
   return { texte: t(cle), erreur: true };
 }
 
-/** Le pied d'un bloc : l'aide au repos, le résultat de l'action quand il arrive. */
+/**
+ * Le pied d'un bloc : l'aide au repos, le résultat de l'action quand il arrive.
+ *
+ * COMME LA MAQUETTE (`parametres.js`, `annoncer`) : la réponse REMPLACE l'aide, entre en
+ * fondu (160 ms), et l'aide revient à la saisie suivante dans le formulaire. L'aide reste
+ * dans le document, masquée (`hidden`) : un champ qui s'en sert (`aria-describedby`) la lit
+ * toujours. La région du message existe AVANT son texte — posée en même temps que lui,
+ * l'annonce se perd.
+ */
 function Pied({
   aide,
   message,
@@ -73,19 +81,47 @@ function Pied({
   readonly idAide?: string;
   readonly children: ReactNode;
 }) {
+  const pied = useRef<HTMLElement>(null);
+  const zone = useRef<HTMLParagraphElement>(null);
+  // Le texte du message que la saisie suivante a « calmé » : il reste masqué tant qu'aucun
+  // nouvel envoi n'a eu lieu (un même refus redit après un nouvel envoi se réaffiche).
+  const [calme, setCalme] = useState<string | null>(null);
+  const texte = message?.texte ?? null;
+  const affiche = texte !== null && texte !== calme;
+
+  useEffect(() => {
+    const formulaire = pied.current?.closest("form");
+    if (formulaire === null || formulaire === undefined) return;
+    const surSaisie = (): void => setCalme(texte);
+    const surEnvoi = (): void => setCalme(null);
+    formulaire.addEventListener("input", surSaisie);
+    formulaire.addEventListener("submit", surEnvoi);
+    return () => {
+      formulaire.removeEventListener("input", surSaisie);
+      formulaire.removeEventListener("submit", surEnvoi);
+    };
+  }, [texte]);
+
+  useEffect(() => {
+    if (!affiche || zone.current === null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    zone.current.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: "cubic-bezier(.23,1,.32,1)" });
+  }, [affiche, texte]);
+
   return (
-    <footer className="bloc-r__pied">
-      {/* L'aide RESTE quand un message arrive : elle décrit un champ (`aria-describedby`)
-          ou porte une note légale. Le message vit dans une région annoncée qui existe
-          AVANT son texte — posée en même temps que lui, l'annonce se perd. */}
+    <footer className="bloc-r__pied" ref={pied}>
       <div className="bloc-r__textes">
-        {aide === "" ? null : <p id={idAide}>{aide}</p>}
+        {aide === "" ? null : (
+          <p id={idAide} hidden={affiche}>
+            {aide}
+          </p>
+        )}
         <p
+          ref={zone}
           className="bloc-r__message"
           role="status"
-          data-ton={message === null ? undefined : message.erreur ? "erreur" : "ok"}
+          data-ton={!affiche || message === null ? undefined : message.erreur ? "erreur" : "ok"}
         >
-          {message?.texte ?? ""}
+          {affiche ? texte : ""}
         </p>
       </div>
       <span className="bloc-r__actions">{children}</span>
@@ -110,6 +146,9 @@ function Tete({ titre, aide, id }: { readonly titre: string; readonly aide: stri
 function useDevoilement<T extends HTMLElement>() {
   const ref = useRef<T>(null);
   useEffect(() => {
+    // Le focus va au premier champ révélé (maquette : `focus({ preventScroll: true })`) :
+    // celui qui vient de demander la confirmation n'a pas à aller la chercher.
+    ref.current?.querySelector<HTMLElement>("input:not([type=hidden]), textarea, select")?.focus({ preventScroll: true });
     if (ref.current === null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     ref.current.animate(
       [
@@ -479,7 +518,9 @@ export function BlocDeuxEtapes({ active }: { readonly active: boolean | null }) 
             )}
             <button
               type="button"
-              className="bouton-app bouton-app--second"
+              // Plein quand la double authentification est à ACTIVER (maquette : `bouton-app--plein`) :
+              // c'est l'action recommandée de l'écran ; « Désactiver » et « Annuler » restent seconds.
+              className={"bouton-app " + (mode === null && active === false ? "bouton-app--plein" : "bouton-app--second")}
               aria-expanded={mode !== null}
               aria-controls={mode !== null ? idPanneau : undefined}
               onClick={() => setMode((m) => (m !== null ? null : active === true ? "desactiver" : "activer"))}

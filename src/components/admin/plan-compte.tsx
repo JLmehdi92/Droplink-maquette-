@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import { DialogueAdmin, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
+import { DialogueAdmin, confirmerEtRecharger, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
 import { BoutonAction } from "@/components/bouton-action";
 import { useTranslations } from "next-intl";
 import { definirPlan, type EtatPlan } from "@/app/[locale]/admin/comptes/[id]/actions";
@@ -64,7 +64,7 @@ export function PlanCompte({
     const resultat = await definirPlan(INITIAL, donnees);
     setEtat(resultat);
     setTravaille(false);
-    if (resultat.statut === "ok") window.location.reload();
+    if (resultat.statut === "ok") confirmerEtRecharger(dialogue.current, t("annonce"));
   }
 
   return (

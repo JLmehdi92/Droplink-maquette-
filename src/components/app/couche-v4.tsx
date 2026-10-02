@@ -15,11 +15,14 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
  * s'afficherait puis disparaîtrait pour rejouer son entrée. Ce composant ne fait
  * que la bordure, par délégation : un seul écouteur pour toutes les cartes.
  */
+/** Les cartes à bordure lumineuse — la même liste que `app.css` (`:where(…)::after`). */
+const CARTES_LUMINEUSES = ".v4-carte, .bloc, .compteurs, .bloc-r, .formulaire-carte, .ed-carte, .adm-bloc, .adm-tuiles";
+
 export function CoucheV4() {
   useEffect(() => {
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     const suivre = (e: PointerEvent) => {
-      const c = (e.target as Element | null)?.closest?.<HTMLElement>(".v4-carte");
+      const c = (e.target as Element | null)?.closest?.<HTMLElement>(CARTES_LUMINEUSES);
       if (!c) return;
       const r = c.getBoundingClientRect();
       c.style.setProperty("--mx", `${e.clientX - r.left}px`);

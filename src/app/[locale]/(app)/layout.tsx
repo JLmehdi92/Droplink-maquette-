@@ -11,6 +11,7 @@ import { LienEcran } from "@/components/lien-ecran";
 import { BarreSuperieure } from "@/components/app/barre-superieure";
 import { CoqueTiroir } from "@/components/app/coque-tiroir";
 import { CoucheV4, ScriptEntreeV4 } from "@/components/app/couche-v4";
+import { Annonce } from "@/components/app/annonce";
 import { TransitionsEcran } from "@/components/app/transitions-ecran";
 import { DetailsFermable } from "@/components/app/details-fermable";
 import { LogoDropLink } from "@/components/logo-droplink";
@@ -153,6 +154,7 @@ export default async function LayoutApplication({
     <div className="page-app v4">
       <ScriptEntreeV4 />
       <CoucheV4 />
+      <Annonce />
       {/* Sortie d'un écran, estompe d'une liste qu'on filtre (maquette, `coque.js`). */}
       <Suspense fallback={null}>
         <TransitionsEcran />

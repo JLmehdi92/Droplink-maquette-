@@ -583,7 +583,7 @@ function Ligne({
           </span>
         </span>
         <span role="cell" className="col-actions">
-          <CopierLienLigne lien={lien} libelles={{ copier: t("copierLien", { client: nom }), echec: t("copieEchouee") }} />
+          <CopierLienLigne lien={lien} libelles={{ copier: t("copierLien", { client: nom }), echec: t("copieEchouee"), copie: t("lienCopie", { client: nom }) }} />
           <a className="action-ligne" href={lien} target="_blank" rel="noopener noreferrer" aria-label={t("ouvrirPage", { client: nom })} title={t("ouvrirPage", { client: nom })}>
             <ExternalLink aria-hidden="true" className="ic" />
           </a>

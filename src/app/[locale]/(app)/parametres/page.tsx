@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BoutonAppliquerLangue } from "@/components/parametres/bouton-appliquer-langue";
 import { redirect } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
@@ -273,9 +274,7 @@ export default async function Parametres({
                         {t("preferences.languePubliqueAide")}
                       </LienEcran>
                     </p>
-                    <button type="submit" className="bouton-app bouton-app--plein">
-                      {t("preferences.appliquer")}
-                    </button>
+                    <BoutonAppliquerLangue initiale={langue}>{t("preferences.appliquer")}</BoutonAppliquerLangue>
                   </footer>
                 </form>
               ) : null}

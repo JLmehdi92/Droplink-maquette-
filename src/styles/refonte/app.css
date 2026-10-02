@@ -1011,7 +1011,9 @@ a.action-ligne { color: var(--corps); }
 }
 @media (max-width: 1020px) {
   .marque { grid-template-columns: minmax(0, 1fr); }
-  .marque__apercu { position: static; order: -1; }
+  /* `relative` et non `static` : la carte reste le repère de sa bordure lumineuse
+     (`::after`, inset -1 px) — en `static`, elle s’ancrait à la page et la faisait déborder d’1 px. */
+  .marque__apercu { position: relative; order: -1; }
   .apercu-zone { --h: 520px; }
   .apercu-format button, .apercu-format__lien { height: 44px; }
   .apercu-format__lien { width: 44px; flex: none; }
@@ -1203,11 +1205,14 @@ a.action-ligne { color: var(--corps); }
 .v4 .tableau__tete h1 { font-size: 24px; font-weight: 800; letter-spacing: -.035em; }
 
 /* la bordure lumineuse : une couronne de 1 px qui suit le pointeur */
-.v4-carte { position: relative; --mx: 50%; --my: 0%; }
-.v4-carte::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none; opacity: 0; transition: opacity 280ms var(--ease); z-index: 1;
+/* SUR TOUTES LES CARTES, comme la maquette (`v4.js` pose `.v4-carte` sur `.bloc, .compteurs,
+   .bloc-r, .formulaire-carte`) : ici par le sélecteur, avec les cartes propres au produit (fiche,
+   administration). `:where()` : spécificité nulle, un positionnement existant (collant) gagne. */
+:where(.v4-carte, .bloc, .compteurs, .bloc-r, .formulaire-carte, .ed-carte, .adm-bloc, .adm-tuiles) { position: relative; --mx: 50%; --my: 0%; }
+:where(.v4-carte, .bloc, .compteurs, .bloc-r, .formulaire-carte, .ed-carte, .adm-bloc, .adm-tuiles)::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none; opacity: 0; transition: opacity 280ms var(--ease); z-index: 1;
   background: radial-gradient(240px circle at var(--mx) var(--my), color-mix(in srgb, var(--accent) 65%, transparent), transparent 70%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-@media (hover: hover) and (pointer: fine) { .v4-carte:hover::after { opacity: 1; } }
+@media (hover: hover) and (pointer: fine) { :where(.v4-carte, .bloc, .compteurs, .bloc-r, .formulaire-carte, .ed-carte, .adm-bloc, .adm-tuiles):hover::after { opacity: 1; } }
 
 /* l'entrée, au premier chargement seulement */
 .v4-entree .v4 .tableau__tete h1, .v4-entree .v4 .acces__tete h1 { animation: l4-ligne 700ms cubic-bezier(.23, 1, .32, 1) both; }

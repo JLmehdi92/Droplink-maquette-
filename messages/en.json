@@ -1415,7 +1415,8 @@
       "silence": "No movement for {jours, plural, one {# day} other {# days}}"
     },
     "resume": "Summary",
-    "nbPhotos": "{n, plural, one {# photo} other {# photos}}"
+    "nbPhotos": "{n, plural, one {# photo} other {# photos}}",
+    "lienCopie": "{client}’s link copied"
   },
   "editeur": {
     "historique": {
@@ -1560,7 +1561,9 @@
     "echecOrdre": "The new order could not be saved. The previous order has been restored.",
     "videos": "{n, plural, one {# video} other {# videos}} of {max}",
     "aideOrdre": "Drag a thumbnail by its handle to reorder. The cover is the first image your customer sees.",
-    "aideOrdreTelephone": "Press and hold the handle to move a photo."
+    "aideOrdreTelephone": "Press and hold the handle to move a photo.",
+    "annonceSuppression": "Media deleted.",
+    "annonceCouverture": "New cover."
   },
   "actions": {
     "revocation": {
@@ -1886,7 +1889,9 @@
         "refuse": "This account cannot be suspended.",
         "introuvable": "Account not found.",
         "ecriture": "Nothing was changed. Please retry."
-      }
+      },
+      "annonceSuspendu": "Done. Account suspended, written to the audit log with the reason.",
+      "annonceReactive": "Done. Account reactivated, written to the audit log with the reason."
     },
     "plan": {
       "titre": "Plan",
@@ -1909,7 +1914,8 @@
         "deja": "This account is already on this plan. Reload the page.",
         "introuvable": "This account cannot be found.",
         "ecriture": "The plan could not be saved. Nothing has changed."
-      }
+      },
+      "annonce": "Done. Plan change written to the audit log."
     },
     "panneau": {
       "titre": "Overview",
@@ -2341,7 +2347,9 @@
         "introuvable": "Order not found.",
         "ecriture": "Nothing was changed. Please retry."
       },
-      "motifAideBlocage": "At least {n} characters. The seller reads it on their order, and it is written to the log."
+      "motifAideBlocage": "At least {n} characters. The seller reads it on their order, and it is written to the log.",
+      "annonceBloque": "Link blocked. The seller sees the reason in their order.",
+      "annonceDebloque": "Link unblocked. The page is back on the same link."
     },
     "contestation": {
       "pastille": "Appeal",
@@ -2362,7 +2370,10 @@
         "saisie": "The reply is too short.",
         "deja": "This dispute has already been answered.",
         "ecriture": "The reply could not be saved. Nothing has changed."
-      }
+      },
+      "annonceAcceptee": "Appeal accepted: link unblocked, reply sent to the seller.",
+      "annonceRefusee": "Appeal rejected. The seller reads your reply; the link stays blocked.",
+      "reponseCourte": "The reply is too short."
     },
     "doublons": {
       "titre": "Duplicate accounts",

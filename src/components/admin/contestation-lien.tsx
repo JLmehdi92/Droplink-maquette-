@@ -2,7 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 import { MessageCircle } from "lucide-react";
-import { DialogueAdmin, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
+import { DialogueAdmin, confirmerEtRecharger, fermerDialogue } from "@/components/admin/dialogue-admin";
 import { useFormatter, useTranslations } from "next-intl";
 import { BoutonAction } from "@/components/bouton-action";
 import {
@@ -55,7 +55,6 @@ export function ContestationLien({
   const [resultat, setResultat] = useState<Resultat>(INITIAL);
   const [travaille, setTravaille] = useState<"refuser" | "debloquer" | null>(null);
   const [refus, setRefus] = useState<string | null>(null);
-  const td = useTranslations("admin.dialogue");
 
 
   async function ouvrir(): Promise<void> {
@@ -70,9 +69,10 @@ export function ContestationLien({
 
   async function repondre(geste: "refuser" | "debloquer"): Promise<void> {
     if (lecture.etat !== "ok") return;
+    // « La réponse est trop courte. », SANS secousse : la maquette (`admin.js`) réserve la
+    // secousse aux motifs d'une sanction ; ici on répond au vendeur.
     if (reponse.trim().length < motifMin) {
-      setRefus(td("motifCourt"));
-      secouerDialogue(dialogue.current);
+      setRefus(t("reponseCourte"));
       return;
     }
     setTravaille(geste);
@@ -91,7 +91,7 @@ export function ContestationLien({
     }
     setResultat(r);
     setTravaille(null);
-    if (r.statut === "ok") window.location.reload();
+    if (r.statut === "ok") confirmerEtRecharger(dialogue.current, t(geste === "refuser" ? "annonceRefusee" : "annonceAcceptee"));
   }
 
   return (
