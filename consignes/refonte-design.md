@@ -1285,6 +1285,12 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
   confirmations repliées après succès ; bulles de l'archivage et des interrupteurs.
   Vérifié sans défaut : un jeton valide sous un mauvais nom rend la même 404 neutre (aucun
   `theme-color`, même titre) — pas d'oracle.
+- **Relecture du lot 10** (un agent) : un HIGH — le focus posé au contenu à l'arrivée
+  reprenait le curseur qu'une commande neuve met dans « Nom du client » (gardé : seul un
+  focus resté sur `<body>` ou hors de l'écran part au contenu) — et des MEDIUM : validation
+  d'adresse perdue au clavier (rétablie, mesurée), focus perdu après le repli d'une
+  confirmation, région du pied qui changeait de rôle (deux régions permanentes), bulle de
+  l'archivage redite au retour (paramètres retirés de l'adresse, mesuré).
 - **Mesures** : fumée sans débordement, violation CSP ni erreur sur les surfaces vendeur,
   accès, public et `/p`, à 1440 et 390 px, normal et réduit ; `/p` 288,7 Ko transférés hors
   médias ; CPU ×4, feuille d'historique pire image 33-50 ms (maquette 33).
