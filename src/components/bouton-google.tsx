@@ -39,14 +39,12 @@ import { fournisseurActif } from "@/lib/auth/fournisseurs";
  * l'échec est silencieux : derrière un pare-feu, le bouton s'afficherait sans
  * marque et paraîtrait cassé. Le glyphe est en SVG local.
  */
-/** Le séparateur du kit : deux filets et un libellé 13 / 600 en sourdine. */
+/** Le trait « ou » de la maquette (`.separateur`), décoratif : le bouton se lit seul. */
 function Separateur({ libelle }: { readonly libelle: string }) {
   return (
-    <div aria-hidden="true" className="flex items-center gap-4">
-      <span className="h-px flex-1 bg-ds-filet" />
-      <span className="text-[13px] font-semibold text-ds-texte-sourdine">{libelle}</span>
-      <span className="h-px flex-1 bg-ds-filet" />
-    </div>
+    <p aria-hidden="true" className="separateur">
+      {libelle}
+    </p>
   );
 }
 
@@ -61,7 +59,7 @@ export async function BoutonGoogle({
    * continuer avec », puis Google ; l'inscription met Google d'abord, puis
    * « ou », puis le formulaire.
    */
-  separateur: { readonly position: "avant" | "apres"; readonly cle: "ou" | "ouAvec" };
+  separateur: { readonly position: "avant" | "apres"; readonly cle: "ou" };
 }) {
   if (!fournisseurActif("google")) return null;
 
@@ -74,13 +72,8 @@ export async function BoutonGoogle({
 
       <form action={partirVersGoogle}>
         <input type="hidden" name="locale" value={locale} />
-        {/* LE BOUTON DU KIT : 52 px, rayon de carte, filet par défaut, 15 / 600,
-            glyphe de 18 à 10 px du libellé. */}
-        <button
-          type="submit"
-          className="flex h-13 w-full items-center justify-center gap-2.5 rounded-ds-card border border-ds-filet-appuye bg-ds-surface-carte text-[15px] font-semibold text-ds-texte-fort transition-shadow hover:shadow-ds-sm"
-        >
-          <svg viewBox="0 0 18 18" className="h-[18px] w-[18px]" aria-hidden="true" focusable="false">
+        <button type="submit" className="bouton bouton--second bouton--large bouton-google">
+          <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
             <path
               fill="#4285F4"
               d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62Z"

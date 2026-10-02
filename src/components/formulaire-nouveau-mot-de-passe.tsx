@@ -2,7 +2,6 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { Lock } from "lucide-react";
 import {
   changerMotDePasse,
   type ResultatChangement,
@@ -56,8 +55,8 @@ export function FormulaireNouveauMotDePasse({ locale }: { readonly locale: strin
           nom="motDePasse"
           type="password"
           libelle={tm("labelNouveau")}
-          icone={Lock}
           autoComplete="new-password"
+          libellesOeil={{ afficher: t("afficherMotDePasse"), masquer: t("masquerMotDePasse") }}
           invalide={messageErreur !== null}
           decritPar={
             messageErreur !== null

@@ -3,7 +3,7 @@
 import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ImagePlus, MessageCircle, Store, Upload, Users, X } from "lucide-react";
+import { ImagePlus, MessageCircle, Upload, Users, X } from "lucide-react";
 import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
 import {
   confirmerDepotLogo,
@@ -168,7 +168,6 @@ export function FormulaireOnboarding({
           id="nom"
           nom="nom"
           libelle={t("nomTitre")}
-          icone={Store}
           placeholder={t("nomPlaceholder")}
           requis={false}
           valeur={nom}

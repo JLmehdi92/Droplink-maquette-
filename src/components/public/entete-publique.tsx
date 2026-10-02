@@ -76,7 +76,7 @@ export function EntetePublique({
       <div className="sentinelle" ref={sentinelle} aria-hidden="true" />
       <header className={"entete" + (defile ? " est-defile" : "")}>
         <div className="entete__barre">
-          <Link className="logo" href={accueil} aria-label={libelleAccueil}>
+          <Link className="logo min-h-11" href={accueil} aria-label={libelleAccueil}>
             {logo}
           </Link>
           <nav className="nav" aria-label={etiquetteNav}>

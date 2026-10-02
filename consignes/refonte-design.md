@@ -555,6 +555,41 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   `test` : seule l'alarme Railway. **Au poste de Mehdi** : `fumee` (titre du héros), `couverture`
   (`lib/page-publique/plafonds.ts` a son test).
 
+### ▶️ 02/10/2026 — étape 3 : connexion et inscription (session cloud)
+
+- **Portée de `connexion.html` / `inscription.html`** (« v4 ») : une colonne de formulaire et, à
+  partir de 1021 px, la vitrine filmée. Le film est un port de `film.js` (`FilmAcces`) : « Pendant
+  votre absence » à la connexion, « Une minute » à l'inscription ; une navigation cliente entre les
+  deux change de film. La page client du film est la DÉMO de la landing (`PageClientDemo`), rendue
+  par le serveur et clonée, jamais une page refaite. Rien n'est construit ni calculé sous 1021 px.
+- **Gardé du produit** : noms des champs (`email`, `motDePasse`, `locale`), messages et motifs
+  d'erreur (liste close), redirection d'une session déjà ouverte, suggestion de faute de frappe,
+  bouton Google conditionnel, mention légale à l'inscription. Le compteur de mot de passe lit
+  `LONGUEUR_MINIMALE` (passée par la page serveur : son module importe zod, et l'importer dans le
+  composant client embarquait zod dans le bundle). L'offre du film (« N commandes offertes ») est
+  LUE par `lirePlafondsPublics`, pluralisée, et se dit sans nombre si le plafond est illisible.
+- **Champs** : `ChampAcces` prend le balisage de la maquette ; l'œil n'apparaît que si on lui passe
+  ses libellés, ce que font la connexion, l'inscription ET le nouveau mot de passe (la relecture
+  avait vu ce dernier perdre l'œil). Les autres formulaires de compte gardent leur page jusqu'à
+  l'étape 7 mais ont déjà le nouveau champ.
+- **Mesuré** : 1440 et 390 px, fr/en/zh-CN, mouvement normal et réduit ; comportement au
+  navigateur (suggestion, erreur annoncée, œil, bascule vers l'inscription qui change de film,
+  jauge) ; aucun débordement, aucune erreur console, aucune violation CSP, aucune cible sous 44 px
+  ni police sous 11,5 px au téléphone.
+- **Relecture** (agent généraliste, quatre angles ; les agents ECC ne sont pas installés ici) :
+  0 CRITICAL/HIGH, 3 MEDIUM, 9 LOW. Corrigés : œil du nouveau mot de passe, zod dans le bundle
+  client, une exception du film qui se serait répétée à chaque image (journalisée une fois, film
+  arrêté), script inline mort qui laissait la classe `js` aux écrans suivants (retiré ; les entrées
+  CSS de la page d'accès ne sont plus gardées par `js`, elles n'en ont pas besoin), film qui
+  repartait à zéro sur une redirection vers la même page (clé = contenu des textes), suggestion à
+  32 px (44 px, marge négative), œil qui disait « Masquer… enfoncé » (`aria-pressed` retiré), offre
+  non pluralisée, cast de tuple, JSDoc obsolète, option `ouAvec` sans appelant (et sa clé). Laissés :
+  textes du film typés en index (toutes les clés vérifiées fournies), relevés de mise en page par
+  image dans le film « minute » (repris tels quels de la maquette), le signalement qui mêle deux
+  dessins de champ (réglé à l'étape 6, quand sa page se porte).
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
+  **Au poste de Mehdi** : `fumee` (connexion et inscription servent un autre HTML).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

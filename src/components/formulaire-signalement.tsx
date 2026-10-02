@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronDown, Flag, Link as IconeLien, Mail } from "lucide-react";
+import { ChevronDown, Flag } from "lucide-react";
 import { BoutonPrincipalDs, CLASSE_LIBELLE_DS, ChampAcces } from "@/components/acces-champs";
 
 /**
@@ -80,7 +80,6 @@ export function FormulaireSignalement({ adresse }: { readonly adresse: string })
         nom="lien"
         type="url"
         libelle={t("signalement.lien")}
-        icone={IconeLien}
         placeholder={t("signalement.lienExemple")}
         valeur={lien}
         surChangement={setLien}
@@ -129,7 +128,6 @@ export function FormulaireSignalement({ adresse }: { readonly adresse: string })
         nom="email"
         type="email"
         libelle={t("signalement.email")}
-        icone={Mail}
         placeholder={t("signalement.emailExemple")}
         autoComplete="email"
         valeur={email}

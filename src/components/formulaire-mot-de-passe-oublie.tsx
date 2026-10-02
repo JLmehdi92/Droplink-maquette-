@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { MailCheck, Mail } from "lucide-react";
+import { MailCheck } from "lucide-react";
 import {
   demanderReinitialisation,
   type ResultatReinitialisation,
@@ -68,7 +68,6 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
         nom="email"
         type="email"
         libelle={t("labelEmail")}
-        icone={Mail}
         placeholder={t("placeholderEmail")}
         autoComplete="username"
         modeSaisie="email"

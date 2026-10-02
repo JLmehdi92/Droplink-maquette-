@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, KeyRound } from "lucide-react";
+import { Check } from "lucide-react";
 import { verifierCode, type ResultatVerification } from "@/app/[locale]/verification/actions";
 import { BoutonPrincipalDs, ChampAcces, MessageErreurDs } from "@/components/acces-champs";
 
@@ -44,7 +44,6 @@ export function FormulaireVerification({
         id="code"
         nom="code"
         libelle={t("libelle")}
-        icone={KeyRound}
         placeholder="123456"
         autoComplete="one-time-code"
         modeSaisie="numeric"

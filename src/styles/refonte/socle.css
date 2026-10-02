@@ -681,7 +681,8 @@ code { font: 500 .92em/1 ui-monospace, "SFMono-Regular", Menlo, monospace; }
 .champ-acces__aide span { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--corps); }
 .champ-acces__aide.est-ok span { color: var(--succes-encre); }
 .champ-acces__suggestion { font-size: 13px; color: var(--corps); animation: entre 240ms var(--ease-sortie); }
-.champ-acces__suggestion button { min-height: 32px; font-weight: 700; color: var(--accent-texte); text-decoration: underline; text-underline-offset: 3px; }
+/* 44 px de cible (règle n° 5) sans pousser la ligne : la marge négative rend la hauteur ajoutée */
+.champ-acces__suggestion button { min-height: 44px; margin-block: -6px; font-weight: 700; color: var(--accent-texte); text-decoration: underline; text-underline-offset: 3px; }
 .secoue { animation: secoue 360ms var(--ease-sortie); }
 @keyframes secoue { 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-2px); } 80% { transform: translateX(2px); } }
 
@@ -741,11 +742,11 @@ code { font: 500 .92em/1 ui-monospace, "SFMono-Regular", Menlo, monospace; }
 .carte-flottante b { white-space: nowrap; }
 
 @media (prefers-reduced-motion: no-preference) {
-  .js .page-acces .acces__corps, .js .page-acces .acces__legal { animation: monte 560ms var(--ease-sortie) 60ms both; }
-  .js .page-acces [data-vitrine-tel] { animation: monte-scene 800ms var(--ease-sortie) 140ms both; }
-  .js .page-acces [data-flottante] { animation: bulle 560ms var(--ease-sortie) both; }
-  .js .page-acces .carte-flottante--vues { animation-delay: 520ms; }
-  .js .page-acces .carte-flottante--suivi { animation-delay: 680ms; }
+  .page-acces .acces__corps, .page-acces .acces__legal { animation: monte 560ms var(--ease-sortie) 60ms both; }
+  .page-acces [data-vitrine-tel] { animation: monte-scene 800ms var(--ease-sortie) 140ms both; }
+  .page-acces [data-flottante] { animation: bulle 560ms var(--ease-sortie) both; }
+  .page-acces .carte-flottante--vues { animation-delay: 520ms; }
+  .page-acces .carte-flottante--suivi { animation-delay: 680ms; }
 }
 
 @media (max-width: 1020px) {

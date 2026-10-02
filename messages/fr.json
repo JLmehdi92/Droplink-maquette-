@@ -935,9 +935,10 @@
     "atoutTexte2": "Photos, suivi, statut, client… tout est centralisé.",
     "atoutTitre3": "Conçu pour les vendeurs",
     "atoutTexte3": "Une expérience pensée par et pour les e-commerçants.",
-    "ouAvec": "ou continuer avec",
     "placeholderMotDePasse": "Votre mot de passe",
-    "noteSecurite": "Vos données sont sécurisées et confidentielles."
+    "noteSecurite": "Vos données sont sécurisées et confidentielles.",
+    "afficherMotDePasse": "Afficher le mot de passe",
+    "masquerMotDePasse": "Masquer le mot de passe"
   },
   "inscription": {
     "titre": "Créer un compte",
@@ -952,11 +953,13 @@
     "erreurMdpContientEmail": "Votre mot de passe ne doit pas contenir votre adresse email.",
     "erreurMdpFuite": "Ce mot de passe figure dans une fuite de données publique. Choisissez-en un autre.",
     "erreurDejaInscrit": "Un compte existe déjà pour cette adresse. Connectez-vous.",
-    "titreCarte": "Créer un compte",
-    "sousTitreCarte": "Commencez gratuitement et en moins d'une minute.",
+    "titreCarte": "Créer votre compte",
+    "sousTitreCarte": "Commencez gratuitement. Votre premier lien de suivi part juste après.",
     "lienSeConnecter": "Se connecter",
     "atoutTitre1": "Rapide à mettre en place",
-    "atoutTexte1": "Créez votre compte en moins d'une minute."
+    "atoutTexte1": "Créez votre compte en moins d'une minute.",
+    "placeholderMotDePasse": "Une phrase, plutôt qu'un mot",
+    "compteurMotDePasse": "<b>{n}</b> / {min} caractères minimum. Prenez plutôt une phrase qu’un mot compliqué."
   },
   "onboarding": {
     "titre": "Mettons votre nom sur la page",
@@ -3194,6 +3197,40 @@
       "mentions": "Mentions légales",
       "signalement": "Signaler un contenu",
       "droits": "© {annee} DropLink"
+    }
+  },
+  "acces": {
+    "film": {
+      "absence": {
+        "surtitre": "Pendant votre absence",
+        "titre1": "Vos clients,",
+        "titre2": "ont suivi leurs colis.",
+        "n1": "Pris en charge par La Poste",
+        "n1lieu": "Paris",
+        "n2": "Colis en cours d’acheminement",
+        "n2lieu": "Wissous",
+        "consulte": "Lien consulté",
+        "consultations": "consultations",
+        "derniere": "Dernière le {quand}",
+        "valide1": "Photos validées",
+        "valide2": "par votre client.",
+        "mouvementHier": "Mouvement hier",
+        "mouvementAujourdhui": "Mouvement aujourd’hui"
+      },
+      "minute": {
+        "titre1": "Dans une minute,",
+        "titre2": "votre premier lien.",
+        "b1": "Vous remplissez.",
+        "b2": "DropLink s’occupe du reste.",
+        "c1": "Votre client suit",
+        "c2": "son colis tout seul.",
+        "pourLea": "Pour Léa M.",
+        "photos": "4 photos",
+        "transit": "Colissimo · En transit",
+        "fin": "Moins d’une minute.",
+        "offre": "{n, plural, one {# commande offerte} other {# commandes offertes}} · sans carte bancaire",
+        "offreSansNombre": "Commandes offertes · sans carte bancaire"
+      }
     }
   }
 }

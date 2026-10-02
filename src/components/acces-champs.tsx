@@ -1,65 +1,27 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
-import { ArrowRight, Eye, EyeOff, type LucideIcon } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { useState } from "react";
-import { Anneau } from "@/components/bouton-action";
 
 /**
- * LES BRIQUES COMMUNES AUX QUATRE ÉCRANS D'ACCÈS.
+ * LES CHAMPS DES PAGES D'ACCÈS ET DE COMPTE — au dessin de la refonte (maquette,
+ * `construire.mjs` : `champ-acces`, `bouton-envoi`).
  *
- * Connexion, inscription, mot de passe oublié, nouveau mot de passe.
- *
- * ⚠️ CE N'EST PAS UNE FACTORISATION DE CONFORT. Le formulaire de connexion et
- * celui d'inscription ÉTAIENT le même composant, distingués par une propriété
- * `intention` qui ne changeait que le libellé du bouton — parce qu'avec un lien
- * magique le serveur faisait strictement la même chose des deux côtés. Ce n'est
- * plus vrai : l'un vérifie, l'autre crée. Les deux formulaires sont donc
- * séparés, et ce qui reste commun est ici, à l'endroit où le partager ne peut
- * plus faire diverger un comportement.
- *
- * ═══════════════════════════════════════════════════════════════════════════
- * MIGRÉ SUR LE DESIGN SYSTEM LE 11/09/2026 — valeurs MESURÉES, pas lues.
- *
- * Le champ d'accès CASSE la pilule du reste du produit : 56 px de haut et un
- * rayon de 16, là où les contrôles ordinaires sont entièrement arrondis. Ce
- * n'est pas une approximation — c'est écrit dans le README du kit et confirmé
- * par la boîte rendue, mesurée dans Chrome sur la référence servie en HTTP :
- * `h=56, radius=16px, filet 1px #DEDEEA, padding 0 18px, saisie 15px`.
- *
- * ⚠️ ET LA MESURE A CORRIGÉ UNE LECTURE. Le `<label>` rend 16px/400 : c'est
- * l'héritage du corps, pas le libellé. Le libellé lui-même est un `<span>` à
- * **14px/600 sur l'encre forte**. Lire la boîte extérieure aurait donné un
- * libellé trop clair et trop léger, sans que rien ne le signale.
- * ═══════════════════════════════════════════════════════════════════════════
+ * Ce qui ne change PAS avec le dessin, et ne doit jamais changer : le NOM des
+ * champs (`name`), lu par les Server Actions (`tests/unit/formulaires-et-actions`),
+ * et le serveur comme seule autorité. Ce qui est vérifié ici est un confort ;
+ * aucune vérification d'ici ne dit quoi que ce soit sur l'existence d'un compte.
  */
 
-/*
- * ⚠️ DEUX JEUX DE BRIQUES ONT COHABITÉ ICI DU 11 AU 14/09/2026. Le design system
- * ne dessinait que la connexion et l'inscription ; le mot de passe oublié et le
- * nouveau mot de passe gardaient les briques de l'ancien canevas — champ de
- * 52 px au rayon 13, bouton à flèche Material. Les deux écrans ont été écrits
- * dans le kit `auth` puis portés : l'ancien jeu est retiré, et l'infixe `Ds`
- * reste pour ne pas renommer quatre formulaires dans le même geste.
- */
+/** Le libellé d'un champ hors de `ChampAcces` (sélecteur, zone de texte). */
+export const CLASSE_LIBELLE_DS = "text-[13.5px] leading-[normal] font-semibold text-ds-texte-fort";
 
-/** Le libellé d'un champ d'accès : 14/600 sur l'encre forte, mesuré sur le kit. */
-export const CLASSE_LIBELLE_DS = "text-[14px] leading-[normal] font-semibold text-ds-texte-fort";
-
-/**
- * Un champ d'accès complet : libellé, boîte, icône, et l'action de droite.
- *
- * L'icône vit DANS la boîte, à gauche, en 18 px et trait 1,8 — la graisse de
- * Lucide retenue par le design system. Elle est décorative : le libellé dit
- * déjà ce que le champ attend, et la doubler ferait entendre deux fois la même
- * chose à un lecteur d'écran.
- */
 export function ChampAcces({
   id,
   nom,
   type = "text",
   libelle,
-  icone: Icone,
   placeholder,
   autoComplete,
   requis = true,
@@ -69,170 +31,109 @@ export function ChampAcces({
   surChangement,
   modeSaisie,
   invalide = false,
+  libellesOeil,
+  children,
 }: {
   readonly id: string;
   readonly nom: string;
   readonly type?: "text" | "email" | "password" | "url";
   readonly libelle: string;
-  readonly icone: LucideIcon;
   readonly placeholder?: string;
   readonly autoComplete?: string;
   readonly requis?: boolean;
+  /** Un lien sur la ligne du libellé (« Mot de passe oublié ? »). */
   readonly action?: React.ReactNode;
   readonly decritPar?: string;
-  /**
-   * Contrôlé UNIQUEMENT quand l'appelant en a besoin — la connexion, pour
-   * pouvoir proposer la correction d'une adresse mal tapée. Partout ailleurs le
-   * champ reste non contrôlé : un état React par champ ne sert à rien quand le
-   * formulaire est envoyé au serveur, et il coûte un rendu à chaque frappe.
-   */
   readonly valeur?: string;
   readonly surChangement?: (valeur: string) => void;
   readonly modeSaisie?: "email" | "text" | "numeric";
   readonly invalide?: boolean;
+  /**
+   * Les libellés du bouton qui montre le mot de passe, traduits par l'appelant
+   * (ce composant ne tire aucun catalogue). Sans eux, pas de bouton : un bouton
+   * sans nom n'est pas un bouton.
+   */
+  readonly libellesOeil?: { readonly afficher: string; readonly masquer: string };
+  /** Ce qui vit sous la boîte : jauge, aide, suggestion. */
+  readonly children?: React.ReactNode;
 }) {
   const [devoile, setDevoile] = useState(false);
   const estMotDePasse = type === "password";
 
   return (
-    /*
-     * ⚠️ LE `<label>` ENVELOPPE TOUTE LA BOÎTE, PAS SEULEMENT SON TEXTE — ET
-     * C'EST UNE PROPRIÉTÉ DE ZONE TACTILE, PAS DE SÉMANTIQUE.
-     *
-     * Mesuré le 11/09/2026 à 390 px, TACTILE ÉMULÉ, par
-     * `scripts/mesurer-cibles-tactiles.mjs` : avec un label séparé, la zone
-     * réellement touchable du champ est celle de l'`<input>` — **80 × 23** —
-     * et non celle de la boîte de 56. Les 33 px manquants sont le filet, le
-     * padding et l'icône : visuellement le champ, mais inertes au doigt.
-     *
-     * En enveloppant, la boîte entière active la saisie. C'est ce que fait la
-     * référence, et c'est pour cela qu'elle mesure 56.
-     */
-    <label htmlFor={id} className="block">
-      <span className="mb-2 flex items-baseline gap-3">
-        <span className={CLASSE_LIBELLE_DS}>{libelle}</span>
-        <span className="flex-1" />
+    <div className={"champ-acces" + (invalide ? " est-invalide" : "")}>
+      <div className="champ-acces__ligne">
+        <label htmlFor={id}>{libelle}</label>
         {action}
-      </span>
-      {/*
-       * LE FILET ET L'ANNEAU SONT SUR LA BOÎTE, PAS SUR LA SAISIE. Le champ
-       * porte une icône et parfois un bouton : si le focus n'habillait que
-       * l'`<input>`, l'anneau couperait la boîte en son milieu.
-       *
-       * `focus-within` plutôt qu'un état React : la boîte n'a aucune autre
-       * raison d'être un îlot client, et le CSS le fait sans JavaScript.
-       */}
-      <span
-        className={
-          "flex h-14 items-center gap-3 rounded-ds-card border border-ds-filet-appuye " +
-          "bg-ds-surface-carte px-[18px] transition-colors " +
-          "focus-within:border-ds-filet-focus focus-within:shadow-[var(--anneau-ds-focus)]"
-        }
-      >
-        <Icone aria-hidden="true" size={18} strokeWidth={1.8} className="shrink-0 text-ds-texte-sourdine" />
+      </div>
+      <div className="champ-acces__boite">
         <input
           id={id}
           name={nom}
-          type={estMotDePasse && !devoile ? "password" : type === "password" ? "text" : type}
+          type={estMotDePasse && devoile ? "text" : type}
           placeholder={placeholder}
           autoComplete={autoComplete}
+          autoCapitalize={type === "email" ? "off" : undefined}
+          spellCheck={type === "email" || estMotDePasse ? false : undefined}
           required={requis}
           aria-describedby={decritPar}
           aria-invalid={invalide || undefined}
           inputMode={modeSaisie}
           {...(valeur === undefined
             ? {}
-            : { value: valeur, onChange: (e) => surChangement?.(e.target.value) })}
-          className="min-w-0 flex-1 border-none bg-transparent text-[15px] text-ds-texte-fort outline-none placeholder:text-ds-texte-corps"
+            : { value: valeur, onChange: (e: React.ChangeEvent<HTMLInputElement>) => surChangement?.(e.target.value) })}
         />
-        {estMotDePasse ? (
+        {estMotDePasse && libellesOeil !== undefined ? (
           <button
             type="button"
+            className="champ-acces__oeil"
             onClick={() => setDevoile((d) => !d)}
-            /*
-             * ⚠️ 44 px DE ZONE TOUCHABLE SANS ÉLARGIR LE DESSIN. Le bouton
-             * mesure 18 px pour ne pas déformer la boîte de 56 ; le
-             * pseudo-élément lui donne la cible du brief §8. Mesuré par
-             * `scripts/mesurer-cibles-tactiles.mjs`, pas par `getBoundingClientRect`
-             * qui ne compte pas la boîte d'un `::before`.
-             */
-            className="relative shrink-0 text-ds-texte-sourdine transition-colors hover:text-ds-texte-fort before:absolute before:top-1/2 before:left-1/2 before:h-11 before:w-11 before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']"
-            aria-label={devoile ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            aria-label={devoile ? libellesOeil.masquer : libellesOeil.afficher}
           >
-            {devoile ? <EyeOff size={18} strokeWidth={1.8} /> : <Eye size={18} strokeWidth={1.8} />}
+            {devoile ? <EyeOff aria-hidden="true" className="ic" /> : <Eye aria-hidden="true" className="ic" />}
           </button>
         ) : null}
-      </span>
-    </label>
+      </div>
+      {children}
+    </div>
   );
 }
 
 /**
- * L'action principale de l'écran, au dégradé de marque.
- *
- * Le dégradé est réservé à UNE action principale par écran, et uniquement sur
- * les surfaces DropLink — ce qui est le cas des quatre écrans d'accès.
- *
- * `useFormStatus` doit être lu depuis un composant ENFANT du formulaire : lu
- * dans le formulaire lui-même, il rendrait toujours `false`.
- *
- * ⚠️ IL CHANGEAIT DÉJÀ DE LIBELLÉ, ET CE N'ÉTAIT PAS SUFFISANT. Sur les quatre
- * écrans d'accès, l'attente ne se lisait qu'en relisant le mot — or on ne relit
- * pas un bouton qu'on vient de cliquer, on le REGARDE. L'anneau est celui de
- * `BoutonAction`, validé par Wassim le 09/09 : `animate-spin` en CSS pur, aucune
- * couleur qui change, et il ne porte aucune information que le libellé ne porte
- * pas — d'où son `aria-hidden`.
- *
- * ⚠️ LA FLÈCHE CÈDE SA PLACE À L'ANNEAU, elle ne s'y ajoute pas : les deux
- * ensemble élargiraient le bouton au moment précis du clic.
- *
- * Géométrie mesurée sur la référence : 58 px de haut, rayon 16, libellé 16/600.
+ * LE BOUTON D'ENVOI : le libellé sort par le haut, « Connexion… » entre par le
+ * bas, à largeur constante (les deux sont empilés dans la même cellule). Il porte
+ * le seul dégradé de l'écran.
  */
 export function BoutonPrincipalDs({
   libelle,
   libelleEnCours,
-  /**
-   * 58 sur la connexion, 60 sur l'inscription — mesuré sur la référence, et pas
-   * arrondi. Deux pixels ne se voient pas seuls ; ils se voient quand les deux
-   * écrans se succèdent et que le bouton saute.
-   */
-  hauteur = 58,
 }: {
   readonly libelle: string;
   readonly libelleEnCours: string;
-  readonly hauteur?: 58 | 60;
 }) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
       disabled={pending}
-      className={
-        `degrade-ds-marque flex w-full items-center justify-center gap-2 rounded-ds-card ` +
-        `border border-transparent px-7 text-[16px] font-semibold tracking-[-0.02em] ` +
-        `text-ds-texte-sur-marque shadow-ds-brand transition-shadow ` +
-        `hover:shadow-ds-brand-hover disabled:opacity-60 ${hauteur === 60 ? "h-[60px]" : "h-[58px]"}`
-      }
+      aria-busy={pending}
+      className={"bouton bouton--marque bouton--large bouton-envoi" + (pending ? " est-en-cours" : "")}
     >
-      {pending ? <Anneau /> : null}
-      {/* LE LIBELLÉ EST UN NŒUD DE TEXTE DU BOUTON, PAS UN `<span>` : c'est le
-          montage du kit, et la sonde mesurait sinon un mot de 102 px au lieu
-          du bouton de 424 qui le porte. */}
-      {pending ? libelleEnCours : libelle}
-      {pending ? null : <ArrowRight aria-hidden="true" size={18} strokeWidth={1.8} />}
+      <span className="bouton-envoi__libelle" aria-hidden={pending}>
+        {libelle}
+      </span>
+      <span className="bouton-envoi__cours" aria-hidden={!pending}>
+        <LoaderCircle aria-hidden="true" className="ic tourne" />
+        {libelleEnCours}
+      </span>
     </button>
   );
 }
 
-/**
- * Le message d'échec, sous les champs et avant le bouton.
- *
- * `role="alert"` : il apparaît après une soumission, donc hors du champ de
- * quelqu'un qui emploie un lecteur d'écran.
- */
+/** Ce que le serveur a refusé, dit en clair ; `role="alert"` : il apparaît après l'envoi. */
 export function MessageErreurDs({ id, texte }: { readonly id: string; readonly texte: string }) {
   return (
-    <p id={id} role="alert" className="text-ds-body-sm text-ds-erreur-encre">
+    <p id={id} role="alert" className="formulaire__statut formulaire__statut--erreur">
       {texte}
     </p>
   );

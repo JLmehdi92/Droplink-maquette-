@@ -4,12 +4,10 @@ import Link from "next/link";
 import { FormulaireInscription } from "@/components/formulaire-inscription";
 import { BoutonGoogle } from "@/components/bouton-google";
 import { TraductionsClient } from "@/components/traductions-client";
-import {
-  ArgumentAcces,
-  FondAcces,
-  LogoMarque,
-  NoteSecurite,
-} from "@/components/acces/coque-acces";
+import { Check } from "lucide-react";
+import { PageAcces } from "@/components/acces/page-acces";
+import { LONGUEUR_MINIMALE } from "@/lib/auth/mot-de-passe";
+import { lirePlafondsPublics } from "@/lib/page-publique/plafonds";
 import { routing } from "@/i18n/routing";
 import { redirect } from "next/navigation";
 import { estLangueSupportee } from "@/i18n/config";
@@ -90,101 +88,50 @@ export default async function Inscription({
   if (dejaOuverte !== null) redirect(dejaOuverte);
 
   const t = await getTranslations("inscription");
-  const tc = await getTranslations("connexion");
+  const { gratuitAVie } = await lirePlafondsPublics();
+  const ta = await getTranslations("accueil");
+  const garanties = [
+    gratuitAVie === null ? ta("garanties.offertesSansNombre") : ta("garanties.offertes", { n: gratuitAVie }),
+    ta("garanties.carte"),
+    ta("garanties.compte"),
+  ];
+
+  /*
+   * L'INSCRIPTION DE LA REFONTE (maquette, `inscription.html`) : Google EN
+   * PREMIER (s'inscrire par Google évite de choisir un mot de passe ; le
+   * fournisseur en Chine trouve le formulaire juste en dessous), les garanties
+   * — dont le nombre de commandes offertes, LU EN BASE —, et la phrase de
+   * consentement, puisqu'ici on accepte quelque chose. Le consentement reste
+   * PAR LA CONTINUATION, sans case bloquante : en ajouter une serait un
+   * changement de produit, pas de design.
+   */
   return (
-    <>
-      <FondAcces />
-      {/*
-       * ⚠️ LA GRILLE DE L'INSCRIPTION N'EST PAS CELLE DE LA CONNEXION. La
-       * référence donne 620 px à la carte au lieu de 520, un espacement de 72
-       * au lieu de 80, et aligne les deux colonnes en HAUT et non au centre :
-       * le formulaire y est plus long que l'argument, donc un centrage
-       * laisserait la colonne de gauche flotter au milieu du vide.
-       */}
-      {/* `leading-[normal]` : le kit ne pose aucun interligne sur ses libellés,
-          et la page héritait de 1,5 — 3 à 6 px de trop par libellé. */}
-      <div className="relative flex min-h-dvh flex-col px-4 pt-[22px] pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
-        <main
-          id="contenu"
-          // AUCUN REMPLISSAGE VERTICAL : au kit, les 40 px du haut sont ceux de la
-          // page, et la grille commence juste dessous. Les 16 px de trop
-          // descendaient les deux colonnes d'autant.
-          /* ⚠️ UNE COLONNE DÉCLARÉE SOUS `lg`, ET NON LA PISTE IMPLICITE. Sans
-             modèle, la grille crée une piste `auto` qui prend la largeur
-             MINIMALE de son contenu : le champ mot de passe en réclamait 330,
-             et la carte débordait l'écran de 8 px à 390 — mesuré le
-             13/09/2026, dans les trois langues. `minmax(0,1fr)` borne la piste
-             à la largeur disponible. */
-          className="grid flex-1 grid-cols-[minmax(0,1fr)] items-start gap-[72px] lg:grid-cols-[minmax(0,1fr)_620px]"
-        >
-          <div className="hidden flex-col gap-[34px] pt-1 lg:flex">
-            <Link href={`/${locale}`} className="inline-flex min-h-11 items-center self-start">
-              <LogoMarque hauteur={52} />
-            </Link>
-            <ArgumentAcces variante="inscription" />
-          </div>
+    <PageAcces locale={locale} film="minute" legal>
+      <header className="acces__tete">
+        <h1 tabIndex={-1}>{t("titreCarte")}</h1>
+        <p>{t("sousTitreCarte")}</p>
+      </header>
 
-          <div className="mx-auto flex w-full max-w-[620px] flex-col gap-5 rounded-ds-3xl bg-ds-surface-carte px-5 pt-6 pb-[30px] shadow-ds-lg md:px-11 md:pt-[30px] md:pb-10">
-            <p className="text-right text-[14px] text-ds-texte-corps">
-              {t("dejaCompteTexte")}{" "}
-              <Link
-                href={`/${locale}/connexion`}
-                className="font-semibold text-ds-texte-lien underline hover:text-ds-texte-lien-survol"
-              >
-                {t("lienSeConnecter")}
-              </Link>
-            </p>
+      <BoutonGoogle locale={locale} separateur={{ position: "apres", cle: "ou" }} />
 
-            <div className="flex flex-col items-center gap-2.5">
-              <LogoMarque hauteur={48} className="h-10 w-auto md:h-12" />
-              <h1 className="text-[24px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[32px]">
-                {t("titreCarte")}
-              </h1>
-              <p className="text-center text-[15px] leading-[1.55] text-ds-texte-corps">
-                {t("sousTitreCarte")}
-              </p>
-            </div>
+      <TraductionsClient espaces={["inscription", "connexion"]}>
+        <FormulaireInscription locale={locale} longueurMinimale={LONGUEUR_MINIMALE} />
+      </TraductionsClient>
 
-            {/* ⚠️ GOOGLE EN PREMIER ICI, ET APRÈS LE FORMULAIRE SUR LA CONNEXION —
-                ce n'est pas une incohérence, c'est la référence. S'INSCRIRE par
-                Google évite de choisir un mot de passe ; SE CONNECTER par Google
-                suppose de l'avoir déjà fait. Et le fournisseur en Chine, pour qui
-                Google est inaccessible, trouve le formulaire juste en dessous. */}
-            <BoutonGoogle locale={locale} separateur={{ position: "apres", cle: "ou" }} />
-
-            <TraductionsClient espaces={["inscription", "connexion"]}>
-              <FormulaireInscription locale={locale} />
-            </TraductionsClient>
-
-            {/* ⚠️ LA RÉFÉRENCE EN FAIT UNE CASE À COCHER QUI BLOQUE LE BOUTON.
-                Le produit consent PAR LA CONTINUATION, et passer à un
-                consentement bloquant est un changement de PRODUIT, pas de
-                design : c'est une étape de plus sur le seul écran qui doit être
-                court, et rien dans le brief ne la demande. La phrase reste. */}
-            {/* AU DESSIN DE LA PHRASE DU KIT — 14 / 400 en corps, liens 600
-                soulignés —, SANS SA CASE : voir ci-dessus. */}
-            <p className="text-[14px] leading-[1.5] text-ds-texte-corps">
-              {tc("cgvAvant")}{" "}
-              <Link
-                href={`/${locale}/conditions`}
-                className="font-semibold whitespace-nowrap text-ds-texte-lien underline hover:text-ds-texte-lien-survol"
-              >
-                {tc("cgvConditions")}
-              </Link>{" "}
-              {tc("cgvEt")}{" "}
-              <Link
-                href={`/${locale}/confidentialite`}
-                className="font-semibold whitespace-nowrap text-ds-texte-lien underline hover:text-ds-texte-lien-survol"
-              >
-                {tc("cgvConfidentialite")}
-              </Link>
-              .
-            </p>
-
-            <NoteSecurite />
-          </div>
-        </main>
-      </div>
-    </>
+      <ul className="l4-garanties v4-garanties">
+        {garanties.map((g) => (
+          <li key={g}>
+            <Check aria-hidden="true" className="ic" />
+            {g}
+          </li>
+        ))}
+      </ul>
+      <p className="acces__bascule">
+        {t("dejaCompteTexte")}{" "}
+        <Link className="lien-texte" href={`/${locale}/connexion`}>
+          {t("lienSeConnecter")}
+        </Link>
+      </p>
+    </PageAcces>
   );
 }

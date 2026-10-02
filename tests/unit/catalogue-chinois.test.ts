@@ -66,6 +66,7 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   ["accueil.heros.pastilleUrl", "Une adresse d'exemple : une URL s'écrit en lettres latines."],
   ["accueil.scene.boutique", "Le nom de la boutique de démonstration, un nom propre."],
   ["accueil.client.h1lieu", "Un nom de ville, Wissous : un nom propre."],
+  ["acces.film.absence.n2lieu", "Le même nom de ville, dans le film de la connexion."],
   ["accueil.tarifs.pro", "Le nom du plan, « Pro », identique dans les trois langues."],
   ["accueil.tarifs.lienUrl", "Une adresse d'exemple : une URL s'écrit en lettres latines."],
   ["accueil.final.slugs", "Des noms de lien d'exemple, en lettres latines comme toute adresse."],

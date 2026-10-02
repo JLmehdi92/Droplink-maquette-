@@ -935,9 +935,10 @@
     "atoutTexte2": "Photos, tracking, status, customer — all centralised.",
     "atoutTitre3": "Built for sellers",
     "atoutTexte3": "An experience built by and for online sellers.",
-    "ouAvec": "or continue with",
     "placeholderMotDePasse": "Your password",
-    "noteSecurite": "Your data is secure and confidential."
+    "noteSecurite": "Your data is secure and confidential.",
+    "afficherMotDePasse": "Show password",
+    "masquerMotDePasse": "Hide password"
   },
   "inscription": {
     "titre": "Create an account",
@@ -952,11 +953,13 @@
     "erreurMdpContientEmail": "Your password must not contain your email address.",
     "erreurMdpFuite": "This password has appeared in a public data breach. Please choose another one.",
     "erreurDejaInscrit": "An account already exists for this address. Log in instead.",
-    "titreCarte": "Create an account",
-    "sousTitreCarte": "Start free, in under a minute.",
+    "titreCarte": "Create your account",
+    "sousTitreCarte": "Start for free. Your first tracking link goes out right after.",
     "lienSeConnecter": "Log in",
     "atoutTitre1": "Quick to set up",
-    "atoutTexte1": "Create your account in under a minute."
+    "atoutTexte1": "Create your account in under a minute.",
+    "placeholderMotDePasse": "A sentence rather than a word",
+    "compteurMotDePasse": "<b>{n}</b> / {min} characters minimum. A sentence works better than a complicated word."
   },
   "onboarding": {
     "titre": "Let’s put your name on the page",
@@ -3194,6 +3197,40 @@
       "mentions": "Legal notice",
       "signalement": "Report content",
       "droits": "© {annee} DropLink"
+    }
+  },
+  "acces": {
+    "film": {
+      "absence": {
+        "surtitre": "While you were away",
+        "titre1": "Your customers",
+        "titre2": "tracked their parcels.",
+        "n1": "Picked up by La Poste",
+        "n1lieu": "Paris",
+        "n2": "Parcel in transit",
+        "n2lieu": "Wissous",
+        "consulte": "Link viewed",
+        "consultations": "views",
+        "derniere": "Last one {quand}",
+        "valide1": "Photos approved",
+        "valide2": "by your customer.",
+        "mouvementHier": "Moved yesterday",
+        "mouvementAujourdhui": "Moved today"
+      },
+      "minute": {
+        "titre1": "In one minute,",
+        "titre2": "your first link.",
+        "b1": "You fill it in.",
+        "b2": "DropLink takes care of the rest.",
+        "c1": "Your customer tracks",
+        "c2": "their parcel on their own.",
+        "pourLea": "For Léa M.",
+        "photos": "4 photos",
+        "transit": "Colissimo · In transit",
+        "fin": "Less than a minute.",
+        "offre": "{n, plural, one {# free order} other {# free orders}} · no credit card",
+        "offreSansNombre": "Free orders · no credit card"
+      }
     }
   }
 }

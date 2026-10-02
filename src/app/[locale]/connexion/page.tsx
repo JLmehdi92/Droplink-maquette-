@@ -4,13 +4,7 @@ import Link from "next/link";
 import { FormulaireConnexion } from "@/components/formulaire-connexion";
 import { BoutonGoogle } from "@/components/bouton-google";
 import { TraductionsClient } from "@/components/traductions-client";
-import { ArrowRight } from "lucide-react";
-import {
-  ArgumentAcces,
-  FondAcces,
-  LogoMarque,
-  NoteSecurite,
-} from "@/components/acces/coque-acces";
+import { PageAcces } from "@/components/acces/page-acces";
 import { routing } from "@/i18n/routing";
 import { redirect } from "next/navigation";
 import { estLangueSupportee } from "@/i18n/config";
@@ -120,7 +114,6 @@ export default async function Connexion({
   if (dejaOuverte !== null) redirect(dejaOuverte);
 
   const t = await getTranslations("connexion");
-  const tl = await getTranslations("landing");
 
   const parametres = await searchParams;
   const brut = parametres["erreur"];
@@ -128,155 +121,48 @@ export default async function Connexion({
   const brutInfo = parametres["info"];
   const info = infoConnue(typeof brutInfo === "string" ? brutInfo : undefined);
 
+  /*
+   * LA CONNEXION DE LA REFONTE (maquette, `connexion.html`) : la colonne du
+   * formulaire, le film « Pendant votre absence » à côté (bureau seulement).
+   * La phrase « En continuant, vous acceptez… » n'y est PAS : se reconnecter
+   * n'accepte rien de nouveau (arbitrage du § 5 de refonte-design.md).
+   */
   return (
-    <>
-      <FondAcces />
-      {/*
-       * LA PAGE, SUR LA GÉOMÉTRIE DE LA RÉFÉRENCE : padding 40/56/32 au bureau,
-       * resserré au téléphone où encadrer coûterait un dixième de la largeur.
-       */}
-      {/* `leading-[normal]` : le kit ne pose aucun interligne sur ses libellés,
-          et la page héritait de 1,5 — 3 à 6 px de trop par libellé. */}
-      <div className="relative flex min-h-dvh flex-col px-4 pt-[22px] pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
-        <header className="flex flex-wrap items-center gap-3">
-          {/*
-            ⚠️ `min-h-11` MALGRÉ UNE IMAGE DÉJÀ HAUTE DE 44 PX, et ce n'est pas
-            une redondance : si le logo ne se charge pas — 404, réseau coupé,
-            format refusé — le lien s'effondre à la hauteur de son texte
-            alternatif, et la cible disparaît avec lui. Le plancher tient
-            indépendamment de ce que le réseau rend.
-          */}
-          <Link href={`/${locale}`} className="inline-flex min-h-11 items-center">
-            <LogoMarque hauteur={44} className="md:h-13 md:w-auto" />
-          </Link>
-          <span className="flex-1" />
-          <span className="hidden text-[14px] text-ds-texte-corps sm:inline md:mr-[18px]">
-            {t("pasDeCompteTitre")}
-          </span>
-          {/* L'action secondaire de l'en-tête : pilule, 52 px, dégradé de marque.
-              C'est la SEULE action au dégradé de cet écran avec le bouton du
-              formulaire — or la règle en autorise UNE. Celle-ci est donc en
-              contour, et le dégradé reste au formulaire, qui est ce qu'on vient
-              faire ici. */}
-          <Link
-            href={`/${locale}/inscription`}
-            className="inline-flex h-11 items-center gap-2 rounded-ds-pill border border-ds-filet-appuye bg-ds-surface-carte px-4 text-[14px] font-semibold md:h-13 md:px-5 md:text-[15px] text-ds-texte-fort transition-shadow hover:shadow-ds-sm"
-          >
-            {t("lienCreerCompte")}
-            <ArrowRight aria-hidden="true" size={18} strokeWidth={1.8} />
-          </Link>
-        </header>
+    <PageAcces locale={locale} film="absence" legal={false}>
+      <header className="acces__tete">
+        <h1 tabIndex={-1}>{t("titre")}</h1>
+        <p>{t("sousTitre")}</p>
+      </header>
 
-        <main
-          id="contenu"
-          /* ⚠️ UNE COLONNE DÉCLARÉE SOUS `lg`, ET NON LA PISTE IMPLICITE. Sans
-             modèle, la grille crée une piste `auto` qui prend la largeur
-             MINIMALE de son contenu : le champ mot de passe en réclamait 330,
-             et la carte débordait l'écran de 8 px à 390 — mesuré le
-             13/09/2026, dans les trois langues. `minmax(0,1fr)` borne la piste
-             à la largeur disponible. */
-          className="grid flex-1 grid-cols-[minmax(0,1fr)] items-start gap-20 py-5 lg:grid-cols-[minmax(0,1fr)_520px] lg:items-center lg:py-12"
-        >
-          {/* MASQUÉ SOUS `lg`, ET C'EST LE POINT. Cette colonne ne porte aucune
-              information dont la connexion dépende : sur un écran étroit elle
-              disparaît entièrement, sans que rien ne manque. */}
-          {/* CALÉE EN HAUT, PAS CENTRÉE. Au kit, cette colonne est la plus haute
-              de la grille et commence donc à son bord ; la nôtre, sans preuve
-              sociale ni rangée de places de marché, est plus courte, et le
-              centrage la faisait descendre de 140 px. */}
-          <div className="hidden self-start lg:block">
-            <ArgumentAcces />
-          </div>
+      {/* CE QUI A ÉCHOUÉ EST DIT : un lien expiré ramenait sinon sur un écran
+          identique, sans un mot. `role="alert"` : le message arrive après une
+          navigation, hors du champ d'un lecteur d'écran. */}
+      {motif === null ? null : (
+        <p role="alert" className="formulaire__statut formulaire__statut--erreur">
+          {t(`motif.${motif}`)}
+        </p>
+      )}
+      {/* NEUTRE, PAS ROUGE : une déconnexion réussie est une confirmation. */}
+      {info === null ? null : (
+        <p role="status" className="formulaire__statut">
+          {t(`info.${info}`)}
+        </p>
+      )}
 
-          <div className="mx-auto flex w-full max-w-[520px] flex-col gap-[22px] rounded-ds-3xl bg-ds-surface-carte px-5 pt-6 pb-[30px] shadow-ds-lg md:px-12 md:py-11">
-            <div className="flex flex-col items-center gap-[14px]">
-              <LogoMarque hauteur={46} className="h-10 w-auto md:h-[46px]" />
-              <h1 className="text-[24px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[34px]">
-                {t("titre")}
-              </h1>
-              {/* 1,55 : l'interligne que le kit donne à tout paragraphe. */}
-              <p className="text-center text-[15px] leading-[1.55] text-ds-texte-corps">
-                {t("sousTitre")}
-              </p>
-            </div>
+      <TraductionsClient espaces={["connexion"]}>
+        <FormulaireConnexion locale={locale} />
+      </TraductionsClient>
 
-            {/* CE QUI A ÉCHOUÉ EST DIT. La route de retour redirige ici avec son
-                motif depuis le premier jour, et rien ne l'affichait : un lien
-                expiré ramenait l'utilisateur sur un écran identique à celui
-                qu'il venait de quitter, sans un mot. Il recommence, échoue
-                pareil, et conclut que le produit ne marche pas.
+      {/* APRÈS le formulaire : Google est inaccessible au fournisseur en Chine,
+          le placer en tête ferait passer pour secondaire son seul chemin. */}
+      <BoutonGoogle locale={locale} separateur={{ position: "avant", cle: "ou" }} />
 
-                `role="alert"` et non un simple paragraphe : le message apparaît
-                après une navigation, donc hors du champ de quelqu'un qui
-                emploie un lecteur d'écran. */}
-            {motif === null ? null : (
-              <p
-                role="alert"
-                className="rounded-ds-card border border-ds-erreur bg-ds-erreur-fond p-4 text-[14px] text-ds-erreur-encre"
-              >
-                {t(`motif.${motif}`)}
-              </p>
-            )}
-
-            {/* NEUTRE, PAS ROUGE. Une déconnexion réussie est une confirmation :
-                `role="status"` et non `alert`, filet ordinaire et non filet
-                d'erreur. Elle est annoncée parce que l'écran de connexion
-                ressemble beaucoup à celui qu'on quitte — sans un mot, on peut
-                croire que le bouton n'a rien fait. */}
-            {info === null ? null : (
-              <p
-                role="status"
-                className="rounded-ds-card border border-ds-filet bg-ds-surface-creux p-4 text-[14px] text-ds-texte-corps"
-              >
-                {t(`info.${info}`)}
-              </p>
-            )}
-
-            <TraductionsClient espaces={["connexion"]}>
-              <FormulaireConnexion locale={locale} />
-            </TraductionsClient>
-
-            {/* APRÈS le formulaire, et non avant : Google est inaccessible au
-                fournisseur en Chine. Le placer en tête ferait passer pour
-                secondaire le chemin qui, pour toute une part des utilisateurs,
-                est le seul qui existe. */}
-            <BoutonGoogle locale={locale} separateur={{ position: "avant", cle: "ouAvec" }} />
-
-            <p className="text-center text-[14px] text-ds-texte-corps">
-              {t("pasDeCompteTitre")}{" "}
-              <Link
-                href={`/${locale}/inscription`}
-                className="font-bold text-ds-texte-lien hover:underline"
-              >
-                {t("lienCreerCompte")}
-              </Link>
-            </p>
-
-            <NoteSecurite />
-          </div>
-        </main>
-
-        {/*
-          LE PIED DU KIT : la documentation et le droit d'auteur, en 12 px.
-
-          ⚠️ LA PHRASE DE CONSENTEMENT N'EST PLUS ICI, et ce n'est pas un oubli.
-          Elle datait de la planche du canevas ; le kit `auth` ne la pose que là
-          où l'on ACCEPTE quelque chose, c'est-à-dire à l'inscription, qui la
-          garde. Se reconnecter à un compte n'accepte rien de nouveau.
-        */}
-        <footer className="flex items-end">
-          <span className="text-[12px] text-ds-texte-tenu">
-            <Link
-              href={`/${locale}/docs`}
-              className="-my-3.5 inline-flex min-h-11 items-center font-semibold text-ds-texte-corps hover:underline lg:my-0 lg:min-h-0"
-            >
-              {tl("menu.docs")}
-            </Link>
-            {"  ·  "}
-            {tl("piedDroits", { annee: new Date().getFullYear() })}
-          </span>
-        </footer>
-      </div>
-    </>
+      <p className="acces__bascule">
+        {t("pasDeCompteTitre")}{" "}
+        <Link className="lien-texte" href={`/${locale}/inscription`}>
+          {t("lienCreerCompte")}
+        </Link>
+      </p>
+    </PageAcces>
   );
 }

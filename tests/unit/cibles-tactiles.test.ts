@@ -323,23 +323,21 @@ const AUTONOMES: ReadonlyArray<{
       "14/09/2026 : une IMAGE de 30 px, portée à 44 par son plancher au téléphone.",
   },
   {
-    fichier: "src/app/[locale]/connexion/page.tsx",
-    repere: "LogoMarque hauteur={44}",
+    fichier: "src/components/public/entete-publique.tsx",
+    repere: 'className="logo min-h-11"',
     raison:
-      "Le logo d'en-tête de la connexion, migré le 11/09/2026. Ce n'est plus " +
-      "du texte agrandi par un plancher mais une IMAGE de 44 px de haut : la " +
-      "cible vient de sa hauteur propre, donc `min-h-11` n'a plus rien à y " +
-      "imposer. Mesuré à 390 px, tactile émulé.",
+      "Le logo de l'en-tête des pages publiques (landing comprise), refonte du " +
+      "02/10/2026 : la classe `logo` pose 44 px, `min-h-11` les tient si l'image " +
+      "ne se charge pas.",
   },
   {
-    fichier: "src/app/[locale]/inscription/page.tsx",
-    repere: "LogoMarque hauteur={52}",
+    fichier: "src/components/acces/page-acces.tsx",
+    repere: 'className="logo acces__logo min-h-11"',
     raison:
-      "Le logo de l'inscription, migré le 11/09/2026. Ce n'est plus du texte " +
-      "agrandi par un plancher mais une IMAGE de 52 px : la cible vient de sa " +
-      "hauteur propre. `min-h-11` reste posé quand même — si l'image ne se " +
-      "charge pas, le lien s'effondrerait à la hauteur de son texte alternatif " +
-      "et la cible disparaîtrait avec elle.",
+      "Le logo de la connexion et de l'inscription, porté sur la refonte le " +
+      "02/10/2026 (il vivait dans chacune des deux pages). La classe `logo` de la " +
+      "maquette pose déjà 44 px ; `min-h-11` les tient même si l'image ne se " +
+      "charge pas et que le lien retombe à la hauteur de son texte.",
   },
   {
     fichier: "src/components/acces/coque-acces-simple.tsx",
@@ -387,15 +385,13 @@ const AUTONOMES: ReadonlyArray<{
   },
   {
     fichier: "src/components/formulaire-connexion.tsx",
-    repere: "text-ds-texte-lien underline after:absolute",
+    repere: 'className="lien-texte min-h-11"',
     raison:
-      "« Mot de passe oublié ? ». ⚠️ SEULE CIBLE POSÉE PAR UN PSEUDO-ÉLÉMENT, et " +
-      "ce n'est pas un caprice : son parent est en `items-baseline`, et un " +
-      "`inline-flex` de 44 px y porte sa baseline au centre de sa boîte — le lien " +
-      "descendait de 55 px et entraînait la page. Le pseudo-élément agrandit ce " +
-      "que le doigt touche sans exister dans le flux. Prouvé au navigateur par " +
-      "`elementFromPoint` : à 20 px au-dessus et en dessous c'est le lien qui " +
-      "répond, à 40 px c'est l'input.",
+      "« Mot de passe oublié ? », sur la ligne du libellé. Depuis la refonte du " +
+      "02/10/2026, ses 44 px viennent d'un `inline-flex` compensé par une marge " +
+      "de −12 px (`.champ-acces__ligne .lien-texte`, maquette) : la ligne du " +
+      "libellé est en `align-items: baseline`, et la marge ramène la boîte sans " +
+      "déplacer la ligne.",
   },
 ];
 

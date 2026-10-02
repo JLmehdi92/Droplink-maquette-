@@ -935,9 +935,10 @@
     "atoutTexte2": "照片、物流、状态、客户，统一管理。",
     "atoutTitre3": "为卖家而生",
     "atoutTexte3": "由电商卖家打造，服务电商卖家。",
-    "ouAvec": "或使用以下方式",
     "placeholderMotDePasse": "请输入密码",
-    "noteSecurite": "您的数据安全且保密。"
+    "noteSecurite": "您的数据安全且保密。",
+    "afficherMotDePasse": "显示密码",
+    "masquerMotDePasse": "隐藏密码"
   },
   "inscription": {
     "titre": "注册账号",
@@ -952,11 +953,13 @@
     "erreurMdpContientEmail": "密码不能包含您的邮箱地址。",
     "erreurMdpFuite": "该密码曾出现在公开的数据泄露中，请换一个。",
     "erreurDejaInscrit": "该邮箱已注册。请直接登录。",
-    "titreCarte": "注册账号",
-    "sousTitreCarte": "免费开始，一分钟内完成。",
+    "titreCarte": "创建您的账号",
+    "sousTitreCarte": "免费开始。注册后马上就能发出第一个物流链接。",
     "lienSeConnecter": "登录",
     "atoutTitre1": "快速上手",
-    "atoutTexte1": "一分钟内完成注册。"
+    "atoutTexte1": "一分钟内完成注册。",
+    "placeholderMotDePasse": "用一句话，而不是一个单词",
+    "compteurMotDePasse": "<b>{n}</b> / 至少 {min} 个字符。用一句话比用复杂的单词更好。"
   },
   "onboarding": {
     "titre": "把您的名字放到页面上",
@@ -3194,6 +3197,40 @@
       "mentions": "法律声明",
       "signalement": "举报内容",
       "droits": "© {annee} DropLink 版权所有"
+    }
+  },
+  "acces": {
+    "film": {
+      "absence": {
+        "surtitre": "在您离开的时候",
+        "titre1": "您的客户",
+        "titre2": "已经查看了包裹。",
+        "n1": "La Poste 已揽收",
+        "n1lieu": "巴黎",
+        "n2": "包裹运输中",
+        "n2lieu": "Wissous",
+        "consulte": "链接已被查看",
+        "consultations": "次查看",
+        "derniere": "最近一次：{quand}",
+        "valide1": "照片已确认",
+        "valide2": "由您的客户。",
+        "mouvementHier": "昨天有更新",
+        "mouvementAujourdhui": "今天有更新"
+      },
+      "minute": {
+        "titre1": "一分钟后，",
+        "titre2": "就有您的第一个链接。",
+        "b1": "您来填写。",
+        "b2": "其余交给 DropLink。",
+        "c1": "您的客户",
+        "c2": "自己就能追踪包裹。",
+        "pourLea": "致 Léa M.",
+        "photos": "4 张照片",
+        "transit": "Colissimo · 运输中",
+        "fin": "不到一分钟。",
+        "offre": "赠送 {n} 笔订单 · 无需银行卡",
+        "offreSansNombre": "赠送订单 · 无需银行卡"
+      }
     }
   }
 }
