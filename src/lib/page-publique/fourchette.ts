@@ -9,11 +9,18 @@
  * `page-publique` est déclaré, et la garde des chaînes mortes les y trouve.
  */
 interface Regles {
-  readonly memeMois: (valeurs: { du: string; au: string; jourDu: string; jourAu: string }) => string;
-  readonly autreMois: (valeurs: { du: string; au: string }) => string;
+  readonly memeMois: (valeurs: { du: string; au: string; jourDu: string; jourAu: string; moisAu: string }) => string;
+  readonly autreMois: (valeurs: {
+    du: string;
+    au: string;
+    jourDu: string;
+    jourAu: string;
+    moisDu: string;
+    moisAu: string;
+  }) => string;
 }
 /** Les seules options employées ici : assez précises pour le formateur de next-intl. */
-type OptionsJour = { readonly day: "numeric"; readonly month?: "long"; readonly timeZone: "UTC" };
+type OptionsJour = { readonly day?: "numeric"; readonly month?: "long"; readonly timeZone: "UTC" };
 type FormaterDate = (date: Date, options: OptionsJour) => string;
 
 export function fourchetteDates(du: Date, au: Date, regles: Regles, formater: FormaterDate): string {
@@ -22,8 +29,23 @@ export function fourchetteDates(du: Date, au: Date, regles: Regles, formater: Fo
   const jour = (x: Date): string => formater(x, { day: "numeric", month: "long", timeZone: "UTC" });
   // Le seul numéro du jour (« 1 », et non « 1日 ») : la règle de traduction pose le reste.
   const jourSeul = (x: Date): string => formater(x, { day: "numeric", timeZone: "UTC" }).replace(/\D+$/, "");
+  /*
+   * LE MOIS SEUL, EN PLUS DE LA DATE ENTIÈRE (relecture du français, 03/10/2026).
+   * `Intl` écrit « 1 octobre » ; le français veut « 1er octobre ». Aucune option
+   * de `Intl.DateTimeFormat` ne pose l'ordinal : c'est donc le CATALOGUE qui le
+   * dit, par un `select` sur le jour, et il lui faut le jour et le mois séparés.
+   * Les autres langues gardent `{du}` et `{au}`.
+   */
+  const mois = (x: Date): string => formater(x, { month: "long", timeZone: "UTC" });
   const memeMois = du.getUTCFullYear() === au.getUTCFullYear() && du.getUTCMonth() === au.getUTCMonth();
   return memeMois
-    ? regles.memeMois({ du: jour(du), au: jour(au), jourDu: jourSeul(du), jourAu: jourSeul(au) })
-    : regles.autreMois({ du: jour(du), au: jour(au) });
+    ? regles.memeMois({ du: jour(du), au: jour(au), jourDu: jourSeul(du), jourAu: jourSeul(au), moisAu: mois(au) })
+    : regles.autreMois({
+        du: jour(du),
+        au: jour(au),
+        jourDu: jourSeul(du),
+        jourAu: jourSeul(au),
+        moisDu: mois(du),
+        moisAu: mois(au),
+      });
 }

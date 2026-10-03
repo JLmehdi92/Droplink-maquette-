@@ -1584,6 +1584,52 @@ tout du long sur l'aller-retour, 0,35 → 1 sur un changement simple. « Chiffre
 sur les tuiles seules des Statistiques et des Doublons. Balayage : aucune violation CSP,
 aucune erreur, aucun débordement.
 
+### ▶️ 03/10/2026 — relecture des trois langues : le français (session cloud)
+
+Consigne de Mehdi (`consignes/prompt-langues-et-seo.md`) : relire les trois langues, puis le SEO.
+Méthode : les 2 329 chaînes de `messages/fr.json` mises en feuilles de relecture (hors dépôt), un
+relecteur unique sur TOUTES les clés et les cinq articles du blog ; ses corrections passent par un
+outil qui REFUSE une valeur « avant » différente du fichier, une variable ou une balise changée, et
+un message ICU invalide (une seule refusée, voulue : le pluriel ajouté, appliqué à la main après
+lecture des appelants).
+- **Typographie, mécanique : 236 chaînes** reçoivent l'espace insécable (U+00A0) avant `: ; ? ! »
+  % €` et après `«` ; **41 chaînes du blog** aussi (il n'en avait aucune). Les sondes
+  normalisent les espaces (`\s` couvre U+00A0) ; la fumée lit le catalogue, donc la même valeur.
+- **Relecture : 34 corrections** — cohérence 11 (« e-mail » partout, « facultatif » au lieu
+  d'« optionnel », « Réessayez »), grammaire 7 (propositions soudées par des virgules dans le
+  guide), tournure 7 (« Desktop » → « Ordinateur », « uploadées » → « déposées », « brandée »),
+  typographie 6 (« Ex. : », « 1er »), accord 1, pluriel 1 (« {n} ouvertures » sans pluriel ICU),
+  conjugaison 1 ; blog : 2 tournures.
+- **Trois affirmations FAUSSES corrigées, au-delà de la langue** : le guide (`docs.param5`, trois
+  langues) et deux articles disaient DropLink « gratuit pendant la phase de validation / de
+  lancement » — faux depuis le plan Pro. Ils disent désormais ce que fait l'écran (plan actuel,
+  Gratuit ou Pro) et « gratuit pour commencer ».
+- **« 1er » dans les fourchettes de dates** : `Intl` écrit « 1 octobre », aucune option ne pose
+  l'ordinal. `fourchetteDates` passe désormais aussi le jour et le mois séparés, et le catalogue
+  français écrit `{jourDu, select, 1 {1er} other {…}}` ; l'anglais et le chinois ne changent pas.
+  La landing dit « 1er au 2 octobre », comme `/p` (la note du 02/10 qui retenait « 1 au » est
+  abandonnée). ⚠️ **Reste** : les AUTRES dates longues du produit (« inscrit le 1 juin 2026 »)
+  passent par `Intl` sans ce relais ; les corriger demande un formateur commun — non fait.
+- **Écart au design voulu** : « Ordinateur » au lieu de « Desktop » (Ma marque, éditeur) — la
+  maquette dit « Desktop » ; la langue gagne.
+- **Gardé, avec sa raison** : le glyphe d'apostrophe (le catalogue mélange `'` et `’`, la maquette
+  aussi) — le changer déplacerait 157 ou 385 textes de la comparaison au kit sans gain de lecture ;
+  les chaînes du blog écrites dans `src/` (le blog est français seul par décision, ses textes
+  vivent dans `lib/blog`) ; le titre « Ce lien n'est plus valable » de `/p` (décision commentée
+  dans le layout).
+- **Non corrigés, parce qu'ils changeraient le sens — à trancher par Mehdi** : « Trois minutes
+  suffisent » (`commandes.vide.compteTexte`) contre « moins d'une minute » ailleurs ; la première
+  étape s'appelle « Pas encore scanné » dans le guide et « Préparation » sur la page client ;
+  `blocageVendeur.erreur.saisie` écrit « 20 » en dur quand l'aide voisine lit `{n}` ; la ligne
+  « Export limité à … lignes » du CSV est en français quelle que soit la langue.
+- **À reporter dans le design system** (`ui_kits/legal/contenu-legal-fr.js`) : seules deux
+  corrections touchent `legal.*`, aucune ne change le fond —
+  `legal.pages.confidentialite.sections.1.blocs.3.table.lignes.4.0` « (facultatif) » →
+  « (facultative) » ; `legal.signalement.email` « adresse email » → « adresse e-mail » ; et les
+  espaces insécables avant `: ; ? !` dans tout `legal.pages` (mécanique, même règle).
+- Portes : `typecheck` 0, `lint` 0 erreur (1 avertissement préexistant), `build` vert, `test`
+  1301/1302 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

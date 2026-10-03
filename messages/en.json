@@ -2613,7 +2613,7 @@
     "param2": "Preferences: interface language. The language of customer pages is set in My brand.",
     "param3": "Security: two-factor authentication, active sessions, account deletion.",
     "param4": "Data: export your data, delete everything, every destructive action asks for confirmation.",
-    "param5": "Subscription: current plan. During the validation phase, DropLink is free.",
+    "param5": "Subscription: your current plan, Free or Pro, and the upgrade to Pro.",
     "param6": "Support: help centre.",
     "colIndicateur": "Metric",
     "colMesure": "What it measures",

@@ -8,8 +8,8 @@ import type { Article } from "@/lib/blog/types";
  */
 export const article: Article = {
   slug: "vendre-sans-boutique-ce-quil-faut-vraiment",
-  titre: "Vendre sans boutique : ce dont on a vraiment besoin",
-  titreMeta: "Vendre sans boutique : ce qu'il faut vraiment",
+  titre: "Vendre sans boutique : ce dont on a vraiment besoin",
+  titreMeta: "Vendre sans boutique : ce qu'il faut vraiment",
   description:
     "Pas de site à construire, pas d'abonnement mensuel. La liste courte de ce qui manque réellement quand on vend en message privé, et ce qui n'est qu'un décor.",
   resume:
@@ -21,7 +21,7 @@ export const article: Article = {
     {
       type: "chapeau",
       texte:
-        "Vendre en message privé fonctionne. C'est même souvent plus efficace qu'une boutique : la conversation vend mieux qu'une fiche produit. Ce qui manque n'est pas un site, c'est ce qui se passe après « c'est commandé ».",
+        "Vendre en message privé fonctionne. C'est même souvent plus efficace qu'une boutique : la conversation vend mieux qu'une fiche produit. Ce qui manque n'est pas un site, c'est ce qui se passe après « c'est commandé ».",
     },
     { type: "titre", texte: "Ce qu'on croit qu'il faut, et qui ne sert à rien" },
     {
@@ -32,13 +32,13 @@ export const article: Article = {
     {
       type: "paragraphe",
       texte:
-        "Pour beaucoup de vendeurs, la boutique reste vide six mois puis se ferme. Ce n'est pas un échec de discipline : c'est que l'outil résolvait un problème qu'ils n'avaient pas.",
+        "Pour beaucoup de vendeurs, la boutique reste vide six mois puis se ferme. Ce n'est pas un échec de discipline : c'est que l'outil résolvait un problème qu'ils n'avaient pas.",
     },
     { type: "titre", texte: "Ce qui manque réellement" },
     {
       type: "paragraphe",
       texte:
-        "Le problème arrive après la vente. La conversation a servi à convaincre ; elle est très mauvaise pour tenir le suivi. Les photos se perdent dans le fil, les numéros de suivi aussi, et chaque question oblige à remonter des semaines de messages.",
+        "Le problème arrive après la vente. La conversation a servi à convaincre ; elle est très mauvaise pour tenir le suivi. Les photos se perdent dans le fil, les numéros de suivi aussi, et chaque question oblige à remonter des semaines de messages.",
     },
     {
       type: "citation",
@@ -58,7 +58,7 @@ export const article: Article = {
     {
       type: "paragraphe",
       texte:
-        "Un client qui reçoit un lien vers un service de transfert voit le logo de ce service. Le vôtre n'apparaît nulle part. Ce n'est pas grave sur une commande ; ça l'est sur la vingtième, quand ce client compare mentalement ce que vous lui donnez à ce que lui donne une boutique.",
+        "Un client qui reçoit un lien vers un service de transfert voit le logo de ce service. Le vôtre n'apparaît nulle part. Ce n'est pas grave sur une commande ; ça l'est sur la vingtième, quand ce client compare mentalement ce que vous lui donnez à ce que lui donne une boutique.",
     },
     {
       type: "paragraphe",
@@ -69,12 +69,12 @@ export const article: Article = {
     {
       type: "paragraphe",
       texte:
-        "Si vous ne deviez régler qu'une chose : ce qui se passe entre « c'est commandé » et « je l'ai reçu ». C'est le seul moment où vous n'avez rien à dire de neuf, où le client attend, et où il finit par écrire pour combler le silence.",
+        "Si vous ne deviez régler qu'une chose : ce qui se passe entre « c'est commandé » et « je l'ai reçu ». C'est le seul moment où vous n'avez rien à dire de neuf, où le client attend, et où il finit par écrire pour combler le silence.",
     },
     {
       type: "paragraphe",
       texte:
-        "C'est exactement ce que DropLink fait : une page par commande, à votre nom, avec les photos et le suivi, sur un lien qui ne change jamais. Gratuit pendant la phase de lancement, sans carte demandée.",
+        "C'est exactement ce que DropLink fait : une page par commande, à votre nom, avec les photos et le suivi, sur un lien qui ne change jamais. Gratuit pour commencer, sans carte demandée.",
     },
   ],
 };

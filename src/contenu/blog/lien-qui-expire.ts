@@ -12,9 +12,9 @@ export const article: Article = {
   titre: "Envoyer des photos à un client sans que le lien expire",
   titreMeta: "Envoyer des photos sans lien qui expire",
   description:
-    "Sept jours en gratuit, vingt-huit en payant : après quoi le lien envoyé à votre client ne mène plus nulle part. Pourquoi ça arrive, et comment livrer des photos qui restent consultables.",
+    "Sept jours en gratuit, vingt-huit en payant : après quoi le lien envoyé à votre client ne mène plus nulle part. Pourquoi ça arrive, et comment livrer des photos qui restent consultables.",
   resume:
-    "Sept jours en gratuit, vingt-huit en payant : après quoi votre client clique sur un lien mort. Voilà pourquoi, et quoi faire.",
+    "Sept jours en gratuit, vingt-huit en payant : après quoi votre client clique sur un lien mort. Voilà pourquoi, et quoi faire.",
   date: "2026-09-08",
   minutes: 6,
   etiquette: "SUIVI & PARTAGE",
@@ -38,7 +38,7 @@ export const article: Article = {
     {
       type: "paragraphe",
       texte:
-        "L'expiration n'est pas un défaut de ces outils : c'est leur fonctionnement normal. Stocker des fichiers coûte de l'argent, et un service de transfert n'a aucune raison de les garder une fois qu'ils sont arrivés. Le problème n'est pas l'outil, c'est qu'on lui demande un travail pour lequel il n'a pas été fait.",
+        "L'expiration n'est pas un défaut de ces outils : c'est leur fonctionnement normal. Stocker des fichiers coûte de l'argent, et un service de transfert n'a aucune raison de les garder une fois qu'ils sont arrivés. Le problème n'est pas l'outil, c'est qu'on lui demande un travail pour lequel il n'a pas été fait.",
     },
     { type: "titre", texte: "Ce que ça coûte vraiment" },
     {
@@ -54,7 +54,7 @@ export const article: Article = {
     {
       type: "paragraphe",
       texte:
-        "Il y a un second coût, moins visible : ce que le client en déduit. Un lien mort ressemble à un vendeur qui a disparu. Vous savez que vous êtes toujours là ; lui voit une page d'erreur, et c'est exactement au moment où il attend quelque chose de vous.",
+        "Il y a un second coût, moins visible : ce que le client en déduit. Un lien mort ressemble à un vendeur qui a disparu. Vous savez que vous êtes toujours là ; lui voit une page d'erreur, et c'est exactement au moment où il attend quelque chose de vous.",
     },
     { type: "titre", texte: "Les trois façons de s'en sortir" },
     {
@@ -66,7 +66,7 @@ export const article: Article = {
       type: "liste",
       items: [
         "Un dossier partagé. Le lien ne meurt pas, mais il donne accès à tout ce qu'il y a dans le dossier, pour toujours, à qui le possède. Un client qui transfère le lien transfère aussi ce que vous y ajouterez demain.",
-        "Envoyer les photos une par une dans la conversation. Rien n'expire, mais tout se perd : au bout de trois mois de messages, retrouver les photos d'une commande précise est plus long que de les reprendre.",
+        "Envoyer les photos une par une dans la conversation. Rien n'expire, mais tout se perd : au bout de trois mois de messages, retrouver les photos d'une commande précise est plus long que de les reprendre.",
         "Une page par commande. Le lien est unique, il ne change jamais, et il ne montre que cette commande-là. C'est plus de travail à mettre en place une fois, et plus rien ensuite.",
       ],
     },
@@ -74,12 +74,12 @@ export const article: Article = {
     {
       type: "paragraphe",
       texte:
-        "Une question tranche entre les trois : que se passe-t-il quand vous devez ajouter quelque chose après avoir envoyé le lien ? Une photo oubliée, un numéro de suivi qui arrive deux jours plus tard, une réponse à une question. Avec un transfert de fichiers, il faut tout renvoyer. Avec un dossier partagé, le client doit deviner que quelque chose a changé.",
+        "Une question tranche entre les trois : que se passe-t-il quand vous devez ajouter quelque chose après avoir envoyé le lien ? Une photo oubliée, un numéro de suivi qui arrive deux jours plus tard, une réponse à une question. Avec un transfert de fichiers, il faut tout renvoyer. Avec un dossier partagé, le client doit deviner que quelque chose a changé.",
     },
     {
       type: "paragraphe",
       texte:
-        "C'est ce point-là qui a décidé la forme de DropLink : une page par commande, modifiable après l'envoi, sur un lien qui ne bouge jamais. Le client garde la même adresse et y trouve ce qu'il y a de plus récent, sans qu'on ait à le prévenir.",
+        "C'est ce point-là qui a décidé la forme de DropLink : une page par commande, modifiable après l'envoi, sur un lien qui ne bouge jamais. Le client garde la même adresse et y trouve ce qu'il y a de plus récent, sans qu'on ait à le prévenir.",
     },
   ],
 };
