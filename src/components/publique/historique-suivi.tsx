@@ -4,7 +4,7 @@ import { FeuilleHistorique } from "@/components/publique/feuille-historique";
 /** Un passage du transporteur, déjà formaté par le serveur (la page n'expédie aucun formateur). */
 export interface LignePassage {
   readonly cle: string;
-  /** Le jour, pour les intertitres de la feuille (« 29 septembre »). */
+  /** Le jour, pour les intertitres de la feuille, en date courte (« 29 sept. »). */
   readonly jour: string;
   /** L'heure seule (« 08:40 »). */
   readonly heure: string;

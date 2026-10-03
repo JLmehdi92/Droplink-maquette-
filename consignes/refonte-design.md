@@ -967,7 +967,7 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   thème sombre (§ 5). Un `template.tsx` pose `.entree-ecran`, comme chez le vendeur ; toujours aucun
   `loading.tsx`.
 - **Briques communes** : en-tête à fil d'Ariane, encart de trace, tuiles (`.compteurs.adm-tuiles`),
-  anneau et légende, barres et courbes (`.adm-graphe`, info-bulle au survol, `<title>` par barre),
+  anneau et légende, barres et courbes (`.adm-graphe`, info-bulle au survol ; le `<title>` par barre a été retiré le 03/10, il doublait l'info-bulle),
   filtres en pastilles (des LIENS : le filtre reste en base et dans la trace), recherche,
   avatar d'initiales, colis contre seuil, entrée de journal, et **un dialogue modal unique**
   (`<dialog>` natif : piège de focus du navigateur, rien ne ferme pendant la requête) pour la
