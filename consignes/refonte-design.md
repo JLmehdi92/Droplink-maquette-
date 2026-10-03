@@ -1297,6 +1297,42 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
 - **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1270/1271 (alarme
   Railway, jamais désactivée).
 
+### ▶️ 03/10/2026 — contre-audit indépendant, lots 11 à 13 : règle dure, jeton, comportements (session cloud)
+
+- **A1 (règle dure)** : le lien invalide de `/p` montrait le symbole au DÉGRADÉ ; il prend
+  `logo-symbole-encre.png` (tiré du symbole par son alpha, encre #0B0B18, 18 Ko). Mesuré : aucun
+  style calculé violet ni dégradé ; plus aucune valeur du dégradé sous `src/app/p` et
+  `src/components/publique` (hors la carte « Propulsé par DropLink », aux couleurs du vendeur).
+- **D1** : l'aperçu au survol du tableau de bord est **retiré, décision de Mehdi du 03/10/2026**,
+  avec `data-jeton` (le jeton public quittait le HTML du tableau de bord — mesuré : absent) et
+  ses règles CSS.
+- **D4c (défaut antérieur)** : archiver depuis le menu « ••• » invalidait le cache d'un jeton
+  périmé après une révocation. Test rouge d'abord ; le jeton est désormais RELU EN BASE par
+  l'écriture (`returning`, RLS), plus jamais pris au formulaire ; la révocation relit aussi
+  l'ancien jeton en base. Revue sécurité : ni HIGH ni MEDIUM, LOW corrigés.
+- **B1** : l'historique de la fiche est relu à 700 ms, 1,5 s, 3 s jusqu'à ce que sa ligne la plus
+  récente change (le journal s'écrit après la réponse). Mesuré : la ligne arrive en ≈ 2,5 s — la
+  relecture unique la manquait. Les rafales ne sont PAS fusionnées (chaque ligne est une
+  écriture réelle, l'historique fait preuve), contrairement à `commande.js:48`.
+- **B2** : les formulaires GET du vendeur (filtres, période, recherche globale, recherche
+  d'envois) naviguent côté client avec l'estompe de la table — mesuré : 0 rechargement de
+  document, l'entrée v4 ne rejoue pas ; recherche d'envois à la frappe (160 ms). Les liens
+  sur place gardent la navigation de Next (défilement compris) ; l'administration n'est pas
+  concernée (ses recherches écrivent l'audit).
+- **B3** : l'échec de copie d'une ligne revient au repos en 1,6 s.
+- **B4** : le geste le plus récent gagne pendant la sortie (mesuré : tableau → Commandes puis
+  Analyses en 40 ms → Analyses) ; `data-sens` seulement sur un clic non modifié ;
+  `dl-sans-entree` daté, valable 10 s.
+- **B5** : « Créer une commande » fait sortir l'écran (110 ms) avant l'action (mesuré : action
+  partie à 136 ms, écran à 0). Défaut trouvé à la relecture et corrigé : une action refusée
+  (quota qui ramène ici, erreur) laissait l'écran effacé 6 s — il revient à la fin de l'action
+  (mesuré : 1,5 s après un échec).
+- **Relectures** (agents dédiés) : lot 13, 1 HIGH (la pagination de l'administration ne
+  défilait plus) et 4 MEDIUM (estompe figée sur une adresse inchangée, frappe périmée, geste le
+  plus récent seulement pour les liens, écran effacé après une action refusée) — tous corrigés.
+- **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1289/1290 (alarme
+  Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de
@@ -1327,8 +1363,8 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
 - [ ] Trancher : l'alerte « contestation en attente » de la vue d'ensemble admin et le badge « Pro »
   de la liste des comptes demandent chacun une migration — les porter, ou non ?
 - [ ] Trancher : la mention de facturation de Tarifs au gris secondaire (3,16:1).
-- [ ] Défaut antérieur à la refonte : le menu « ••• » d'une commande poste l'ancien jeton après une
-  révocation.
+- [x] Défaut antérieur à la refonte : le menu « ••• » d'une commande poste l'ancien jeton après une
+  révocation — **corrigé le 03/10/2026** (jeton relu en base ; preuve RLS à faire tourner au poste).
 
 ## 10. Le dépôt bac à sable — comment le travail circule
 

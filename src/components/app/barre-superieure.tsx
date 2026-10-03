@@ -43,7 +43,7 @@ export async function BarreSuperieure({
         />
       </Suspense>
       <ClocheAlertes langue={langue} jamaisOuvertes={jamaisOuvertes} colisSilencieux={colisSilencieux} />
-      <form action={creerBrouillon}>
+      <form action={creerBrouillon} data-sortie-ecran="">
         <input type="hidden" name="langue" value={langue} />
         <BoutonCreerCommande libelle={tc("nouvelle")} libelleEnCours={tc("nouvelleEnCours")} />
       </form>

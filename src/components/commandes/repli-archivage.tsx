@@ -31,7 +31,10 @@ export function RepliArchivage() {
         !window.matchMedia("(prefers-reduced-motion: reduce)").matches
       ) {
         try {
-          sessionStorage.setItem("dl-sans-entree", "1");
+          // DATÉ : un geste qui n'aboutit pas (POST bloqué, onglet fermé) laissait le
+          // drapeau, et l'entrée d'un écran bien plus tard était sautée. Il ne vaut que
+          // 10 s (lu par `ScriptEntreeV4`).
+          sessionStorage.setItem("dl-sans-entree", String(Date.now()));
         } catch {
           // Sans stockage, l'entrée se rejoue : un défaut de confort, rien de plus.
         }

@@ -218,10 +218,11 @@ export async function TableauEnvois({
               </div>
             </DetailsFermable>
           )}
-          {/* La recherche porte sur le NUMÉRO, et elle soumet à l'entrée : une
-              requête par frappe serait une requête par lettre. Les autres filtres
-              voyagent en champs cachés. */}
-          <form method="get" action={base} className="recherche-envoi" role="search">
+          {/* La recherche porte sur le NUMÉRO. À la frappe, 160 ms après la dernière lettre
+              (maquette `envois.js`, `data-frappe-directe`) — pas une requête par lettre — et
+              à l'entrée ; sans JavaScript, à l'entrée seulement. Les autres filtres voyagent
+              en champs cachés. */}
+          <form method="get" action={base} className="recherche-envoi" role="search" data-sur-place="" data-frappe-directe="">
             {parametres.etat === null ? null : <input type="hidden" name="etat" value={parametres.etat} />}
             {parametres.silencieux ? <input type="hidden" name="silencieux" value="oui" /> : null}
             {parametres.abandonnes === null ? null : <input type="hidden" name="abandonnes" value={parametres.abandonnes ? "oui" : "non"} />}

@@ -52,7 +52,7 @@ export function confirmerEtRecharger(d: HTMLDialogElement | null | undefined, an
   // de l'effacer : le poser là sauterait l'entrée d'un écran bien plus tard.
   if (!reduit) {
     try {
-      window.sessionStorage.setItem("dl-sans-entree", "1");
+      window.sessionStorage.setItem("dl-sans-entree", String(Date.now()));
     } catch {
       // Stockage refusé : l'écran rejouera son entrée, rien de plus.
     }

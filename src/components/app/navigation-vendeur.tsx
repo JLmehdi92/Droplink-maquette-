@@ -135,8 +135,10 @@ export function NavigationVendeur({
             aria-current={active ? "page" : undefined}
             {...(prefetch === false ? { prefetch: false } : {})}
             style={{ "--rang": String(rang) } as React.CSSProperties}
-            onClick={() => {
-              // Le contenu suivant entre dans le sens du menu : on descend, il monte.
+            onClick={(e) => {
+              // Le contenu suivant entre dans le sens du menu : on descend, il monte. Pas
+              // pour un clic qui ouvre ailleurs (nouvel onglet, fenêtre) : rien ne bouge ici.
+              if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
               if (rangActif >= 0 && rang !== rangActif) {
                 document.documentElement.dataset.sens = rang < rangActif ? "haut" : "bas";
               }

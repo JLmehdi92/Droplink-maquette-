@@ -88,7 +88,7 @@ export function LienEcran({
   /** Le rang d'une entrée de la coque (`--rang`), pour la cascade du tiroir. */
   readonly style?: React.CSSProperties;
   /** Le sens de l'entrée de l'écran suivant, posé au clic (`NavigationVendeur`). */
-  readonly onClick?: () => void;
+  readonly onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }) {
   return (
     <Link href={href} className={className} {...reste}>

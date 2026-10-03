@@ -91,7 +91,7 @@ export async function OutilPeriode({ base, parametres }: { readonly base: string
       </summary>
       {/* Les autres critères voyagent en champs cachés : poser une période ne
           défait pas le statut qu'on vient de choisir. */}
-      <form method="get" action={base} className="pop pop--droite">
+      <form method="get" action={base} className="pop pop--droite" data-sur-place="">
         <ChampsCaches parametres={parametres} sauf={["du", "au"]} />
         <label>
           {t("periodeDu")}
@@ -179,7 +179,7 @@ export async function BarreListe({
               <span>{t("filtres")}</span>
               {nFiltres > 0 ? <b className="bouton-outil__n">{nFiltres}</b> : null}
             </summary>
-            <form method="get" action={base} className="pop pop--droite pop--filtres">
+            <form method="get" action={base} className="pop pop--droite pop--filtres" data-sur-place="">
               <ChampsCaches parametres={parametres} sauf={["statut", "qc", "archivees"]} />
               <label>
                 {t("statutExpedition")}
@@ -704,7 +704,7 @@ async function AccueilCompteVide({ langue }: { readonly langue: string }) {
           </li>
         ))}
       </ol>
-      <form action={creerBrouillon}>
+      <form action={creerBrouillon} data-sortie-ecran="">
         <input type="hidden" name="langue" value={langue} />
         <BoutonAction
           libelles={{

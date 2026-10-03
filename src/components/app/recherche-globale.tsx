@@ -49,6 +49,14 @@ export function RechercheGlobale({
         })
       : [];
 
+  // LA VALEUR SUIT L'ADRESSE sans recréer le champ (relecture du 03/10/2026) : la recherche
+  // navigue désormais sur place, et une `key` sur la valeur remontait le champ — focus perdu,
+  // et ce qui avait été tapé pendant le trajet aussi. Pas pendant qu'on y écrit.
+  useEffect(() => {
+    const c = champ.current;
+    if (c !== null && document.activeElement !== c) c.value = valeurInitiale;
+  }, [valeurInitiale]);
+
   useEffect(() => {
     const surTouche = (e: KeyboardEvent): void => {
       if (e.key.toLowerCase() !== "k" || (!e.ctrlKey && !e.metaKey)) return;
@@ -61,7 +69,7 @@ export function RechercheGlobale({
   }, []);
 
   return (
-    <form className="recherche" role="search" method="get" action={action}>
+    <form className="recherche" role="search" method="get" action={action} data-sur-place="">
       {gardes.map(([cle, v]) => (
         <input key={cle} type="hidden" name={cle} value={v} />
       ))}
@@ -70,7 +78,6 @@ export function RechercheGlobale({
         ref={champ}
         type="search"
         name="q"
-        key={valeurInitiale}
         defaultValue={valeurInitiale}
         placeholder={etroit ? placeholderCourt : placeholder}
         aria-label={etiquette}

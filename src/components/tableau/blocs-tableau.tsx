@@ -1,4 +1,5 @@
 import { Changeant } from "@/components/app/changeant";
+import { BoutonEnvoiAttente } from "@/components/app/bouton-envoi-attente";
 import { ValeurRoulee } from "@/components/app/couche-v4";
 import { getFormatter, getTranslations } from "next-intl/server";
 import {
@@ -163,13 +164,13 @@ export async function ActionsRapidesBloc({ langue }: { readonly langue: string }
         <li>
           {/* Créer une commande est une Server Action, pas un lien : le brouillon
               naît en base, puis l'éditeur s'ouvre. */}
-          <form action={creerBrouillon}>
+          <form action={creerBrouillon} data-sortie-ecran="">
             <input type="hidden" name="langue" value={langue} />
-            <button type="submit" className="actions-rapides__bouton">
+            <BoutonEnvoiAttente className="actions-rapides__bouton">
               <Plus aria-hidden="true" className="ic" />
               {tc("nouvelle")}
               <ChevronRight aria-hidden="true" className="ic" />
-            </button>
+            </BoutonEnvoiAttente>
           </form>
         </li>
         {liens.map(({ href, libelle, Icone }) => (
