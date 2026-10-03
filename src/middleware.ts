@@ -168,7 +168,16 @@ export default async function middleware(requete: NextRequest): Promise<NextResp
    * introuvable de la refonte, dans la langue de l'URL. Le notFound de la page
    * reste, en filet.
    */
-  const signalement = /^\/([^/]+)\/signalement\/?$/.exec(requete.nextUrl.pathname)?.[1];
+  // Lu DÉCODÉ : `/fr/%73ignalement` désigne la même page, et contournait la réécriture
+  // (revue du 03/10/2026). Un encodage invalide n'est pas cette page.
+  let cheminDecode: string | null = null;
+  try {
+    cheminDecode = decodeURIComponent(requete.nextUrl.pathname);
+  } catch {
+    cheminDecode = null;
+  }
+  const signalement =
+    cheminDecode === null ? undefined : /^\/([^/]+)\/signalement\/?$/.exec(cheminDecode)?.[1];
   if (
     signalement !== undefined &&
     (routing.locales as readonly string[]).includes(signalement) &&

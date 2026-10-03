@@ -15,8 +15,18 @@ export function premierDuMois(langue: string, texte: string): string {
   return texte.replace(PREMIER, "$11er$2$3");
 }
 
-/** Le formateur de next-intl, dont `dateTime` pose « 1er » en français. */
+/**
+ * Le formateur de next-intl, dont `dateTime` ET `dateTimeRange` posent « 1er » en
+ * français. `dateTimeRange` n'a aucun appelant aujourd'hui : l'envelopper quand même
+ * évite qu'un premier appelant demain écrive « 1 mai – 1 juin » sans que rien ne le dise.
+ */
 export function avecPremierDuMois<F extends { dateTime: (...a: never[]) => string }>(langue: string, format: F): F {
-  const dateTime = format.dateTime.bind(format) as F["dateTime"];
-  return { ...format, dateTime: ((...a: Parameters<F["dateTime"]>) => premierDuMois(langue, dateTime(...a))) as F["dateTime"] };
+  const envelopper = <T>(f: T): T =>
+    ((...a: never[]) => premierDuMois(langue, (f as (...b: never[]) => string)(...a))) as T;
+  const plage = (format as { dateTimeRange?: unknown }).dateTimeRange;
+  return {
+    ...format,
+    dateTime: envelopper(format.dateTime.bind(format) as F["dateTime"]),
+    ...(typeof plage === "function" ? { dateTimeRange: envelopper(plage.bind(format)) } : {}),
+  };
 }

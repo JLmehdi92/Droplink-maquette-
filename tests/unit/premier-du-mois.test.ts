@@ -34,6 +34,16 @@ describe("premierDuMois", () => {
     const en = avecPremierDuMois("en", createFormatter({ locale: "en", timeZone: "UTC" }));
     expect(en.dateTime(jour, { day: "numeric", month: "long" })).toBe("October 1");
   });
+
+  test("la plage de dates pose « 1er » aussi (dateTimeRange)", () => {
+    const fr = avecPremierDuMois("fr", createFormatter({ locale: "fr", timeZone: "UTC" }));
+    const plage = fr.dateTimeRange(new Date("2026-05-01T12:00:00Z"), new Date("2026-06-01T12:00:00Z"), {
+      day: "numeric",
+      month: "long",
+    });
+    expect(plage).not.toMatch(/(^|\D)1 /u);
+    expect(plage.match(/1er/gu)).toHaveLength(2);
+  });
 });
 
 describe("Aucun écran ne formate une date sans passer par le formateur du produit", () => {
