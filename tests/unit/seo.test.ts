@@ -245,6 +245,27 @@ describe("Le SEO : chaque page est soit déclarée, soit fermée", () => {
     }
   });
 
+  test("chaque layout de l'espace vendeur et de l'administration pose un noindex", () => {
+    /*
+     * LE FILET (passe de finition du 03/10/2026). Chaque page de `(app)` et
+     * d'`admin` pose son propre `robots` ; le layout le pose aussi, pour qu'une
+     * page ajoutée demain sans métadonnées naisse fermée. Inventorié sur le
+     * disque : un layout imbriqué ajouté plus tard est inspecté sans qu'on y pense.
+     */
+    const layouts = readdirSync(RACINE_APP, { recursive: true, encoding: "utf8" })
+      .map((f) => f.split("\\").join("/"))
+      .filter((f) => /^\[locale\]\/(\(app\)|admin)\/(.*\/)?layout\.tsx$/.test(f));
+    // UN ENSEMBLE VIDE PASSE TOUT : les deux layouts racines au moins.
+    expect(layouts, "la sonde ne trouve pas les layouts privés").toEqual(
+      expect.arrayContaining(["[locale]/(app)/layout.tsx", "[locale]/admin/layout.tsx"]),
+    );
+    const ouverts = layouts.filter((f) => {
+      const code = codeSansCommentaires(join(RACINE_APP, f));
+      return !/export const metadata[^=]*=\s*\{\s*robots:\s*\{\s*index:\s*false,\s*follow:\s*false\s*\}/.test(code);
+    });
+    expect(ouverts, "Ces layouts privés ne posent pas de noindex.").toEqual([]);
+  });
+
   test("chaque page indexable rend un graphe JSON-LD", () => {
     /*
      * ⚠️ AUDIT SEO DU 03/10/2026 : seules la landing et les articles en

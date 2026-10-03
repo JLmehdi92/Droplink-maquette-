@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -57,6 +58,14 @@ import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
  * le jour où l'apparence change.* Celle-ci n'a pas d'autre emploi que d'être
  * trouvée, donc rien ne peut la faire disparaître par effet de bord.
  */
+/**
+ * UN FILET : `noindex` SUR TOUT LE SEGMENT (passe de finition du 03/10/2026).
+ * Chaque page de ce segment pose déjà son propre `robots` ; Next hérite une clé
+ * que la page ne pose pas, et la page qui la pose la remplace. Une page ajoutée
+ * demain sans métadonnées naît donc fermée, au lieu de naître indexable.
+ */
+export const metadata: Metadata = { robots: { index: false, follow: false } };
+
 export default async function LayoutAdmin({
   children,
   params,

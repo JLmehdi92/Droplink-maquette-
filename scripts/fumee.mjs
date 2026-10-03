@@ -5841,6 +5841,54 @@ function ageHsts(entetes) {
     !publique.includes('rel="alternate"'),
     "ni hreflang : sa langue est celle du VENDEUR, elle n a pas de traduction",
   ]);
+
+  /*
+   * ⚠️ LA CARTE TWITTER/X DE CHAQUE PAGE INDEXABLE, LUE SUR LE HTML SERVI
+   * (passe de finition du 03/10/2026).
+   *
+   * Aucun code ne la pose : Next 16 la DERIVE de l Open Graph (titre,
+   * description, image, et `summary_large_image` des qu il y a une image).
+   * L audit du 03/10 l avait crue absente ; elle etait servie. C est une
+   * propriete de configuration, pas de code : seule une mesure du HTML peut la
+   * garantir, et c est ici. Chaque URL du plan de site, dans chaque langue ou
+   * elle existe — le blog compris —, doit porter les quatre balises, image
+   * ABSOLUE. Un ensemble vide passe tout : on exige d avoir inspecte au moins
+   * les 7 chemins trilingues dans les 3 langues.
+   */
+  const meta = (html, nom) =>
+    new RegExp(`<meta[^>]*name="twitter:${nom}"[^>]*content="([^"]*)"`, "i").exec(html)?.[1] ??
+    new RegExp(`<meta[^>]*content="([^"]*)"[^>]*name="twitter:${nom}"`, "i").exec(html)?.[1] ??
+    null;
+  const cartes = await Promise.all(
+    urlsPlan.map(async (u) => {
+      // Une <loc> illisible rougit la garde (HTML vide, donc sans carte) au lieu
+      // de faire tomber toute la fumee.
+      let chemin;
+      try {
+        chemin = new URL(u).pathname;
+      } catch {
+        return [u, ""];
+      }
+      return [chemin, await (await fetch(`${base}${chemin}`)).text()];
+    }),
+  );
+  const sansCarte = cartes
+    .filter(([, h]) => {
+      const image = meta(h, "image");
+      return (
+        meta(h, "card") !== "summary_large_image" ||
+        !meta(h, "title") ||
+        !meta(h, "description") ||
+        image === null ||
+        !/^https?:\/\//.test(image)
+      );
+    })
+    .map(([c]) => c);
+  controles.push([
+    cartes.length >= CHEMINS_INDEXABLES.length * LANGUES_SERVIES.length && sansCarte.length === 0,
+    `les ${cartes.length} pages du plan de site servent une carte Twitter/X complete (summary_large_image, titre, description, image absolue)` +
+      (sansCarte.length ? ` — INCOMPLETE sur ${sansCarte.join(", ")}` : ""),
+  ]);
   // ── LE BLOG : SERVI EN FRANCAIS, ET REFUSE AILLEURS ──────────────────────
   //
   // ⚠️ LE BLOG EXISTE PARCE QUE LE SEO TECHNIQUE NE SUFFIT PAS. Le socle pose

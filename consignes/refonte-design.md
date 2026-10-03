@@ -1910,6 +1910,34 @@ Chemin dans `legal.pages` (ou `legal.*`), avant → après :
   morte », « ce qui n'est que du décor », « Une fois expiré »).
 - Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1311/1312 (alarme Railway).
 
+### ▶️ 03/10/2026 — passe de finition, lot 4 : SEO (session cloud)
+
+- **Twitter/X : CORRECTION DE L'AUDIT PRÉCÉDENT.** Les balises `twitter:*` n'étaient pas
+  absentes : Next 16 les DÉRIVE de l'Open Graph (`resolve-metadata`, titre, description,
+  image, et `summary_large_image` dès qu'il y a une image ; `openGraphDe` en pose toujours une).
+  Aucun code ajouté. Seule la PREUVE est ajoutée : une garde de la fumée exige, sur chaque URL du
+  plan de site (blog compris), `twitter:card` = `summary_large_image`, `twitter:title`,
+  `twitter:description` et `twitter:image` absolue, et refuse un ensemble plus petit que les
+  chemins trilingues × 3 langues. Mesuré ici sur le build servi, avec la même règle :
+  **27 pages sur 27** (24 sans adresse de signalement), `/p` sans aucune balise Open Graph ni
+  Twitter. La fumée elle-même tourne au poste de Mehdi.
+- **Filet `noindex`** : `(app)/layout.tsx` et `admin/layout.tsx` posent `robots: { index: false,
+  follow: false }`. Chaque page de ces segments le posait déjà ; une page ajoutée demain sans
+  métadonnées naît désormais fermée. Aucune page publique n'est sous ces layouts (vérifié). Garde
+  nouvelle dans `seo.test.ts`, qui inventorie les layouts de ces segments sur le disque, vue rouge
+  deux fois (admin, espace vendeur). Mesuré connecté (compte jetable purgé) : sept écrans
+  vendeur servent `noindex, nofollow` ; connexion, inscription, mot de passe, vérification,
+  bienvenue et notification gardent le leur.
+- **Non touché, et pourquoi** : « Le blog » en dur (`donnees-structurees.ts`, `blog/page.tsx`)
+  — le blog est français seul et répond `notFound()` ailleurs, son nom ne s'affiche jamais dans
+  une autre langue ; `PRIX_PRO_EUR` dans la description de `/tarifs` — c'est la source unique du
+  prix, voulue.
+- Sonde SEO complète remesurée : 0 défaut sur les 27 pages indexables ; plan de site à 27 URL,
+  aucune privée.
+- Revue sécurité, TypeScript et React : aucun défaut ; une remarque appliquée (une `<loc>`
+  illisible rougit la garde au lieu de faire tomber la fumée).
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1312/1313 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de
