@@ -199,7 +199,7 @@
     else if (etat.au) p.push(["periode", `Période : jusqu’au ${iso(etat.au)}`]);
     if (etat.archives) p.push(["archives", "Archives"]);
     zonePuces.hidden = !p.length;
-    zonePuces.innerHTML = `<span class="puces__titre">Filtres actifs :</span>${p.map(([k, l]) => `<button type="button" class="puce" data-retirer="${k}" aria-label="Retirer le filtre : ${l}">${l}${ic("x")}</button>`).join("")}<button type="button" class="bouton-texte" data-tout-effacer>Tout effacer</button>`;
+    zonePuces.innerHTML = `<span class="puces__titre">Filtres actifs :</span>${p.map(([k, l]) => `<button type="button" class="puce" data-retirer="${k}" aria-label="Retirer le filtre : ${l}">${l}${ic("x")}</button>`).join("")}<button type="button" class="bouton-texte" data-tout-effacer>Tout effacer</button>`;
     const n = [etat.statut, etat.qc, etat.archives].filter(Boolean).length;
     $("[data-filtres-n]").hidden = !n; $("[data-filtres-n]").textContent = String(n);
     const lib = etat.du && etat.au ? `${iso(etat.du)} au ${iso(etat.au)}` : etat.du ? `À partir du ${iso(etat.du)}` : etat.au ? `Jusqu’au ${iso(etat.au)}` : "Toutes les périodes";

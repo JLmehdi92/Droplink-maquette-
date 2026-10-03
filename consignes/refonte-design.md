@@ -1966,6 +1966,16 @@ Chemin dans `legal.pages` (ou `legal.*`), avant → après :
 - Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1315/1317 puis la garde des
   documents corrigée (le seul échec restant : l'alarme Railway).
 
+### 03/10/2026 — confirmation par trois agents (code, natifs, audit au navigateur)
+
+- **SEO** : `alternateLinks: false` (next-intl posait un en-tête `Link` d'alternates contraire
+  au HTML : x-default vers des redirections, blog en/zh en 404). Mesuré sur build servi.
+- `/fr/%73ignalement` : chemin lu décodé dans le middleware. `dateTimeRange` enveloppé (« 1er »).
+- en : 2 points remis dans les guillemets ; zh : « 照片、视频 » dans les conditions et « 查看 »
+  dans la confidentialité — **à reporter dans `ui_kits/legal/contenu-legal-zh.js`** —,
+  `{affichees, number}` ; maquette : 4 recopies manquées.
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1317/1318 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

@@ -57,6 +57,8 @@ const CLES: ReadonlyArray<readonly [string, Record<string, number | string>]> = 
   ["blocageVendeur.erreur.saisie", { n: 1248 }],
   ["passerPro.features.commandes.texteNombre", { n: 1248 }],
   ["commandes.exportTronque", { n: 1248 }],
+  ["admin.comptes.affichees", { affichees: 1248 }],
+  ["admin.commandes.affichees", { affichees: 1248 }],
 ];
 
 /** La forme de 1248 dans chaque langue, telle que `Intl.NumberFormat` l'écrit. */

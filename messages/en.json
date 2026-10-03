@@ -1324,7 +1324,7 @@
       "marqueQuestion": "Haven't set up your brand yet?",
       "marqueLien": "Add your name and your color",
       "filtreTexteChiffre": "{total, plural, one {Your order is still there} other {Your # orders are still there}}. It is these criteria, together, that return nothing.",
-      "accents": "Search ignores accents: “creme” also finds “Crème”."
+      "accents": "Search ignores accents: “creme” also finds “Crème.”"
     },
     "jamaisOuvert": "Never opened",
     "jamaisOuvertAide": "{client} has not opened their link yet.",
@@ -1924,7 +1924,7 @@
       "passerPro": "Switch to Pro",
       "passerGratuit": "Switch back to Free",
       "motif": "Reason",
-      "motifAide": "At least {n} characters. For example: “payment received on 9/19 by bank transfer”. It is shown in full in the log.",
+      "motifAide": "At least {n} characters. For example: “payment received on 9/19 by bank transfer.” It is shown in full in the log.",
       "annuler": "Cancel",
       "enCours": "Working…",
       "erreur": {

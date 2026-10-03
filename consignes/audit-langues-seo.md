@@ -142,13 +142,33 @@ dans la description de `/tarifs` — la source unique du prix, voulue.
 | `/xx/signalement` sans adresse : 404 générique de Next, en anglais | le middleware réécrit vers un chemin inexistant, avec la langue de l'URL : 404 de la charte | mesuré sur build servi : fr « Cette page n'existe pas », en « This page does not exist », zh « 此页面不存在 », statut 404 |
 | textes de la maquette restés à l'ancienne version | 172 remplacements dans 41 fichiers de `design/maquette/src` (e-mail, Ordinateur, Ex. :, 1er, double authentification, espaces insécables…) | inventaire refait : il ne reste que des commentaires de code et « Pas encore scanné » des écrans VENDEUR, qui est le libellé actuel du produit |
 
+**Confirmation par trois agents (même jour)**, puis corrigé :
+
+| Trouvé par | Défaut | Correction | Preuve |
+|---|---|---|---|
+| audit au navigateur | en-têtes HTTP `Link` de next-intl contredisant le HTML : x-default vers `/` (une 307), versions en/zh du blog qui répondent 404, alternates sur les 404 | `alternateLinks: false` dans `src/i18n/routing.ts` ; les alternates viennent des seules métadonnées | build servi : aucun `Link` d'alternates sur `/fr`, `/en/docs`, `/fr/blog`, 404 ; HTML inchangé |
+| revue de code | `/fr/%73ignalement` contournait la réécriture | chemin lu décodé (encodage invalide : pas cette page) | build servi : 404 de la charte |
+| revue de code | `dateTimeRange` sans « 1er » (aucun appelant aujourd'hui) | enveloppé aussi | test vu rouge puis vert |
+| relecture native | en : point hors des guillemets dans 2 clés (convention US adoptée) | `commandes.vide.accents`, `admin.plan.motifAide` | — |
+| relecture native | zh : « 媒体 » dans les conditions, « 浏览 » pour les vues dans la confidentialité | « 照片、视频 », « 查看 » (à reporter dans le kit légal) | — |
+| relecture native | zh : `{affichees}` non formaté (comptes, commandes) | `{affichees, number}` | `nombres-formates.test.ts`, vu rouge puis vert |
+| relecture native | maquette : 4 recopies manquées | `marque.js` (已发货, October 1–2), `commandes.js`, `client.html` | `node --check` |
+
+**Écartés après vérification** : « du 1 oct. » dans les filtres de période (faux : ces dates
+passent par l'enveloppe, mesuré « 1er oct. 2026 ») ; deux espaces « ordinaires » de `marque.js`
+(ce sont des fines insécables) ; « Une commande de Atelier Nord » (petit surtitre au-dessus du
+nom, sur sa propre ligne : l'élision dépendrait du nom saisi par le vendeur) ; les descriptions
+chinoises de 65 à 68 caractères (≈ 130 de largeur visuelle) ; les préférences de style des
+relecteurs (apostrophes droites ou courbes, « nommé », « Dispute over »…), laissées à Mehdi.
+
 **Laissés, avec leur raison :**
 - la page « lien mort » de `/p` : statut 404, `noindex`, texte présent dans la charge RSC et rendu
   par le navigateur ; le HTML serveur seul a un corps vide (comportement de Next pour un
   `notFound` levé sous une racine sans layout commun ; antérieur à cette mission). Sans
   JavaScript, la page est blanche.
-- deux balises `robots` sur les 404 (celle de Next et la nôtre) : toutes deux `noindex`,
-  combinées par les moteurs ; aucun effet.
+- deux balises `robots` sur les 404 (celle que Next pose seul et la nôtre) : toutes deux
+  `noindex`, combinées par les moteurs. La nôtre est gardée exprès : retirer une protection
+  écrite pour s'en remettre à un comportement implicite de Next serait L-029.
 - le LCP de la landing chinoise au bureau : décision de design, pour Mehdi.
 
 ## Ce qui n'a pas pu se faire d'ici
