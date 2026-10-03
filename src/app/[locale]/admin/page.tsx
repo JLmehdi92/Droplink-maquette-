@@ -255,10 +255,18 @@ export default async function PanneauAdmin({
         <TuileVolume
           libelle={t("panneau.comptesActifs")}
           valeur={chiffre(panneau.compteurs?.comptesActifs)}
-          complement={t("panneau.comptesDont", {
-            suspendus: chiffre(panneau.compteurs?.comptesSuspendus),
-            sansType: chiffre(panneau.compteurs?.comptesSansType),
-          })}
+          /* DES NOMBRES BRUTS, que le catalogue formate (03/10/2026) : la chaîne déjà
+             formatée de `chiffre` tombait dans un pluriel français et rendait « NaN
+             suspendus » au-delà de 999. Sans compteurs, pas de complément : un
+             tiret dans un pluriel ne se dit pas. */
+          complement={
+            panneau.compteurs == null
+              ? undefined
+              : t("panneau.comptesDont", {
+                  suspendus: panneau.compteurs.comptesSuspendus,
+                  sansType: panneau.compteurs.comptesSansType,
+                })
+          }
         />
         {/* LE CHIFFRE QUI INFORME EST LE SECOND : une boutique naît à
             l'inscription ; combien sont allées jusqu'à se donner un nom, c'est

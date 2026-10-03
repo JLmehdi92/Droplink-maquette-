@@ -1791,6 +1791,56 @@ Sonde de l'auteur remesurée : 0 défaut. Bilan complet : `consignes/audit-langu
 remesures au poste de Mehdi : étape 6 TER de `verification-finale-locale.md`.
 - Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1307/1308 (alarme Railway).
 
+### ▶️ 03/10/2026 — passe de finition, lot 1 : la langue (session cloud)
+
+Après contre-vérification de l'audit (`d1b5dfc..be3450b`) par deux agents, Mehdi a fixé une passe
+de finition point par point. **Clés modifiées : 15 en français, 16 en anglais, 48 en chinois.**
+- « Dernière le {quand} » → « Dernière ouverture le {quand} » (tuile de l'éditeur, film de
+  l'accès), comme `commandes.derniereVue`.
+- **Durée promise alignée** (décision de Mehdi) : « Trois minutes suffisent » contredisait les
+  quatre « moins d'une minute » du produit → « Moins d'une minute suffit. », « Under a minute is
+  enough. », « 只需不到一分钟。 ». `supabase/modeles-email/confirmation.html` n'est pas touché (il
+  décrit la mise en route, pas la création d'une commande).
+- **Le guide dit ce que voit le client** : la frise de la page client affiche « Préparation »,
+  le guide disait « Pas encore scanné » (`docs.clientVoit3`, `docs.stPreparation`, et
+  l'explication `stPreparationE`), dans les trois langues. Les `envois.*` (écran du vendeur, qui
+  affiche bien « Pas encore scanné ») ne changent pas.
+- **Un seul terme pour la double authentification** : « Double authentification » (fr),
+  « Two-factor authentication » (en) ; plus aucun « deux facteurs », « deux étapes »,
+  « two-step » hors des textes légaux.
+- **Nombres non formatés** : intl-messageformat rend un argument simple `{x}` par `String()`,
+  donc « 1248 ». Une garde nouvelle (`tests/unit/nombres-formates.test.ts`, 35 clés déclarées
+  avec leurs arguments, rendues avec 1248 dans les trois langues) a d'abord été vue ROUGE
+  (40 rendus fautifs, dont 34 en chinois), puis le catalogue corrigé : `{x, number}` partout où
+  l'appelant passe un nombre brut (zh : 35 clés ; fr et en : `analyses.livreesSur`,
+  `reponsesSur`, `admin.panneau.comptesDont`, `alertes.titreAvec`, `envois.compteurPage`,
+  `commandes.surTotal`). Vue rouge une seconde fois sur une variante (`tableau.colisTotal`).
+  Positions de galerie non touchées (≤ 20).
+- **Défaut réel trouvé en chemin** : `admin.panneau.comptesDont` recevait un nombre DÉJÀ formaté
+  en texte (`chiffre()`) dans un pluriel français — « NaN suspendus » au-delà de 999, et sans
+  compteurs. L'appelant passe désormais les nombres bruts, et ne pose aucun complément quand les
+  compteurs manquent.
+- **Chinois** : « 他 » remplacé par une forme neutre (该卖家的, 客户, 其) dans six clés ; « 也是该决定
+  被质疑时我们会回看的依据 » ; « 9月19日 ». **Anglais** : « What's on the page », « All time »,
+  « Moved yesterday / Moved today / Last moved {n} days ago » (série homogène).
+- `scripts/ecarts-declares.json` : 28 textes déclarés mis à jour sur les nouveaux textes, raisons
+  inchangées (dont les 8 « Double authentification (2FA) », « Double authentification »,
+  « Préparation » et « Une frise de suivi : Préparation, Expédi » de `/docs`). Un texte encore
+  servi par un autre écran (« Pas encore scanné » des envois) reste déclaré tel quel.
+  ⚠️ La MAQUETTE porte encore les anciens textes (« Pas encore scanné » dans `docs.html`,
+  « Vérification en deux étapes », « Authentification à deux facteurs », « Photos uploadées »,
+  « Desktop », « Email ») : la soustraction les rendra côté référence — à resynchroniser.
+- **Rendus mesurés** (production locale, base de tests, compte jetable purgé), à 390 px et
+  1 440 px, trois langues : titre 2FA des Paramètres sur 1 ligne, tuile « Dernière ouverture le…
+  » sans débordement, `commandes.vide.compteTexte` sur 1 à 3 lignes, guide sur 1 à 2 lignes ;
+  le titre de `/verification` (page qui exige un facteur enrôlé) mesuré par substitution dans la
+  carte d'accès : 2 lignes au plus.
+- Revues : français, anglais, chinois natifs et TypeScript/React — aucun défaut ; leurs remarques
+  appliquées (`{de, number}–{a, number}` du compteur des envois, « 只需不到一分钟 », « not
+  included in this total », sept clés de plus dans la garde).
+- Portes : `typecheck` 0, `lint` 0 erreur (1 avertissement préexistant), `build` vert, `test`
+  1311/1312 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

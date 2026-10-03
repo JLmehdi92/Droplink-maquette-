@@ -1131,7 +1131,7 @@
     "aide": "刚粘贴的运单号往往还没有被扫描。这不是故障：只是承运商还没有发布任何信息。",
     "actualiser": "刷新",
     "derniereMaj": "最后更新",
-    "compteurPage": "显示第 {de}–{a} 个，共 {total} 个包裹",
+    "compteurPage": "显示第 {de, number}–{a, number} 个，共 {total, number} 个包裹",
     "prochaine": {
       "livre": "包裹已送达",
       "aujourdhui": "预计今日送达",
@@ -1151,7 +1151,7 @@
       "selectionPlusieurs": "已选 # 个包裹",
       "toutDeselectionner": "取消全选"
     },
-    "autresCommandes": "另有 {n} 笔订单",
+    "autresCommandes": "另有 {n, number} 笔订单",
     "trier": "排序",
     "finDeListe": "已到列表末尾。"
   },
@@ -1194,12 +1194,12 @@
       "silencieux": "无更新",
       "vide": "目前没有跟踪中的包裹。",
       "aide": "当前发货状态。",
-      "dontSilencieux": "其中 {n} 个包裹超过 10 天没有动态",
+      "dontSilencieux": "其中 {n, number} 个包裹超过 10 天没有动态",
       "suivis": "个跟踪中的包裹"
     },
     "consultees": {
       "titre": "查看次数最多的订单",
-      "aide": "客户反复查看自己的页面，说明他很放心。",
+      "aide": "反复查看自己页面的客户，就是放心的客户。",
       "sansNom": "未填写收件人",
       "vide": "此周期内还没有链接被打开。",
       "vues": "次查看"
@@ -1215,9 +1215,9 @@
       "aucuneReponse": "暂无回复"
     },
     "sousTitreEcran": "跟踪业务表现与发货效率。",
-    "livreesSur": "已创建 {total} 笔中的 {n} 笔",
-    "reponsesSur": "{total} 笔中有 {n} 笔已回复",
-    "surColisLivres": "基于 {n} 个已送达包裹",
+    "livreesSur": "已创建 {total, number} 笔中的 {n, number} 笔",
+    "reponsesSur": "{total, number} 笔中有 {n, number} 笔已回复",
+    "surColisLivres": "基于 {n, number} 个已送达包裹",
     "jours": "{n, number} 天",
     "evolution": {
       "titre": "订单趋势",
@@ -1227,7 +1227,7 @@
       "titre": "客户链接",
       "aide": "物流链接打开次数。",
       "aucun": "本周期内没有链接被打开。",
-      "ouvertures": "{n} 次打开"
+      "ouvertures": "{n, number} 次打开"
     },
     "transporteurs": {
       "titre": "最常用承运商",
@@ -1301,7 +1301,7 @@
     },
     "vide": {
       "compteTitre": "创建您的第一笔订单",
-      "compteTexte": "三分钟就够了。客户会收到一个署您店名的链接，无需注册账户。",
+      "compteTexte": "只需不到一分钟。客户会收到一个署您店名的链接，无需注册账户。",
       "filtreTitre": "没有符合条件的订单",
       "filtreTexte": "此账户有订单，但没有一笔符合当前的筛选条件。",
       "archiveTitre": "全部已归档",
@@ -1366,7 +1366,7 @@
     "sansNom": "未填写",
     "sousTitreChiffre": "{total, plural, other {共 # 笔订单}}，{semaine, plural, other {本周新增 # 笔}}",
     "sousTitreVide": "您的工作台已准备好",
-    "surTotal": "显示 {n} 笔，共 {total} 笔订单",
+    "surTotal": "显示 {n, number} 笔，共 {total, number} 笔订单",
     "chargerLaSuite": "加载更多",
     "plusDActions": "{client} 的更多操作",
     "dupliquer": "复制为模板",
@@ -1393,7 +1393,7 @@
     "nouvelleEnCours": "正在创建…",
     "creationImpossible": "无法创建订单，请重试。",
     "plusMedias": "+{n}",
-    "vuesCourt": "{n} 次查看",
+    "vuesCourt": "{n, number} 次查看",
     "ouvrirCommande": "打开订单 {reference}",
     "periodeToutes": "全部时间",
     "periodeEntreCourt": "{du} – {au}",
@@ -1402,7 +1402,7 @@
     "lienBloque": "链接已停用",
     "quota": {
       "gratuitTitre": "免费版额度已用完",
-      "gratuitTexte": "免费账户共可创建 {n} 笔订单：此额度为终身额度，不会重置。升级至 Pro 即可继续创建订单。",
+      "gratuitTexte": "免费账户共可创建 {n, number} 笔订单：此额度为终身额度，不会重置。升级至 Pro 即可继续创建订单。",
       "gratuitTexteSansNombre": "您已用完免费版额度：此额度为终身额度，不会重置。升级至 Pro 即可继续创建订单。",
       "mensuelTitre": "已达本月上限",
       "mensuelTexte": "您本月已创建 {n} 笔订单。上限将于每月 1 日重置。",
@@ -1416,10 +1416,10 @@
       "dernierMouvement": "包裹最近动态：{date}",
       "sansInfo": "暂无承运商信息",
       "sansNumero": "暂无运单号",
-      "silence": "已 {jours} 天没有动态"
+      "silence": "已 {jours, number} 天没有动态"
     },
     "resume": "概览",
-    "nbPhotos": "{n} 张照片",
+    "nbPhotos": "{n, number} 张照片",
     "lienCopie": "已复制 {client} 的链接"
   },
   "editeur": {
@@ -1528,7 +1528,7 @@
     "compteur": "<b>{n}</b> / {max}",
     "deposer": "点击或将文件拖到这里",
     "plein": "此订单已达上限。",
-    "formats": "JPEG、PNG、WebP 或 MP4 · 最多 {videos} 个视频",
+    "formats": "JPEG、PNG、WebP 或 MP4 · 最多 {videos, number} 个视频",
     "apercu": "第 {position} 个文件的预览",
     "estUneVideo": "视频",
     "couverture": "封面",
@@ -1877,8 +1877,8 @@
           "pourquoi": "有记录的只读访问已足够排查问题。"
         },
         "commandes": {
-          "quoi": "打开他的订单。",
-          "pourquoi": "订单内容属于他的客户。"
+          "quoi": "打开该卖家的订单。",
+          "pourquoi": "订单内容属于该卖家的客户。"
         }
       },
       "email": "邮箱",
@@ -1890,10 +1890,10 @@
       "rouvrir": "恢复此账户",
       "titreSuspension": "停用此账户",
       "titreReactivation": "恢复此账户",
-      "aideSuspension": "他的公开页面将立即停止提供访问。链接不会被销毁：恢复后会原样重新可用。",
-      "aideReactivation": "他的页面将在已经发给客户的同一批链接上重新可用。",
+      "aideSuspension": "该卖家的公开页面将立即停止提供访问。链接不会被销毁：恢复后会原样重新可用。",
+      "aideReactivation": "该卖家的页面将在已经发给客户的同一批链接上重新可用。",
       "motif": "原因",
-      "motifAide": "至少 {n} 个字符。它会明文显示在日志中，也是决定被质疑时我们会重读的内容。",
+      "motifAide": "至少 {n} 个字符。它会明文显示在日志中，也是该决定被质疑时我们会回看的依据。",
       "recopier": "请手动输入该账户的邮箱地址以确认",
       "collageAide": "粘贴已被禁用：手动输入地址，才能确保您停用的是正确的账户。",
       "collageRefuse": "粘贴被拒绝。请手动输入地址：这是唯一一次真正核对目标账户的机会。",
@@ -1923,7 +1923,7 @@
       "passerPro": "切换为 Pro",
       "passerGratuit": "切回免费版",
       "motif": "原因",
-      "motifAide": "至少 {n} 个字符。例如：“9 月 19 日已通过银行转账收到付款”。原因会完整显示在日志中。",
+      "motifAide": "至少 {n} 个字符。例如：“9月19日已通过银行转账收到付款”。原因会完整显示在日志中。",
       "annuler": "取消",
       "enCours": "处理中…",
       "erreur": {
@@ -1956,7 +1956,7 @@
       "facture": "计费项",
       "ceMoisCi": "本月",
       "commandes": "新建订单",
-      "comptesDont": "其中 {sansType} 个未声明类型 · {suspendus} 个已停用，不计入此总数",
+      "comptesDont": "其中 {sansType, number} 个未声明类型 · {suspendus, number} 个已停用，不计入此总数",
       "dernieresActions": "最近的管理操作",
       "dernieresActionsIndisponibles": "预览暂时无法读取。完整日志仍可查看。",
       "toutLeJournal": "查看完整日志",
@@ -1983,12 +1983,12 @@
       "courbe": "订单",
       "periode": "最近 {jours} 天",
       "periodeEtiquette": "曲线时间窗",
-      "alerteDoublons": "{comptes} 个账户，共用 {identifiants} 个标识",
+      "alerteDoublons": "{comptes, number} 个账户，共用 {identifiants, number} 个标识",
       "alerteContestation": "{n, plural, =1 {{reference} 的停用申诉} other {# 项停用申诉待处理，最早一项为 {reference}}}",
       "alerteContestationDetail": "卖家于 {date} 提交。",
       "contestationsIndisponibles": "无法读取待处理的申诉。",
       "doublonsIndisponibles": "无法读取重复账户。",
-      "barre": "{jour}：{n} 笔订单"
+      "barre": "{jour}：{n, number} 笔订单"
     },
     "parametres": {
       "titre": "系统参数",
@@ -2074,7 +2074,7 @@
         },
         "medias_par_commande": {
           "titre": "每笔订单的文件数",
-          "aide": "其中视频最多 {videos} 个"
+          "aide": "其中视频最多 {videos, number} 个"
         },
         "poids_video": {
           "titre": "单个视频的最大体积",
@@ -2226,7 +2226,7 @@
         "autorise": "如果计数器发生故障，访问仍然放行：这次故障与卖家的客户无关。",
         "refuse": "在这里，计数器故障会拒绝访问。受影响的只有我们自己。"
       },
-      "barre": "{jour}：{n} 个包裹"
+      "barre": "{jour}：{n, number} 个包裹"
     },
     "traceTitre": "一切都有记录",
     "traceTexte": "管理员对卖家数据的每一次查看都会写入日志。",
@@ -2307,7 +2307,7 @@
       "tuileLiensAide": "至少打开过一次",
       "tuilePhotos": "已上传照片",
       "tuileActifs": "活跃账户",
-      "surComptes": "共 {total} 个账户",
+      "surComptes": "共 {total, number} 个账户",
       "tuileNouveaux": "新增账户",
       "tuileColis": "已登记包裹",
       "tuileColisAide": "由物流跟踪服务计费",
@@ -2338,13 +2338,13 @@
       "tauxConsultes": "链接打开率",
       "tauxValeur": "{valeur}%",
       "delaiLivraison": "平均送达时长",
-      "delaiValeur": "{valeur} 天",
+      "delaiValeur": "{valeur, number} 天",
       "serieDelai": "平均时长（天）",
       "aucuneMesure": "该周期内暂无数据。",
       "statutCommandes": "订单状态",
-      "statutTotal": "已创建 {total} 笔订单",
+      "statutTotal": "已创建 {total, number} 笔订单",
       "transporteurs": "最常用承运商",
-      "transporteursTotal": "共跟踪 {total} 个包裹",
+      "transporteursTotal": "共跟踪 {total, number} 个包裹",
       "transporteurInconnu": "尚未识别",
       "aucunColis": "该周期内没有包裹。",
       "part": "{part}%",
@@ -2367,7 +2367,7 @@
       "aideBlocage": "其客户将看到“此链接已失效”。链接不会被销毁：恢复后与原来完全相同。您看不到订单内容。",
       "aideDeblocage": "页面恢复为同一个链接，即客户已收到的那个。",
       "motif": "原因",
-      "motifAide": "至少 {n} 个字符。它会明文显示在日志中，也是决定被质疑时我们会重读的内容。",
+      "motifAide": "至少 {n} 个字符。它会明文显示在日志中，也是该决定被质疑时我们会回看的依据。",
       "annuler": "取消",
       "enCours": "处理中…",
       "erreur": {
@@ -2384,7 +2384,7 @@
       "pastille": "申诉",
       "voir": "查看 {ref} 的申诉",
       "titre": "{ref} 的停用申诉",
-      "aide": "卖家于 {date} 提交 · 三次中的第 {rang} 次。本次查看已写入审计日志。",
+      "aide": "卖家于 {date} 提交 · 三次中的第 {rang, number} 次。本次查看已写入审计日志。",
       "image": "打开卖家附上的图片",
       "reponse": "您的回复",
       "reponseAide": "至少 {n} 个字符。卖家会看到这条回复，它也会写入日志。",
@@ -2415,7 +2415,7 @@
         "whatsapp": "WhatsApp",
         "site": "网站"
       },
-      "nombreComptes": "{n} 个账户",
+      "nombreComptes": "{n, number} 个账户",
       "colCompte": "账户",
       "colStatut": "状态",
       "colInscription": "注册时间",
@@ -2475,14 +2475,14 @@
   },
   "alertes": {
     "titre": "提醒",
-    "titreAvec": "提醒（{n}）",
+    "titreAvec": "提醒（{n, number}）",
     "rien": "暂无需要处理的事项。",
     "jamaisOuvertes": {
-      "titre": "{n} 笔订单从未被打开",
+      "titre": "{n, number} 笔订单从未被打开",
       "texte": "客户还没有打开链接，也许从未收到。"
     },
     "silencieux": {
-      "titre": "{n} 个包裹无更新",
+      "titre": "{n, number} 个包裹无更新",
       "texte": "超过十天没有承运商信息。"
     }
   },
@@ -2557,8 +2557,8 @@
     "suiviAlerteTexte": "这不是故障：承运商只是还没有发布信息。页面会如实说明，绝不会显示“运单号不存在”。",
     "statuts": "订单状态",
     "statutsTexte": "进度条共四个阶段，且永不回退。更细的信息在物流明细中，而不在进度条上。",
-    "stPreparation": "尚未扫描",
-    "stPreparationE": "运单号已登记，承运商尚未发布信息。",
+    "stPreparation": "备货中",
+    "stPreparationE": "卖家正在备货，承运商尚未发布信息。",
     "stExpedie": "已发货",
     "stExpedieE": "承运商已揽收包裹。",
     "stTransit": "运输中",
@@ -2629,7 +2629,7 @@
     "analysesSuite": "此外还有 7 天、30 天或 90 天的订单趋势、状态分布、承运商使用情况与近期动态。",
     "clientVoit1": "您的 Logo、店铺名称与社交账号。",
     "clientVoit2": "订单编号与预计送达日期。",
-    "clientVoit3": "物流进度条：尚未扫描、已发货、运输中、已送达。",
+    "clientVoit3": "物流进度条：备货中、已发货、运输中、已送达。",
     "clientVoit4": "您上传的订单照片与视频。",
     "clientVoit5": "承运商与运单号。",
     "clientVoit6": "详细的物流事件记录。",
@@ -2666,9 +2666,9 @@
       "jour": "日期",
       "ouvertures": "打开次数",
       "zoneSemaines": "{n} 周的订单趋势。用左右方向键逐周查看。",
-      "zoneLiens": "客户链接：共 {n} 次打开。用左右方向键逐日查看。"
+      "zoneLiens": "客户链接：共 {n, number} 次打开。用左右方向键逐日查看。"
     },
-    "colisTotal": "{n} 个包裹",
+    "colisTotal": "{n, number} 个包裹",
     "silenceJours": "无更新 · {n} 天"
   },
   "parametres": {
@@ -2762,7 +2762,7 @@
       "proAide": "您的 Pro 订阅已生效。",
       "inclusPhotos": "照片、视频和自动物流跟踪",
       "inclusCouleurs": "使用您品牌配色的客户页面",
-      "inclusTotal": "共 {n} 笔订单",
+      "inclusTotal": "共 {n, number} 笔订单",
       "proLien": "以您命名的链接",
       "proMarque": "不显示“由 DropLink 提供支持”卡片",
       "proPlafond": "按月重置的上限，而非终身额度",
@@ -2852,7 +2852,7 @@
   },
   "blocageVendeur": {
     "titre": "链接已被 DropLink 停用",
-    "texte": "自 {date} 起，您的客户看到的是“此链接已失效”，而不是他的订单。如果这是误判，请提出申诉：说明原因，附上图片会更有帮助。",
+    "texte": "自 {date} 起，您的客户看到的是“此链接已失效”，而不是其订单。如果这是误判，请提出申诉：说明原因，附上图片会更有帮助。",
     "contester": "对停用提出申诉",
     "explication": "您的说明",
     "explicationAide": "至少 {n} 个字符。DropLink 团队会连同您附上的图片一起阅读。",
@@ -2869,7 +2869,7 @@
     "refusee": "申诉已于 {date} 被驳回",
     "refuseeBadge": "已驳回",
     "reponse": "DropLink 的回复",
-    "restantes": "此次停用还可以再申诉 {n} 次。",
+    "restantes": "此次停用还可以再申诉 {n, number} 次。",
     "aucuneRestante": "此次停用的三次申诉机会已用完。",
     "recontester": "再次申诉",
     "erreur": {
@@ -3039,7 +3039,7 @@
       "cta2": "查看客户页面"
     },
     "garanties": {
-      "offertes": "赠送 {n} 笔订单",
+      "offertes": "赠送 {n, number} 笔订单",
       "offertesSansNombre": "免费订单，轻松起步",
       "carte": "无需银行卡",
       "compte": "客户无需注册账户"
@@ -3159,7 +3159,7 @@
       "vuesTitre": "谁看过，看了几次",
       "vuesTexte": "每次打开链接都会被记录。经常回来查看的客户，是安心的客户。",
       "ouvertures": "次打开（最近 30 天）",
-      "vues": "{n} 次查看",
+      "vues": "{n, number} 次查看",
       "envoisTitre": "所有包裹，一屏掌握",
       "envoisTexte": "每个包裹的最新状态，直接取自承运商。不必再打开十个查询网站。",
       "enTransit": "运输中",
@@ -3206,7 +3206,7 @@
       "r2": "粘贴运单号即可自动识别承运商；如果没有识别出来，您可以手动选择。物流阶段会自动更新，无需您再回到订单。",
       "q3": "发送链接后还能修改订单吗？",
       "r3": "可以，随时修改。照片、单号、状态：客户在同一个链接上看到最新版本，链接永远不变。",
-      "q4": "用完 {n} 笔免费订单后会怎样？",
+      "q4": "用完 {n, number} 笔免费订单后会怎样？",
       "q4SansNombre": "用完免费订单后会怎样？",
       "r4": "免费版共可创建 {gratuit} 笔订单。如需更多，请升级 Pro：每月 {pro} 笔订单，仅需 {prix}，无需长期合约。",
       "r4SansNombre": "免费版的订单总数有限。如需更多，请升级 Pro，每月 {prix}，无需长期合约。"
@@ -3258,7 +3258,7 @@
         "photos": "4 张照片",
         "transit": "Colissimo · 运输中",
         "fin": "不到一分钟。",
-        "offre": "赠送 {n} 笔订单 · 无需银行卡",
+        "offre": "赠送 {n, number} 笔订单 · 无需银行卡",
         "offreSansNombre": "赠送订单 · 无需银行卡"
       }
     }

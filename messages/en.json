@@ -31,7 +31,7 @@
     "metaTitre": "DropLink — One tracking link for the whole order",
     "metaDescription": "Add your photos and a tracking number: DropLink creates one link where your customer follows their parcel, with carrier statuses updating on their own.",
     "fonctionnalites": {
-      "titre": "What the page holds"
+      "titre": "What's on the page"
     },
     "menu": {
       "etapes": "How it works"
@@ -1131,7 +1131,7 @@
     "aide": "A number you have just pasted is often not scanned yet. This is not an error: the carrier simply has not published anything.",
     "actualiser": "Refresh",
     "derniereMaj": "Last updated",
-    "compteurPage": "Showing {de} to {a} of {total, plural, one {# shipment} other {# shipments}}",
+    "compteurPage": "Showing {de, number} to {a, number} of {total, plural, one {# shipment} other {# shipments}}",
     "prochaine": {
       "livre": "Parcel delivered",
       "aujourdhui": "Delivery expected today",
@@ -1215,8 +1215,8 @@
       "aucuneReponse": "no replies yet"
     },
     "sousTitreEcran": "Track your performance and the effectiveness of your shipments.",
-    "livreesSur": "{n} of {total} created",
-    "reponsesSur": "{n, plural, one {# reply} other {# replies}} of {total}",
+    "livreesSur": "{n, number} of {total, number} created",
+    "reponsesSur": "{n, plural, one {# reply} other {# replies}} of {total, number}",
     "surColisLivres": "across {n, plural, one {# delivered parcel} other {# delivered parcels}}",
     "jours": "{n, plural, one {# day} other {# days}}",
     "evolution": {
@@ -1301,7 +1301,7 @@
     },
     "vide": {
       "compteTitre": "Create your first order",
-      "compteTexte": "Three minutes is enough. Your customer gets a link in your name, with no account to create.",
+      "compteTexte": "Under a minute is enough. Your customer gets a link in your name, with no account to create.",
       "filtreTitre": "No order matches",
       "filtreTexte": "This account has orders, but none of them pass the current filters.",
       "archiveTitre": "Everything is archived",
@@ -1366,7 +1366,7 @@
     "sansNom": "Unnamed",
     "sousTitreChiffre": "{total, plural, one {# order} other {# orders}}, {semaine, plural, one {# created} other {# created}} this week",
     "sousTitreVide": "Your space is ready",
-    "surTotal": "Showing {n} of {total, plural, one {# order} other {# orders}}",
+    "surTotal": "Showing {n, number} of {total, plural, one {# order} other {# orders}}",
     "chargerLaSuite": "Load more",
     "plusDActions": "More actions for {client}",
     "dupliquer": "Duplicate as template",
@@ -1626,9 +1626,9 @@
     },
     "suivi": {
       "aucunMouvement": "No carrier information yet",
-      "dernierMouvement": "Last movement {n} days ago",
-      "aujourdHui": "Movement today",
-      "hier": "Movement yesterday",
+      "dernierMouvement": "Last moved {n} days ago",
+      "aujourdHui": "Moved today",
+      "hier": "Moved yesterday",
       "silence": "The parcel is registered and tracked. Such a delay is not unusual at customs — we keep querying the carrier every day.",
       "arrete": "The carrier no longer reports on this number. Contact the seller if nothing has arrived.",
       "silenceTitre": "No movement for {n} days",
@@ -1797,7 +1797,7 @@
         "parametre": "Settings"
       },
       "fenetre": {
-        "0": "Since the beginning",
+        "0": "All time",
         "7": "Last 7 days",
         "30": "Last 30 days"
       },
@@ -1956,7 +1956,7 @@
       "facture": "BILLED",
       "ceMoisCi": "this month",
       "commandes": "Orders created",
-      "comptesDont": "including {sansType} with no type · {suspendus} suspended, outside this total",
+      "comptesDont": "including {sansType, number} with no type · {suspendus, number} suspended, not included in this total",
       "dernieresActions": "Latest administration actions",
       "dernieresActionsIndisponibles": "Preview unavailable right now. The full log is still readable.",
       "toutLeJournal": "Full log",
@@ -2475,7 +2475,7 @@
   },
   "alertes": {
     "titre": "Alerts",
-    "titreAvec": "Alerts ({n})",
+    "titreAvec": "Alerts ({n, number})",
     "rien": "Nothing needs your attention.",
     "jamaisOuvertes": {
       "titre": "{n, plural, one {# order never opened} other {# orders never opened}}",
@@ -2557,8 +2557,8 @@
     "suiviAlerteTexte": "It is not an error: the carrier simply has not published anything. The page says so, and never “number not found.”",
     "statuts": "Order statuses",
     "statutsTexte": "The tracker has four steps, and it never goes backwards. Finer detail lives in the tracking history, not in the tracker.",
-    "stPreparation": "Not scanned yet",
-    "stPreparationE": "The number is saved; the carrier has published nothing yet.",
+    "stPreparation": "Preparation",
+    "stPreparationE": "The seller is preparing the order; the carrier has published nothing yet.",
     "stExpedie": "Shipped",
     "stExpedieE": "The carrier has picked up the parcel.",
     "stTransit": "In transit",
@@ -2629,7 +2629,7 @@
     "analysesSuite": "On top of that: order trends over 7, 30 or 90 days, status breakdown, carrier usage and recent activity.",
     "clientVoit1": "Your logo, the shop name and your social links.",
     "clientVoit2": "The order reference and the estimated delivery date.",
-    "clientVoit3": "A progress tracker: Not scanned yet, Shipped, In transit, Delivered.",
+    "clientVoit3": "A progress tracker: Preparation, Shipped, In transit, Delivered.",
     "clientVoit4": "Your photos and videos of the order.",
     "clientVoit5": "The carrier and the tracking number.",
     "clientVoit6": "The detailed history of tracking events.",
@@ -2834,7 +2834,7 @@
     }
   },
   "verification": {
-    "titre": "Two-step verification",
+    "titre": "Two-factor authentication",
     "souvenirAppareil": "Remember this device for 30 days",
     "sousTitre": "Enter the 6-digit code from your authenticator app.",
     "libelle": "Verification code",
