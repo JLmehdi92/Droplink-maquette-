@@ -6,6 +6,7 @@ import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "@/i18n/routing";
 import { clePubliable, urlSupabase } from "@/lib/supabase/config";
+import { signalementDisponible } from "@/lib/contact";
 
 /**
  * CHAQUE EXCLUSION DE CE MATCHER EST UNE PORTE.
@@ -155,6 +156,31 @@ export default async function middleware(requete: NextRequest): Promise<NextResp
     cible.pathname = `/p/${lienAuNom.jeton}`;
     cible.searchParams.set(PARAM_NOM, lienAuNom.nom);
     return NextResponse.rewrite(cible);
+  }
+
+  /*
+   * SANS ADRESSE DE SIGNALEMENT, LA PAGE N'EXISTE PAS — ET ELLE DOIT LE DIRE DANS LA
+   * CHARTE (03/10/2026). La page appelle notFound de Next, mais un notFound levé SOUS
+   * `[locale]` sert la 404 générique de Next (anglais en dur, hors charte) : ce dépôt
+   * n'a pas de layout racine, et `global-not-found` ne répond qu'aux routes
+   * INEXISTANTES. Mesuré sur un build servi, prérendu comme rendu à la demande. On
+   * réécrit donc vers un chemin qui n'existe pas : même statut 404, mais l'écran
+   * introuvable de la refonte, dans la langue de l'URL. Le notFound de la page
+   * reste, en filet.
+   */
+  const signalement = /^\/([^/]+)\/signalement\/?$/.exec(requete.nextUrl.pathname)?.[1];
+  if (
+    signalement !== undefined &&
+    (routing.locales as readonly string[]).includes(signalement) &&
+    !signalementDisponible()
+  ) {
+    const cible = requete.nextUrl.clone();
+    cible.pathname = `/${signalement}/signalement/absente`;
+    // `global-not-found` lit sa langue dans l'en-tête que pose d'ordinaire next-intl,
+    // qu'on court-circuite ici : sans lui, `/zh-CN/signalement` répondait en français.
+    const enTetes = new Headers(requete.headers);
+    enTetes.set("x-next-intl-locale", signalement);
+    return NextResponse.rewrite(cible, { request: { headers: enTetes } });
   }
 
   const reponse = gestionLangue(requete);
