@@ -183,7 +183,7 @@ export function BandeauBlocage({
 
       {erreur === null ? null : (
         <p role="alert" className="text-[13px] text-ds-erreur-encre">
-          {t(`erreur.${erreur}`)}
+          {t(`erreur.${erreur}`, { n: explicationMin })}
         </p>
       )}
 

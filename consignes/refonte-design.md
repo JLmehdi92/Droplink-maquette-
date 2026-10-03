@@ -1938,6 +1938,17 @@ Chemin dans `legal.pages` (ou `legal.*`), avant → après :
   illisible rougit la garde au lieu de faire tomber la fumée).
 - Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1312/1313 (alarme Railway).
 
+### ▶️ 03/10/2026 — le « 20 » de la contestation, et le prompt local relu (session principale)
+
+- `blocageVendeur.erreur.saisie` écrivait « au moins 20 caractères » en dur dans les trois langues,
+  alors que la borne vit dans `EXPLICATION_MIN` (`src/lib/commandes/contestation.ts`). Le message
+  reçoit désormais `{n}`, passé par `bandeau-blocage.tsx` depuis la propriété `explicationMin` qu'il
+  avait déjà (l'aide du champ s'en servait). Changer la borne ne laissera plus un message faux.
+- `consignes/verification-finale-locale.md` : le CONTEXTE est réécrit pour un Claude Code local qui
+  n'a rien vu (maquette, portage, bac à sable, ce qui n'a jamais tourné) ; la ligne périmée sur le
+  menu mobile sans « Créer un compte » est remplacée par la décision du 03/10 ; le message
+  « Export limité » du CSV, resté en français, y est listé comme point à trancher.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de
@@ -2043,4 +2054,3 @@ JLmehdi92/Droplink-maquette- (privé)       JLmehdi92/droplink2
    Puis la méthode du pixel près de `CLAUDE.md` sur chaque écran porté, `pnpm verif:prod`,
    les migrations éventuelles en production **avant** le push, et seulement alors fusionner
    dans `master` et pousser — ce qui redéploie droplink.fr.
-

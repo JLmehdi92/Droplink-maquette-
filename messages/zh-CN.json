@@ -2873,7 +2873,7 @@
     "aucuneRestante": "此次停用的三次申诉机会已用完。",
     "recontester": "再次申诉",
     "erreur": {
-      "saisie": "说明至少需要 20 个字符。",
+      "saisie": "说明至少需要 {n} 个字符。",
       "image": "无法附上图片。请重试，或不附图片直接提交。",
       "type": "不支持此图片格式：请使用 JPEG、PNG 或 WebP。",
       "taille": "该图片超出允许的大小。",

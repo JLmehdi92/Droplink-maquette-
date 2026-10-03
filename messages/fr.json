@@ -2873,7 +2873,7 @@
     "aucuneRestante": "Les trois contestations de ce blocage ont été utilisées.",
     "recontester": "Contester à nouveau",
     "erreur": {
-      "saisie": "L’explication doit compter au moins 20 caractères.",
+      "saisie": "L’explication doit compter au moins {n} caractères.",
       "image": "L’image n’a pas pu être jointe. Réessayez, ou envoyez sans image.",
       "type": "Ce format d’image n’est pas accepté : JPEG, PNG ou WebP.",
       "taille": "Cette image dépasse la taille permise.",

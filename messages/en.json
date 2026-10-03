@@ -2873,7 +2873,7 @@
     "aucuneRestante": "All three disputes for this block have been used.",
     "recontester": "Dispute again",
     "erreur": {
-      "saisie": "The explanation must be at least 20 characters long.",
+      "saisie": "The explanation must be at least {n} characters long.",
       "image": "The image could not be attached. Try again, or send without an image.",
       "type": "This image format is not accepted: JPEG, PNG or WebP.",
       "taille": "This image exceeds the allowed size.",
