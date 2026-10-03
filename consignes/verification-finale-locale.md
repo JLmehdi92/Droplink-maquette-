@@ -140,6 +140,10 @@ CE QUE LE CLOUD N'A PAS PU MESURER, À FAIRE EN PRIORITÉ :
 - les mini-frises d'Envois avec un vrai colis suivi ;
 - le BUDGET de /p : 288 Ko transférés hors médias mesurés au cloud (gzip) — 12 Ko de marge
   seulement ; à remesurer en production (Brotli) avant tout ajout sur /p ;
+- le menu ☰ des pages publiques au téléphone (≤ 640 px), sur la landing, une page légale, le
+  signalement et un article : « Se connecter » en gris SANS filet, puis « Créer un compte » en
+  bouton plein pleine largeur (52 px, texte lisible sur l'accent), qui ferme le menu et mène à
+  l'inscription, dans les trois langues (le libellé chinois ne doit pas déborder) ;
 - « Précédent » entre connexion et inscription sur Safari (l'adresse ne suit qu'avec la
   Navigation API : Safari 18.2 et plus).
 

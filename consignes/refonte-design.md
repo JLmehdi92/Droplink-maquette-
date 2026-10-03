@@ -1634,10 +1634,12 @@ aucune erreur, aucun débordement.
 - [ ] **« Ce que ce compte a fait »** (fiche admin) : la maquette montre des TUILES de totaux par
   type d'événement ; `lire_compte_admin` ne rend que les six derniers couples (type, jour). Une
   migration (nouvelle fonction de comptage) le permettrait — à décider.
-- [ ] **Menu mobile des pages publiques (décision D du 03/10)** : sans « Créer un compte », et le
-  bouton de la barre est masqué sous 640 px — au téléphone, une page publique sans appel dans son
-  corps (pages légales, signalement, article de blog sans encart final) n'a plus de chemin vers
-  l'inscription. À confirmer, ou à rouvrir.
+- [x] **Menu mobile des pages publiques** — TRANCHÉ par Mehdi le 03/10/2026 : « Créer un compte »
+  revient dans le menu ☰, en dernier, en bouton plein sous « Se connecter ». Écrit d'abord dans la
+  maquette (13 pages, `base.css`), puis dans le produit (`entete-publique.tsx`, `socle.css`, mêmes
+  règles `.menu-mobile__connexion` et `.menu-mobile__inscription`). Mesuré dans la maquette à 360 et
+  390 px sur cinq pages : bouton de 52 px de haut, accent avec texte sur accent, mène à
+  l'inscription, aucun débordement. Le produit est à remesurer au poste de Mehdi.
 - [x] Défaut antérieur à la refonte : le menu « ••• » d'une commande poste l'ancien jeton après une
   révocation — **corrigé le 03/10/2026** (jeton relu en base ; preuve RLS à faire tourner au poste).
 

@@ -113,12 +113,19 @@ export function EntetePublique({
               {l.libelle}
             </Link>
           ))}
-          {/* Comme la maquette (décision de Mehdi du 03/10/2026) : les ancres, puis « Se
-              connecter », sans « Créer un compte ». ⚠️ Au téléphone, le bouton de la barre
-              est masqué (`socle.css`) : l'inscription ne passe plus que par les appels du
-              corps de page — une page publique qui n'en a pas n'y mène plus (noté au § 9). */}
-          <Link href={connexion.href} onClick={fermer}>
+          {/* Les ancres, « Se connecter », puis « Créer un compte » (décision de Mehdi du
+              03/10/2026, écrite d'abord dans la maquette). Au téléphone, le bouton de la barre
+              est masqué (`socle.css`) : sans cette entrée, une page publique sans appel dans
+              son corps (pages légales, signalement, articles) ne menait plus à l'inscription. */}
+          <Link className="menu-mobile__connexion" href={connexion.href} onClick={fermer}>
             {connexion.libelle}
+          </Link>
+          <Link
+            className="bouton bouton--plein bouton--large menu-mobile__inscription"
+            href={inscription.href}
+            onClick={fermer}
+          >
+            {inscription.libelle}
           </Link>
         </div>
       </header>

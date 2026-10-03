@@ -153,7 +153,11 @@ code { font: 500 .92em/1 ui-monospace, "SFMono-Regular", Menlo, monospace; }
 .menu-bouton { display: none; }
 .menu-mobile { display: grid; padding: 8px var(--gouttiere) 20px; background: var(--fond); border-bottom: 1px solid var(--filet); }
 .menu-mobile a { padding: 14px 4px; font-weight: 600; font-size: 17px; border-bottom: 1px solid var(--filet); }
-.menu-mobile a:last-child { border-bottom: 0; color: var(--corps); }
+/* « Se connecter » puis « Créer un compte » (décision de Mehdi du 03/10/2026) : sous 640 px le
+   bouton de la barre est masqué, le menu est alors le seul chemin vers l'inscription sur une page
+   sans appel dans son corps (légal, signalement, articles). */
+.menu-mobile a.menu-mobile__connexion { border-bottom: 0; color: var(--corps); }
+.menu-mobile a.menu-mobile__inscription { margin-top: 8px; padding: 0 24px; border-bottom: 0; font-size: 15px; font-weight: 700; }
 
 /* ---------- Héros ---------- */
 .heros { position: relative; padding-block: clamp(32px, 6vw, 72px) clamp(72px, 9vw, 120px); }
