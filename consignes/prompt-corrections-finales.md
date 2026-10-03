@@ -1,33 +1,39 @@
 # Prompt des corrections finales de la refonte
 
-À coller tel quel dans une **nouvelle session Claude Code cloud** ouverte sur le dépôt
-`JLmehdi92/Droplink-maquette-`, branche `claude/saas-motion-design-video-r3ani3`
-(le même environnement que les sessions précédentes). Écrit le 03/10/2026 à partir du
-contre-audit de `consignes/audit-fidelite-refonte.md` et des réponses de Mehdi, puis
-contre-vérifié par un agent `ecc:code-explorer` : chemins et lignes exacts, 15 défauts corrigés.
+À coller tel quel dans **la session cloud qui a fait les finitions** (« DropLink — finitions de
+la refonte : toutes les animations, à l'identique »), qui connaît déjà le chantier. Écrit le
+03/10/2026 à partir du contre-audit de `consignes/audit-fidelite-refonte.md` et des réponses
+de Mehdi, puis contre-vérifié par un agent `ecc:code-explorer` : chemins et lignes exacts,
+15 défauts corrigés.
 
 ---
 
 ```
-Tu travailles pour Mehdi (pas Wassim), toujours en français. Ce dépôt est le BAC À SABLE
-JLmehdi92/Droplink-maquette- (copie de JLmehdi92/droplink2, relié à AUCUN service Railway).
-La refonte y est portée et ses animations aussi ; un contre-audit indépendant a trouvé ce qui
-reste. TA MISSION : tout corriger, sans en oublier un seul point, sans rien casser, puis le
-prouver. Mehdi veut le produit identique à la maquette (design/maquette/src/), animations et
-optimisations de fluidité comprises, sauf ce qu'il a décidé autrement ci-dessous.
+Mehdi ici. Merci pour les finitions. J'ai fait refaire un CONTRE-AUDIT INDÉPENDANT de ton
+travail par une autre session (3 agents ecc:code-explorer en lecture seule) : toutes les
+animations sont bien portées et câblées, bravo, mais il reste une règle dure violée, des
+défauts de comportement et des écarts à la maquette. J'ai aussi tranché quelques points.
+TA MISSION : tout corriger, sans oublier un seul point, sans rien casser, puis le prouver.
+Mêmes exigences que pour les finitions : identique à la maquette, animations et
+optimisations de fluidité comprises, sauf ce que je décide autrement ci-dessous.
 
 TU NE T'ARRÊTES PAS TANT QUE TOUT N'EST PAS FINI. Tu ne rends la main ni entre deux
 corrections, ni pour demander « je continue ? ». Un obstacle se résout : tu raisonnes, tu
 tranches, tu écris pourquoi (commit + journal), tu enchaînes. Tu ne t'arrêtes que si tout est
 fait, ou devant un blocage qu'aucun choix de ta part ne peut lever (dis alors lequel).
 
-RÈGLES ABSOLUES
+ÉTAPE 0 — RÉCUPÈRE LE CONTRE-AUDIT. La branche du bac à sable a avancé depuis ton dernier
+commit (e5ce6bd) : des commits de documentation seulement y ont été poussés (le
+contre-audit et ce prompt). `git remote -v`, puis `git pull --ff-only` depuis le remote du bac à
+sable, branche claude/saas-motion-design-video-r3ani3. Si l'avance rapide est impossible,
+arrête-toi et dis pourquoi, ne force rien. Puis relis le bloc « CONTRE-AUDIT INDÉPENDANT DU
+03/10/2026 » de consignes/audit-fidelite-refonte.md : c'est ta liste, que ce prompt détaille.
+
+RÈGLES (les mêmes qu'avant, rappelées parce qu'elles ne se négocient pas)
 - AVANT TOUT PUSH : `git remote -v`. Tu ne pousses QUE vers le remote dont l'URL est
   https://github.com/JLmehdi92/Droplink-maquette- (avec ou sans .git), branche
-  claude/saas-motion-design-video-r3ani3 ; Mehdi t'y autorise sans redemander. Si un remote
-  pointe vers JLmehdi92/droplink2, quel que soit son nom (origin compris), tu ne t'en sers
-  JAMAIS : chaque push sur droplink2 redéploie le vrai site. Si aucun remote ne pointe vers le
-  bac à sable, crée-le (`git remote add maquette https://github.com/JLmehdi92/Droplink-maquette-.git`).
+  claude/saas-motion-design-video-r3ani3. Si un remote pointe vers JLmehdi92/droplink2, quel
+  que soit son nom, tu ne t'en sers JAMAIS : chaque push sur droplink2 redéploie le vrai site.
 - Jamais `pnpm db:migrate` (production), jamais la base de production
   (référence csndfatwtbzqmhgqseem). Aucun secret écrit sur le disque.
 - Commits par `git commit -F -` avec un heredoc à délimiteur quoté (<<'FIN'), jamais -m.
@@ -35,21 +41,11 @@ RÈGLES ABSOLUES
 - Aucun test supprimé, sauté ou affaibli pour passer. Constate le rouge avant d'écrire un test
   qui doit le prévenir.
 - Les contraintes verrouillées de CLAUDE.md gagnent toujours sur la maquette.
-
-LIS D'ABORD, EN ENTIER : CLAUDE.md ; consignes/audit-fidelite-refonte.md (surtout les blocs
-« ÉTAT AU 02/10/2026 » et « CONTRE-AUDIT INDÉPENDANT DU 03/10/2026 », c'est ta liste) ;
-consignes/refonte-design.md (§ 5, § 6 « règles de construction apprises » = les optimisations
-de fluidité, § 8, § 9) ; consignes/verification-finale-locale.md. La référence visuelle et de
-mouvement est la maquette : ses JS et CSS donnent les durées, courbes, délais et seuils EXACTS.
-
-ENVIRONNEMENT : Postgres est injoignable d'ici (pas d'IPv6, pas de TCP brut) ; l'API HTTPS de
-la base de tests répond. Aucun compte administrateur n'est utilisable d'ici (2FA, migration
-186). LES QUATRE PORTES LOCALES, à chaque lot : pnpm typecheck (0 erreur), pnpm lint (0 erreur ;
-1 avertissement préexistant toléré dans tests/unit/suivi-quota-fournisseur.test.ts, aucun
-nouveau), pnpm build, pnpm test (seul échec admis : l'alarme Railway
-tests/unit/deploiement.test.ts, jamais désactivée). Les trois autres portes (test:rls,
-couverture, fumee) tournent sur le poste de Mehdi. Pour voir le produit : pnpm build &&
-pnpm start sur un port libre, Playwright avec le Chromium de /opt/pw-browsers.
+- LES QUATRE PORTES LOCALES, à chaque lot : pnpm typecheck (0 erreur), pnpm lint (0 erreur ;
+  1 avertissement préexistant toléré dans tests/unit/suivi-quota-fournisseur.test.ts, aucun
+  nouveau), pnpm build, pnpm test (seul échec admis : l'alarme Railway
+  tests/unit/deploiement.test.ts, jamais désactivée). test:rls, couverture et fumee tournent
+  sur mon poste (Postgres injoignable d'ici, aucun compte administrateur utilisable).
 
 DÉCISIONS DE MEHDI (03/10/2026) — elles priment sur la maquette
 
