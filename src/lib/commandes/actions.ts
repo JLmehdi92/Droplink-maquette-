@@ -5,16 +5,8 @@ import { z } from "zod";
 import { LANGUE_DEFAUT, estLangueSupportee } from "@/i18n/config";
 import { SchemaLangue } from "@/i18n/schema";
 
-/**
- * LA FORME D UN JETON RENVOYÉ PAR LE NAVIGATEUR.
- *
- * Il ne sert JAMAIS à autoriser quoi que ce soit — l autorisation vient du
- * profil et de la RLS. Il ne sert qu à nommer l entrée de cache à invalider.
- * On borne donc sa forme, sans plus : une valeur non textuelle ferait lever
- * l invalidation après une mutation déjà écrite en base, et le vendeur
- * conclurait à un échec devant une opération réussie.
- */
-const Jeton = z.string().max(200);
+/** La forme d'un identifiant de commande, pour relire son jeton avant une révocation. */
+const Identifiant = z.string().uuid();
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types-base";
@@ -22,10 +14,8 @@ import { appliquerChamp, type ResultatEnregistrement } from "./ecriture";
 import { invaliderCommandePublique } from "./cache";
 import { cheminQuotaAtteint, quotaDepuisErreur } from "./quota-atteint";
 import {
-  archiverCommande,
   dupliquerCommande,
   revoquerLien,
-  type Archivage,
   type Duplication,
   type Revocation,
 } from "./cycle";
@@ -140,7 +130,6 @@ export async function enregistrerChamp(
  */
 export async function revoquerLienPublic(
   orderId: unknown,
-  ancienJeton: unknown,
 ): Promise<Revocation | { statut: "echec"; motif: "session" }> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") {
@@ -148,15 +137,22 @@ export async function revoquerLienPublic(
   }
 
   const supabase = await creerClientServeur();
+  // L'ANCIEN JETON EST RELU EN BASE, sous RLS, juste avant la rotation — il venait du
+  // navigateur (contre-audit du 03/10/2026) : deux onglets sur la même fiche, le second
+  // révoquait avec un jeton déjà révoqué et invalidait le mauvais cache. Une course reste
+  // possible entre cette lecture et la rotation ; elle ne vaut qu'entre deux révocations
+  // simultanées de la MÊME commande par son propre vendeur.
+  const id = Identifiant.safeParse(orderId);
+  const lu = id.success
+    ? await supabase.from("orders").select("public_token").eq("id", id.data).maybeSingle()
+    : null;
   const resultat = await revoquerLien(supabase, profil.profilId, orderId);
 
   if (resultat.statut === "ok") {
-    // L ANCIEN JETON VIENT DU NAVIGATEUR. Il ne sert qu à invalider une entrée
-    // de cache : une valeur non textuelle ne doit pas faire lever la révocation
-    // APRÈS que la base a déjà tourné le jeton — le vendeur croirait avoir
-    // échoué alors que son lien est bel et bien coupé.
-    const ancien = Jeton.safeParse(ancienJeton);
-    if (ancien.success) invaliderCommandePublique(ancien.data);
+    // Une lecture échouée ne fait pas lever la révocation APRÈS que la base a déjà tourné
+    // le jeton : le vendeur croirait avoir échoué alors que son lien est bien coupé.
+    const ancien = lu?.data?.public_token;
+    if (typeof ancien === "string") invaliderCommandePublique(ancien);
     invaliderCommandePublique(resultat.nouveauJeton);
   }
 
@@ -185,26 +181,3 @@ export async function dupliquer(
   return resultat;
 }
 
-export async function archiver(
-  orderId: unknown,
-  jeton: unknown,
-  archiver: unknown,
-): Promise<Archivage | { statut: "echec"; motif: "session" }> {
-  const profil = await lireProfilVendeur();
-  if (profil === null || profil.statut !== "active") {
-    return { statut: "echec", motif: "session" };
-  }
-
-  const supabase = await creerClientServeur();
-  const resultat = await archiverCommande(supabase, profil.profilId, orderId, archiver === true);
-
-  // Archiver ne retire PAS la page, mais l'invalidation reste juste : la vue
-  // publique lit d'autres colonnes de la même ligne, et un cache tenu pour une
-  // mutation près finirait par l'être pour toutes.
-  const cible = Jeton.safeParse(jeton);
-  if (resultat.statut === "ok" && cible.success) {
-    invaliderCommandePublique(cible.data);
-  }
-
-  return resultat;
-}

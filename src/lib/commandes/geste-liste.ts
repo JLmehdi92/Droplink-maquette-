@@ -156,7 +156,6 @@ function separateur(url: string): string {
 
 async function archiverUne(donnees: FormData, profilId: string): Promise<string> {
   const id = Identifiant.safeParse(donnees.get("id"));
-  const jeton = z.string().max(64).safeParse(donnees.get("jeton"));
   const archiver = donnees.get("archiver") === "1";
   const retour = destination(donnees, "/fr/commandes");
   if (!id.success) return retour;
@@ -175,9 +174,11 @@ async function archiverUne(donnees: FormData, profilId: string): Promise<string>
     return retour + separateur(retour) + "lot=" + motif;
   }
 
-  if (jeton.success && jeton.data !== "") {
-    invaliderCommandePublique(jeton.data);
-  }
+  // LE JETON RELU EN BASE par l'écriture même, jamais celui du formulaire : le menu de la
+  // fiche gardait celui du chargement, et après une révocation il invalidait un lien mort
+  // (contre-audit du 03/10/2026). Un jeton venu du navigateur n'a pas à choisir quel cache
+  // on vide.
+  invaliderCommandePublique(resultat.jeton);
 
   invaliderRetour(retour);
   return retour;

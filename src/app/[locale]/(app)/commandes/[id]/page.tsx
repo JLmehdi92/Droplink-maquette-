@@ -355,7 +355,6 @@ export default async function EditeurCommande({
               <MenuGestesFiche
                 langue={langue}
                 id={data.id}
-                jeton={data.public_token}
                 archivee={data.archived_at !== null}
                 taille="bureau"
               />
@@ -364,7 +363,6 @@ export default async function EditeurCommande({
               <MenuGestesFiche
                 langue={langue}
                 id={data.id}
-                jeton={data.public_token}
                 archivee={data.archived_at !== null}
                 taille="telephone"
               />
@@ -415,6 +413,7 @@ export default async function EditeurCommande({
             dans l'îlot ferait voyager ses libellés et sa liste d'événements dans
             la charge d'hydratation, pour un bloc que personne n'interroge.
           */
+          historiquePlusRecent={historique[0]?.id ?? null}
           historique={
             <HistoriqueCommande lignes={historique} />
           }

@@ -1,5 +1,6 @@
 "use client";
 
+import { relireJusquaNouveau } from "@/lib/commandes/relecture-historique";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { relireHistorique } from "@/app/[locale]/(app)/commandes/[id]/actions";
 import { useTranslations } from "next-intl";
@@ -86,6 +87,7 @@ export function Editeur({
   dates,
   resume,
   historique,
+  historiquePlusRecent,
 }: {
   readonly id: string;
   readonly langue: string;
@@ -157,6 +159,8 @@ export function Editeur({
   };
   /** Rendu par le SERVEUR : ses libellés ne voyagent pas dans l'hydratation. */
   readonly historique: React.ReactNode;
+  /** L'identifiant de la ligne la plus récente de `historique` (`null` : aucune ligne). */
+  readonly historiquePlusRecent: string | null;
 }) {
   const t = useTranslations("editeur");
 
@@ -205,23 +209,47 @@ export function Editeur({
    * réexécutait toute la page et comptait une ouverture d'éditeur de plus à chaque fois.
    * Jamais sur la frappe : l'historique dit ce que la base a écrit.
    */
-  const [historiqueRelu, setHistoriqueRelu] = useState<ReactNode | null>(null);
+  const [historiqueRelu, setHistoriqueRelu] = useState<{ readonly bloc: ReactNode; readonly plusRecent: string } | null>(
+    null,
+  );
+  // UN HISTORIQUE NEUF DU SERVEUR (navigation, rechargement) remplace la relecture : sans
+  // cela, une relecture plus ancienne resterait affichée par-dessus (contre-audit du 03/10).
+  const [historiqueVu, setHistoriqueVu] = useState(historique);
+  if (historiqueVu !== historique) {
+    setHistoriqueVu(historique);
+    setHistoriqueRelu(null);
+  }
+  const plusRecentConnu = historiqueRelu?.plusRecent ?? historiquePlusRecent;
+  // Lu dans l'effet sans le relancer : seul un nouveau geste relance la série.
+  const plusRecentRef = useRef(plusRecentConnu);
+  useEffect(() => {
+    plusRecentRef.current = plusRecentConnu;
+  }, [plusRecentConnu]);
+  /*
+   * LE JOURNAL S'ÉCRIT APRÈS LA RÉPONSE (`journaliserApres`) : une seule relecture à
+   * 700 ms pouvait le devancer. On relit à 700 ms, 1,5 s puis 3 s, jusqu'à ce que la ligne
+   * la plus récente change (`relireJusquaNouveau`). Les rafales ne sont PAS fusionnées en
+   * une ligne, contrairement à la démonstration de la maquette (`commande.js`) : chaque
+   * ligne est une écriture réelle en base, et l'historique sert de preuve.
+   */
   useEffect(() => {
     if (versionApercu === 0) return;
     let abandonne = false;
-    const minuteur = window.setTimeout(() => {
-      relireHistorique(id)
-        .then((bloc) => {
-          if (!abandonne && bloc !== null) setHistoriqueRelu(bloc);
-        })
-        .catch((erreur: unknown) => {
-          // L'historique affiché reste celui d'avant : il est vrai, simplement en retard.
-          console.error("[editeur] relecture de l'historique impossible", erreur);
-        });
-    }, 700);
+    relireJusquaNouveau({
+      relire: () => relireHistorique(id),
+      connu: plusRecentRef.current,
+      attendre: (ms) => new Promise((ok) => window.setTimeout(ok, ms)),
+      abandonne: () => abandonne,
+    })
+      .then((relue) => {
+        if (!abandonne && relue !== null) setHistoriqueRelu(relue);
+      })
+      .catch((erreur: unknown) => {
+        // L'historique affiché reste celui d'avant : il est vrai, simplement en retard.
+        console.error("[editeur] relecture de l'historique impossible", erreur);
+      });
     return () => {
       abandonne = true;
-      window.clearTimeout(minuteur);
     };
   }, [versionApercu, id]);
 
@@ -414,7 +442,6 @@ export function Editeur({
         />
         <CarteRevocation
           orderId={id}
-          jeton={jetonCourant}
           lienPublic={lienPublic}
           onNouveauJeton={(nouveau) => {
             setJetonCourant(nouveau);
@@ -427,7 +454,7 @@ export function Editeur({
           versPasserPro={"/" + langue + "/passer-pro"}
           statut={valeurs.status}
         />
-        {historiqueRelu ?? historique}
+        {historiqueRelu?.bloc ?? historique}
       </div>
 
       {/* LA BANDE D'ACTION DU TÉLÉPHONE, collée en bas : « voir la page client » est

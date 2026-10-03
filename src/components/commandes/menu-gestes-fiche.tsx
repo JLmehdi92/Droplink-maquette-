@@ -32,13 +32,11 @@ import { BoutonSoumissionUnique } from "@/components/bouton-soumission-unique";
 export async function MenuGestesFiche({
   langue,
   id,
-  jeton,
   archivee,
   taille,
 }: {
   readonly langue: string;
   readonly id: string;
-  readonly jeton: string;
   readonly archivee: boolean;
   readonly taille: "bureau" | "telephone";
 }) {
@@ -64,12 +62,12 @@ export async function MenuGestesFiche({
             {t("dupliquer")}
           </BoutonSoumissionUnique>
         </form>
-        {/* Le jeton ne sert qu'à invalider la page publique après le geste ;
-            l'autorisation vient de la session et de la RLS sur `orders`. */}
+        {/* AUCUN JETON n'est posté : la route relit en base celui de la commande archivée.
+            Rendu ici au chargement, il devenait faux après une révocation (contre-audit du
+            03/10/2026) — et le jeton n'a jamais à quitter le serveur pour ce geste. */}
         <form method="post" action={action}>
           <input type="hidden" name="geste" value="archiver" />
           <input type="hidden" name="id" value={id} />
-          <input type="hidden" name="jeton" value={jeton} />
           <input type="hidden" name="archiver" value={archivee ? "0" : "1"} />
           <input type="hidden" name="retour" value={retour} />
           <button type="submit">

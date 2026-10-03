@@ -21,14 +21,21 @@ import { HistoriqueCommande } from "@/components/commandes/historique-commande";
  * `null` quand rien n'est à montrer de neuf : session absente, identifiant invalide, ou
  * lecture vide — une commande a toujours au moins sa création, et un historique vide
  * après une écriture serait une lecture échouée qu'on n'affiche pas par-dessus l'ancien.
+ *
+ * `plusRecent` (contre-audit du 03/10/2026) : le bloc rendu est opaque pour le client ;
+ * l'identifiant de sa ligne la plus récente lui dit si la ligne attendue est arrivée
+ * (`relireJusquaNouveau`), le journal s'écrivant après la réponse.
  */
-export async function relireHistorique(commandeId: unknown): Promise<ReactNode | null> {
+export async function relireHistorique(
+  commandeId: unknown,
+): Promise<{ readonly bloc: ReactNode; readonly plusRecent: string } | null> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") return null;
   const id = z.string().uuid().safeParse(commandeId);
   if (!id.success) return null;
   const supabase = await creerClientServeur();
   const lignes = await lireHistorique(supabase, id.data);
-  if (lignes.length === 0) return null;
-  return <HistoriqueCommande lignes={lignes} />;
+  const plusRecent = lignes[0]?.id;
+  if (plusRecent === undefined) return null;
+  return { bloc: <HistoriqueCommande lignes={lignes} />, plusRecent };
 }

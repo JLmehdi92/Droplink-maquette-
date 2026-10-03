@@ -33,7 +33,8 @@ export function ListeHistorique({ children }: { readonly children: ReactNode }) 
   });
 
   return (
-    <ol ref={liste} className="ed-histo">
+    // `aria-live="polite"` (maquette) : une ligne arrivée par relecture se lit.
+    <ol ref={liste} className="ed-histo" aria-live="polite">
       {children}
     </ol>
   );

@@ -222,6 +222,21 @@ describe("L'archivage", () => {
     expect((data as { public_token: string }).public_token).toBe(commande.jeton);
   });
 
+  test("il rend le jeton QUE LA BASE PORTE, y compris après une révocation", async () => {
+    // Contre-audit du 03/10/2026 : l'archivage invalidait le cache d'un jeton posté par
+    // le formulaire, périmé après une révocation. Il rend désormais celui de la base,
+    // relu par l'écriture même — sous RLS, avec un utilisateur réellement authentifié.
+    const commande = await creerCommande(alice);
+    const revoque = await revoquerLien(clientDe(alice), alice.profilId, commande.id);
+    expect(revoque.statut).toBe("ok");
+    if (revoque.statut !== "ok") return;
+    expect(revoque.nouveauJeton).not.toBe(commande.jeton);
+
+    const range = await archiverCommande(clientDe(alice), alice.profilId, commande.id, true);
+    expect(range.statut).toBe("ok");
+    if (range.statut === "ok") expect(range.jeton).toBe(revoque.nouveauJeton);
+  });
+
   test("Bob ne peut pas archiver une commande d'Alice", async () => {
     const commande = await creerCommande(alice);
 

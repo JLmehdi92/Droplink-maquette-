@@ -430,7 +430,6 @@ export async function ListeCommandes({
                   <form id={"arch-" + ligne.id} method="post" action={geste}>
                     <input type="hidden" name="geste" value="archiver" />
                     <input type="hidden" name="id" value={ligne.id} />
-                    <input type="hidden" name="jeton" value={ligne.jetonPublic} />
                     <input type="hidden" name="archiver" value={ligne.archiveeLe === null ? "1" : "0"} />
                     <input type="hidden" name="retour" value={retour} />
                   </form>

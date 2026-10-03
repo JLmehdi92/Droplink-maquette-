@@ -30,6 +30,9 @@ export function CopierLienLigne({
       window.setTimeout(() => setEtat("repos"), 1600);
     } catch {
       setEtat("echec");
+      // L'échec aussi revient au repos (1,6 s, comme le succès) : resté posé, il accusait
+      // encore la copie suivante, réussie (contre-audit du 03/10/2026).
+      window.setTimeout(() => setEtat("repos"), 1600);
     }
   };
   const libelle = etat === "echec" ? libelles.echec : libelles.copier;

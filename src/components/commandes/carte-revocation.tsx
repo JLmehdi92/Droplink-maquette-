@@ -28,12 +28,10 @@ import { BoutonCopierFiche } from "./copier-fiche";
  */
 export function CarteRevocation({
   orderId,
-  jeton,
   lienPublic,
   onNouveauJeton,
 }: {
   readonly orderId: string;
-  readonly jeton: string;
   readonly lienPublic: string;
   readonly onNouveauJeton: (jeton: string) => void;
 }) {
@@ -49,7 +47,7 @@ export function CarteRevocation({
   const revoquer = useCallback(async (): Promise<void> => {
     setEnCours(true);
     setEchec(null);
-    const resultat = await revoquerLienPublic(orderId, jeton).catch(() => null);
+    const resultat = await revoquerLienPublic(orderId).catch(() => null);
     setEnCours(false);
 
     if (resultat === null || resultat.statut !== "ok") {
@@ -66,7 +64,7 @@ export function CarteRevocation({
     // tomberait sur `body`, et le clavier repartirait du haut de la page.
     if (volet.current !== null) volet.current.open = false;
     titreVolet.current?.focus();
-  }, [orderId, jeton, onNouveauJeton, t]);
+  }, [orderId, onNouveauJeton, t]);
 
   // L'adresse se lit sans son protocole, et sa DERNIÈRE partie — le jeton — en gras :
   // c'est elle qui change à la révocation.

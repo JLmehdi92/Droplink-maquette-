@@ -145,7 +145,9 @@ export async function dupliquerCommande(
 }
 
 export type Archivage =
-  | { readonly statut: "ok"; readonly archivee: boolean }
+  /** `jeton` : celui que la base porte À L'INSTANT de l'écriture (`returning`), seul à
+   *  invalider — jamais celui qu'un formulaire a gardé d'un chargement antérieur. */
+  | { readonly statut: "ok"; readonly archivee: boolean; readonly jeton: string }
   | { readonly statut: "echec"; readonly motif: "saisie" | "introuvable" | "ecriture" };
 
 /**
@@ -173,7 +175,7 @@ export async function archiverCommande(
     .from("orders")
     .update({ archived_at: archiver ? new Date().toISOString() : null })
     .eq("id", analyse.data)
-    .select("id, archived_at")
+    .select("id, archived_at, public_token")
     .maybeSingle();
 
   if (error !== null) return { statut: "echec", motif: "ecriture" };
@@ -192,5 +194,5 @@ export async function archiverCommande(
 
   journaliserApres(supabase, analyse.data, "commande_archivee", { archivee: archiver });
 
-  return { statut: "ok", archivee: data.archived_at !== null };
+  return { statut: "ok", archivee: data.archived_at !== null, jeton: data.public_token };
 }
