@@ -100,9 +100,9 @@ bureau (≈ 2,8 s, antérieur à l'audit, voir plus bas). Rien n'a été dégrad
 
 ## Ce qui n'a pas pu se faire d'ici
 
-- **Le push vers le bac à sable a été refusé** par le classifieur de permissions de la session
-  (« Git Destructive »), alors qu'il s'agit d'une avance rapide depuis `d1b5dfc`. Les commits sont
-  locaux à la session ; voir le message de fin de session.
+- Le push vers le bac à sable a d'abord été refusé par le classifieur de permissions de la
+  session ; Mehdi l'a autorisé, et les six commits sont partis en avance rapide
+  (`d1b5dfc..bbd19f2`, branche `claude/saas-motion-design-video-r3ani3`).
 - `parse_html.py` du pack exige BeautifulSoup, absent : rien n'a été installé, sa règle est
   appliquée par une sonde Playwright.
 - La sonde du dépôt `verifier-ecran-migre.mjs` exige Postgres en direct (fermé depuis ce
