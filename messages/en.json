@@ -1701,11 +1701,11 @@
     }
   },
   "admin": {
+    "dateHeure": "{jour} at {heure}",
     "navigation": "Administration",
     "bandeau": "ADMINISTRATION",
     "comptes": {
       "titre": "Accounts",
-      "sousTitre": "Every view of this page is recorded with your email address and the time.",
       "recherche": "Search for an account",
       "recherchePlaceholder": "Email address or shop name…",
       "chercher": "Search",
@@ -1731,6 +1731,10 @@
         "active": "Active",
         "suspended": "Suspended"
       },
+      "statutsPluriel": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
       "videCompte": "No accounts.",
       "videRecherche": "No account matches this search.",
       "pageSuivante": "Show more",
@@ -1739,7 +1743,6 @@
       "trace": "This view is written to the audit log, along with the criteria used. Opening an account adds another entry.",
       "sansNom": "Not named yet",
       "ouvrir": "Open",
-      "decompte": "{total, plural, one {# account} other {# accounts}} · {suspendus, plural, one {# suspended} other {# suspended}}",
       "tuileTotal": "Total accounts",
       "tuileNouveaux": "New sign-ups",
       "tuileActifs": "Active accounts",
@@ -1779,10 +1782,9 @@
         "comptes_doublons": "Viewed duplicate accounts"
       },
       "vide": "No entries yet.",
-      "surTotalAuDela": "{affichees} of more than {total, number} entries",
+      "surTotalAuDela": "{affichees} of more than {total, number} entries · neither editable nor erasable",
       "surTotal": "{affichees} of {total, plural, one {# entry} other {# entries}} · neither editable nor erasable",
       "pageSuivante": "Show more",
-      "decompteAuDela": "More than {total, number} entries · neither editable nor erasable",
       "decompte": "{total, plural, one {# entry} other {# entries}} · neither editable nor erasable",
       "garantie": "This log can be neither edited nor erased, and it outlives the deletion of the accounts it describes. Reading it writes nothing to it.",
       "famille": {
@@ -1812,7 +1814,7 @@
       "surLaFenetre": "over the selected window",
       "liste": "Entry list",
       "listeTotal": "{total, plural, one {# entry in total} other {# entries in total}}",
-      "listeTotalAuDela": "more than {total} entries",
+      "listeTotalAuDela": "more than {total, number} entries",
       "repartition": "Log breakdown",
       "unite": "entries",
       "part": "{part}%",
@@ -1830,7 +1832,7 @@
       "commandes": "Orders",
       "colis": "Parcels",
       "retour": "Back to the account list",
-      "resume": "{email} · {type} · signed up on {date}",
+      "typeInscrit": "{type} · joined on {date}",
       "trace": "Opening this record was written to the audit log, with your identity. This vendor's order content is not reachable from anywhere here.",
       "medias": "Media",
       "stockage": "Storage",
@@ -2109,7 +2111,6 @@
     },
     "boutiques": {
       "titre": "Shops",
-      "sousTitre": "What each account takes up, sorted by storage. This screen shows no content: no customer name, no reference, no notes. Every view is recorded with your email and the time.",
       "recherche": "Search for a shop",
       "recherchePlaceholder": "Shop name or email address…",
       "chercher": "Search",
@@ -2128,7 +2129,8 @@
         "colis": "Parcels"
       },
       "decompte": "One shop per account · {total, plural, one {# in total} other {# in total}}",
-      "trace": "This view is written to the audit log, along with the criteria used, filter included.",
+      "stockageInfo": "{taille} re-read server-side",
+      "trace": "What each account takes up, sorted by storage. This screen shows no content: no customer name, no reference, no notes. This view is written to the audit log, along with the criteria used, filter included.",
       "filtre": {
         "toutes": "All",
         "supplier": "Suppliers",
@@ -2292,6 +2294,7 @@
       "aucunTransporteur": "No carrier"
     },
     "statistiques": {
+      "surFenetre": "over {jours} days",
       "titre": "Statistics",
       "sousTitre": "Analyse DropLink's growth and usage.",
       "vsAvant": "vs previous period",

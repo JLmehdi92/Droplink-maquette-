@@ -13,15 +13,10 @@
  *               surface d'administration, l'inverse exact de la page publique où
  *               une information absente est omise : un client consulte, un
  *               administrateur décide.
- *   `eteint`  — la capacité n'est pas déployée. La bascule est dessinée, en
- *               position basse, et n'est PAS un bouton : rendre cliquable ce qui
- *               ne pilote rien est la façon la plus courante de faire croire
- *               qu'un réglage existe.
  */
 export type FormeConstatee =
   | { readonly forme: "valeur"; readonly valeur: string }
-  | { readonly forme: "absent"; readonly mention: string }
-  | { readonly forme: "eteint" };
+  | { readonly forme: "absent"; readonly mention: string };
 
 export function RangeeConstatee({
   titre,
@@ -38,18 +33,7 @@ export function RangeeConstatee({
         <p>{titre}</p>
         {aide === undefined ? null : <small>{aide}</small>}
       </div>
-      {etat.forme === "valeur" ? (
-        <b>{etat.valeur}</b>
-      ) : etat.forme === "absent" ? (
-        <b>{etat.mention}</b>
-      ) : (
-        /* ÉTEINT ET NON CLIQUABLE : rien ne le pilote encore, et un
-           interrupteur qui ne commande rien serait un réglage qui ment. */
-        <span className="interrupteur" aria-hidden="true">
-          <input type="checkbox" disabled tabIndex={-1} />
-          <i />
-        </span>
-      )}
+      <b>{etat.forme === "valeur" ? etat.valeur : etat.mention}</b>
     </div>
   );
 }

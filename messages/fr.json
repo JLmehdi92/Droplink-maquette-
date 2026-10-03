@@ -1701,11 +1701,11 @@
     }
   },
   "admin": {
+    "dateHeure": "{jour} à {heure}",
     "navigation": "Administration",
     "bandeau": "ADMINISTRATION",
     "comptes": {
       "titre": "Comptes",
-      "sousTitre": "Chaque consultation de cette page est enregistrée avec votre email et l'heure.",
       "recherche": "Rechercher un compte",
       "recherchePlaceholder": "Adresse email ou nom de boutique…",
       "chercher": "Rechercher",
@@ -1731,6 +1731,10 @@
         "active": "Actif",
         "suspended": "Suspendu"
       },
+      "statutsPluriel": {
+        "active": "Actifs",
+        "suspended": "Suspendus"
+      },
       "videCompte": "Aucun compte.",
       "videRecherche": "Aucun compte ne correspond à cette recherche.",
       "pageSuivante": "Voir la suite",
@@ -1739,7 +1743,6 @@
       "trace": "Cette consultation est écrite au journal d'audit, avec les critères employés. Ouvrir un compte y ajoute une entrée.",
       "sansNom": "Pas encore nommée",
       "ouvrir": "Ouvrir",
-      "decompte": "{total, plural, one {# compte} other {# comptes}} · {suspendus, plural, one {# suspendu} other {# suspendus}}",
       "tuileTotal": "Comptes totaux",
       "tuileNouveaux": "Nouveaux inscrits",
       "tuileActifs": "Comptes actifs",
@@ -1779,10 +1782,9 @@
         "comptes_doublons": "Consultation des comptes en doublon"
       },
       "vide": "Aucune entrée pour l'instant.",
-      "surTotalAuDela": "{affichees} sur plus de {total, number} entrées",
+      "surTotalAuDela": "{affichees} sur plus de {total, number} entrées · ni modifiables ni effaçables",
       "surTotal": "{affichees} sur {total, plural, one {# entrée} other {# entrées}} · ni modifiables ni effaçables",
       "pageSuivante": "Voir la suite",
-      "decompteAuDela": "Plus de {total, number} entrées · ni modifiables ni effaçables",
       "decompte": "{total, plural, one {# entrée} other {# entrées}} · ni modifiables ni effaçables",
       "garantie": "Ce journal ne peut être ni modifié ni effacé, et il survit à la suppression des comptes concernés. Le consulter n'y écrit rien.",
       "famille": {
@@ -1812,7 +1814,7 @@
       "surLaFenetre": "sur la fenêtre choisie",
       "liste": "Liste des entrées",
       "listeTotal": "{total, plural, one {# entrée au total} other {# entrées au total}}",
-      "listeTotalAuDela": "plus de {total} entrées",
+      "listeTotalAuDela": "plus de {total, number} entrées",
       "repartition": "Répartition du journal",
       "unite": "entrées",
       "part": "{part} %",
@@ -1830,7 +1832,7 @@
       "commandes": "Commandes",
       "colis": "Colis",
       "retour": "Revenir à la liste des comptes",
-      "resume": "{email} · {type} · inscrit le {date}",
+      "typeInscrit": "{type} · inscrit le {date}",
       "trace": "L'ouverture de cette fiche a été écrite au journal d'audit, avec votre identité. Le contenu des commandes de ce vendeur n'est accessible depuis nulle part ici.",
       "medias": "Médias",
       "stockage": "Stockage",
@@ -1951,7 +1953,7 @@
       "facture": "FACTURÉ",
       "ceMoisCi": "ce mois-ci",
       "commandes": "Commandes créées",
-      "comptesDont": "dont {sansType} sans type · {suspendus} suspendus, hors de ce total",
+      "comptesDont": "dont {sansType} sans type · {suspendus, plural, one {# suspendu} other {# suspendus}}, hors de ce total",
       "dernieresActions": "Dernières actions d'administration",
       "dernieresActionsIndisponibles": "Aperçu indisponible pour l’instant. Le journal complet reste consultable.",
       "toutLeJournal": "Tout le journal",
@@ -2109,7 +2111,6 @@
     },
     "boutiques": {
       "titre": "Boutiques",
-      "sousTitre": "Ce que chaque compte occupe, trié par stockage. Cet écran ne montre aucun contenu : ni nom de client, ni référence, ni note. Chaque consultation est enregistrée avec votre email et l'heure.",
       "recherche": "Rechercher une boutique",
       "recherchePlaceholder": "Nom de boutique ou adresse email…",
       "chercher": "Rechercher",
@@ -2128,7 +2129,8 @@
         "colis": "Colis"
       },
       "decompte": "Une boutique par compte · {total, plural, one {# au total} other {# au total}}",
-      "trace": "Cette consultation est écrite au journal d'audit, avec les critères employés, filtre compris.",
+      "stockageInfo": "{taille} relus côté serveur",
+      "trace": "Ce que chaque compte occupe, trié par stockage. Cet écran ne montre aucun contenu : ni nom de client, ni référence, ni note. Cette consultation est écrite au journal d'audit, avec les critères employés, filtre compris.",
       "filtre": {
         "toutes": "Toutes",
         "supplier": "Fournisseurs",
@@ -2292,6 +2294,7 @@
       "aucunTransporteur": "Aucun transporteur"
     },
     "statistiques": {
+      "surFenetre": "sur {jours} jours",
       "titre": "Statistiques",
       "sousTitre": "Analysez la croissance et l'utilisation de DropLink.",
       "vsAvant": "vs période précédente",

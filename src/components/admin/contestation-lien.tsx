@@ -119,7 +119,8 @@ export function ContestationLien({
         aide={
           lecture.etat === "ok"
             ? t("aide", {
-                date: format.dateTime(new Date(lecture.contestation.creeeLe), { dateStyle: "long" }),
+                // « 30 sept. 2026 », comme la maquette et l'alerte du panneau.
+                date: format.dateTime(new Date(lecture.contestation.creeeLe), { day: "numeric", month: "short", year: "numeric" }),
                 rang: lecture.contestation.rang,
               })
             : undefined

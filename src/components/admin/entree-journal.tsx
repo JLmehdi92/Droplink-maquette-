@@ -61,7 +61,11 @@ export async function EntreeJournal({ ligne }: { readonly ligne: LigneJournal })
       </div>
       <p>
         <time dateTime={ligne.quand}>
-          {format.dateTime(quand, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+          {/* « 30 sept. à 11:42 », comme la maquette : le « à » est une règle de traduction. */}
+          {t("dateHeure", {
+            jour: format.dateTime(quand, { day: "numeric", month: "short" }),
+            heure: format.dateTime(quand, { hour: "2-digit", minute: "2-digit" }),
+          })}
         </time>
         <small>
           {t("journal.parQui")} {ligne.adminEmail}

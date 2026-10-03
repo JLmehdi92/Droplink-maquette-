@@ -41,7 +41,7 @@ export async function generateMetadata({
  * LA DÉCISION QUI STRUCTURE TOUT L'ÉCRAN
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * La planche dessine QUATORZE réglages ; le produit n'en lisait que trois
+ * L'ancienne planche dessinait QUATORZE réglages ; le produit n'en lisait que trois
  * depuis `system_settings`. La conformité au dessin aurait donc pu s'obtenir en
  * ouvrant les onze autres à l'écriture — et c'est exactement le défaut que
  * `lib/audit/parametres.ts` existe pour empêcher : une clé qu'aucun chemin de
@@ -49,10 +49,10 @@ export async function generateMetadata({
  * crédibles, et ne substitue rien. Une valeur qui a la FORME d'une
  * configuration franchit toutes les validations de présence.
  *
- * L'écran rend donc les quatorze rangées, dans TROIS états qui ne se
- * confondent pas :
+ * L'écran rend donc ses rangées (dix-sept le 03/10/2026), dans TROIS états qui ne
+ * se confondent pas :
  *
- *   MODIFIABLE — cinq réglages de l'inventaire clos, écrits en base, tracés par
+ *   MODIFIABLE — huit réglages de l'inventaire clos, écrits en base, tracés par
  *                un déclencheur avec l'ancienne ET la nouvelle valeur.
  *   CONSTATÉ   — huit valeurs que le produit applique vraiment, lues À LEUR
  *                SOURCE et non recopiées, mais qui se changent ailleurs :
@@ -66,10 +66,9 @@ export async function generateMetadata({
  *
  * DEUX INTERRUPTEURS SONT NÉS AVEC CET ÉCRAN (migration 117) parce que la
  * planche les dessine et qu'ils coupent deux choses réelles : la facturation à
- * la prise en charge, et la porte d'entrée. Le troisième que la planche dessine
- * — les notifications par email — reste ÉTEINT ET NON CLIQUABLE : rien ne les
- * envoie encore, et rendre cliquable ce qui ne pilote rien est la façon la plus
- * courante de faire croire qu'un réglage existe.
+ * la prise en charge, et la porte d'entrée. La rangée « Notifications par email —
+ * rien n'est envoyé » est RETIRÉE (audit final du 03/10/2026) : la maquette ne la
+ * dessine plus, et elle était fausse depuis les e-mails de suivi (188-189).
  *
  * AUCUN SECRET NE PASSE PAR CET ÉCRAN. Clés d'API, secret du planificateur, clé
  * service-role restent dans l'environnement. Une valeur en base est lisible par
@@ -84,9 +83,6 @@ type Rangee =
   // de la carte un mur de texte.
   | { readonly genre: "constate"; readonly id: string; readonly sansAide?: true }
   | { readonly genre: "absent"; readonly id: string };
-
-/** « 20 sept. 2026 », comme l'origine d'un réglage dans la maquette. */
-const DATE_ORIGINE = { day: "numeric", month: "short", year: "numeric" } as const;
 
 /*
  * L ICÔNE DE CHAQUE CARTE, comme le kit en pose une. Elle ne porte AUCUNE
@@ -204,9 +200,9 @@ export default async function ParametresAdmin({
     !p.ecrit
       ? t("origine.jamaisDecide")
       : p.modifiePar === null
-        ? t("origine.auteurParti", { date: format.dateTime(new Date(p.modifieLe ?? 0), DATE_ORIGINE) })
+        ? t("origine.auteurParti", { date: format.dateTime(new Date(p.modifieLe ?? 0), "origine") })
         : t("origine.decide", {
-            date: format.dateTime(new Date(p.modifieLe ?? 0), DATE_ORIGINE),
+            date: format.dateTime(new Date(p.modifieLe ?? 0), "origine"),
             email: p.modifiePar,
           });
 

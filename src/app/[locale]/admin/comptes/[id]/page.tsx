@@ -108,12 +108,7 @@ export default async function FicheCompte({
           pas `history.back()` : on arrive souvent ici depuis une recherche. */}
       <EnTeteAdmin
         titre={t("fiche.titre")}
-        sousTitre={t("fiche.resume", {
-          email: fiche.email,
-          type: typeLisible,
-          date: format.dateTime(new Date(fiche.creeLe), { dateStyle: "long" }),
-        })}
-        sousTitreAuBureauSeulement
+        sousTitre=""
         fil={[{ href: `/${langue}/admin/comptes`, libelle: t("comptes.titre") }, { libelle: t("fiche.titre") }]}
       >
         <Link prefetch={false} className="bouton-outil" href={`/${langue}/admin/comptes`}>
@@ -129,7 +124,13 @@ export default async function FicheCompte({
           <div>
             <h2>{fiche.email}</h2>
             <p>
-              {fiche.boutique ?? t("comptes.sansNom")} · {typeLisible}
+              {/* Comme la maquette (`admin-compte.html`) : le type et l'inscription, ici,
+                  au téléphone comme au bureau — la date ne vivait que dans le sous-titre,
+                  masqué sous 768 px (audit final du 03/10/2026). */}
+              {t("fiche.typeInscrit", {
+                type: typeLisible,
+                date: format.dateTime(new Date(fiche.creeLe), { dateStyle: "long" }),
+              })}
             </p>
           </div>
           <div className="adm-fiche__etats">

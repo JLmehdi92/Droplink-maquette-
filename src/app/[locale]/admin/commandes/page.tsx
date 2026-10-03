@@ -173,8 +173,12 @@ export default async function AdminCommandes({
   /* LE LIEN BLOQUÉ S'AJOUTE À LA RÉFÉRENCE, il ne remplace pas le statut : c'est
      un état du LIEN, la commande garde le sien. Si la lecture des blocages a
      échoué, ni pastille ni bouton (contrainte 8). */
+  // « 30 sept. à 11:42 », comme la maquette (audit final du 03/10/2026).
   const date = (l: LigneCommandeAdmin): string =>
-    format.dateTime(new Date(l.creeLe), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    t("dateHeure", {
+      jour: format.dateTime(new Date(l.creeLe), { day: "numeric", month: "short" }),
+      heure: format.dateTime(new Date(l.creeLe), { hour: "2-digit", minute: "2-digit" }),
+    });
   /* UNE CONTESTATION EN ATTENTE REMPLACE LE DÉBLOCAGE DIRECT : débloquer passe
      alors par sa lecture (tracée à l'ouverture) et sa réponse, qui part au vendeur.
      Sa pastille se pose dans la cellule de référence, comme la maquette. */
@@ -186,7 +190,7 @@ export default async function AdminCommandes({
 
   return (
     <main id="contenu" className="tableau adm">
-      <EnTeteAdmin titre={t("commandes.titre")} sousTitre={t("commandes.sousTitreListe")} sousTitreAuBureauSeulement />
+      <EnTeteAdmin titre={t("commandes.titre")} sousTitre={t("commandes.sousTitreListe")} />
       <EncartTrace texte={t("commandes.trace")} />
       {repartition === null ? <p className="adm-aide">{t("panneau.compteursIndisponibles")}</p> : null}
 

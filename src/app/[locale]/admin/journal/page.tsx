@@ -131,7 +131,6 @@ export default async function AdminJournal({
       <EnTeteAdmin
         titre={t("journal.titre")}
         sousTitre={t("journal.sousTitreListe")}
-        sousTitreMobile={depasse ? t("journal.decompteAuDela", { total }) : t("journal.decompte", { total })}
       />
 
       {/* LES FAMILLES DU JOURNAL, qui sont exactement celles du filtre : un
@@ -163,7 +162,7 @@ export default async function AdminJournal({
 
       {/* CE QUE CE JOURNAL GARANTIT, dit avant qu'on le lise. Au téléphone, le
           sous-titre porte cette garantie : l'encart y est masqué. */}
-      <p className="adm-garantie max-md:hidden">
+      <p className="adm-garantie">
         <LockKeyhole aria-hidden="true" className="ic" />
         <span>{t("journal.garantie")}</span>
       </p>

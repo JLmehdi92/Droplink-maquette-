@@ -171,7 +171,7 @@ export default async function AdminBoutiques({
 
   return (
     <main id="contenu" className="tableau adm">
-      <EnTeteAdmin titre={t("boutiques.titre")} sousTitre={t("boutiques.sousTitreListe")} sousTitreAuBureauSeulement />
+      <EnTeteAdmin titre={t("boutiques.titre")} sousTitre={t("boutiques.sousTitreListe")} />
       <EncartTrace texte={t("boutiques.trace")} />
 
       {/* « CONFIGURÉES » ET NON « ACTIVES » : une boutique naît à l'inscription
@@ -279,7 +279,7 @@ export default async function AdminBoutiques({
                       <td className="adm-nb">{format.number(b.commandes)}</td>
                       <td className="adm-nb">{format.number(b.medias)}</td>
                       <td>
-                        <span className="adm-stock" data-info={taille(b.octets)}>
+                        <span className="adm-stock" data-info={t("boutiques.stockageInfo", { taille: taille(b.octets) })}>
                           <b>{taille(b.octets)}</b>
                           <i aria-hidden="true" style={{ "--k": (b.octets / plusGrosse).toFixed(3) } as React.CSSProperties} />
                         </span>

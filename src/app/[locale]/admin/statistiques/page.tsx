@@ -352,7 +352,7 @@ export default async function AdminStatistiques({
 
   return (
     <main id="contenu" className="tableau adm">
-      <EnTeteAdmin titre={t("statistiques.titre")} sousTitre={t("statistiques.sousTitre")} sousTitreAuBureauSeulement />
+      <EnTeteAdmin titre={t("statistiques.titre")} sousTitre={t("statistiques.sousTitre")} />
 
       {/* LA VUE ET LA PÉRIODE VIVENT DANS L'URL : des liens, pas des boutons. */}
       <div className="adm-outils adm-outils--tete">
@@ -396,7 +396,7 @@ export default async function AdminStatistiques({
             {laCroissance}
           </div>
           <div className="adm-rangee adm-rangee--3">
-            {tuileSeule(t("statistiques.pagesConsultees"), nombre(vuesTotales), t(`statistiques.fenetres.${jours}`))}
+            {tuileSeule(t("statistiques.pagesConsultees"), nombre(vuesTotales), t("statistiques.surFenetre", { jours: Number(jours) }))}
             {tuileSeule(
               t("statistiques.tauxConsultes"),
               tauxCourant === null ? "—" : t("statistiques.tauxValeur", { valeur: tauxCourant }),

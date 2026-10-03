@@ -16,18 +16,24 @@ import { routing } from "./routing";
  * Partout ailleurs le code passe un OBJET d'options, qui ne peut pas manquer :
  * les deux écritures se ressemblent trop pour qu'une relecture les distingue.
  *
- * `long` PORTE L'HEURE. Ces dates répondent à « qui a changé ce réglage, et
+ * `origine` PORTE L'HEURE. Ces dates répondent à « qui a changé ce réglage, et
  * quand » : à la journée près, deux modifications du même jour deviennent
- * indiscernables, et c'est précisément le cas où l'on regarde.
+ * indiscernables, et c'est précisément le cas où l'on regarde. Le mois est COURT
+ * (« 20 sept. 2026, 14:05 »), comme l'origine de la maquette (audit final du
+ * 03/10/2026) ; la page ET l'action qui la recompose après un enregistrement
+ * l'emploient, pour qu'elle ne change pas de forme.
  *
  * TOUT NOM AJOUTÉ ICI DOIT ÊTRE EMPLOYÉ, et tout nom employé doit être ici —
  * `tests/unit/formats-nommes.test.ts` échoue dans les deux sens.
  */
 export const FORMATS = {
   dateTime: {
-    long: {
-      dateStyle: "long",
-      timeStyle: "short",
+    origine: {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     },
   },
 } as const;

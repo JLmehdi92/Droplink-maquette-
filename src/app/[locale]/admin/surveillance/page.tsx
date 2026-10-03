@@ -214,11 +214,9 @@ export default async function SurveillanceAdmin({
             </div>
           </header>
           <ul className="adm-limites">
-            {SURFACES_AFFICHEES.map((surface, rang) => {
+            {SURFACES_AFFICHEES.map((surface) => {
               const plafond = plafonds.get(surface) ?? 1;
               const valeur = pic(surface);
-              const precedente = SURFACES_AFFICHEES[rang - 1];
-              const nouvelleRegle = precedente === undefined || DEGRADATION[precedente] !== DEGRADATION[surface];
               return (
                 <li key={surface}>
                   <p>
@@ -233,7 +231,9 @@ export default async function SurveillanceAdmin({
                   <i aria-hidden="true">
                     <b style={{ "--k": String(valeur === null ? 0 : Math.min(valeur / Math.max(plafond, 1), 1)) } as React.CSSProperties} />
                   </i>
-                  {nouvelleRegle ? <small>{t(`surveillance.degradation.${DEGRADATION[surface]}`)}</small> : null}
+                  {/* Sur CHAQUE surface, comme la maquette : la règle de panne se lit avec la
+                      jauge qu'elle concerne (audit final du 03/10/2026). */}
+                  <small>{t(`surveillance.degradation.${DEGRADATION[surface]}`)}</small>
                 </li>
               );
             })}

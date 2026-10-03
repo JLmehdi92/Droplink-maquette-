@@ -132,7 +132,8 @@ export async function enregistrerParametre(
   const t = await getTranslations("admin.parametres");
   const format = await getFormatter();
   const quand = (iso: string | null): string =>
-    format.dateTime(new Date(iso ?? 0), "long");
+    // Le format nommé de l'écran : l'origine ne change pas de forme après un enregistrement.
+    format.dateTime(new Date(iso ?? 0), "origine");
 
   return {
     statut: "ok",

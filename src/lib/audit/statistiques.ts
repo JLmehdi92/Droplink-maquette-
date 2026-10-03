@@ -16,7 +16,8 @@ import type { ClientAdmin } from "@/lib/audit/comptes";
  * relue par Zod : un `null` affiché « 0 » affirmerait qu'on a mesuré.
  */
 
-export const FENETRES_STATISTIQUES = ["7", "30", "90"] as const;
+// Dans l'ordre de la maquette (`admin-statistiques.html`) : la fenêtre par défaut d'abord.
+export const FENETRES_STATISTIQUES = ["30", "7", "90"] as const;
 export type FenetreStatistiques = (typeof FENETRES_STATISTIQUES)[number];
 
 export const VUES_STATISTIQUES = ["globale", "utilisation", "croissance", "commandes", "comptes"] as const;

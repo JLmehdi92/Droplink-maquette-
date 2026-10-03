@@ -93,7 +93,9 @@ export default async function AdminComptes({
     lireSeuils(supabase),
     lireCompteurs(supabase),
     lireInscriptionsRecentes(supabase, maintenant, JOURS_INSCRIPTIONS),
-    compterDoublons(supabase),
+    // Un comptage en panne ne fait pas tomber la liste auditée : la colonne le DIT, comme la
+    // vue d'ensemble (audit final du 03/10/2026).
+    compterDoublons(supabase).catch((): null => null),
   ]);
 
   const t = await getTranslations("admin");
@@ -138,7 +140,7 @@ export default async function AdminComptes({
 
   return (
     <main id="contenu" className="tableau adm">
-      <EnTeteAdmin titre={t("comptes.titre")} sousTitre={t("comptes.sousTitreListe")} sousTitreAuBureauSeulement />
+      <EnTeteAdmin titre={t("comptes.titre")} sousTitre={t("comptes.sousTitreListe")} />
       <EncartTrace texte={t("comptes.trace")} />
 
       {/* QUATRE TUILES, PAS SIX : le kit compte aussi les plans, que la liste ne
@@ -185,8 +187,8 @@ export default async function AdminComptes({
               courant={parametres.statut}
               options={[
                 { valeur: "tous", libelle: t("comptes.statutTous"), href: lienFiltre("tous") },
-                { valeur: "active", libelle: t("comptes.statuts.active"), href: lienFiltre("active") },
-                { valeur: "suspended", libelle: t("comptes.statuts.suspended"), href: lienFiltre("suspended") },
+                { valeur: "active", libelle: t("comptes.statutsPluriel.active"), href: lienFiltre("active") },
+                { valeur: "suspended", libelle: t("comptes.statutsPluriel.suspended"), href: lienFiltre("suspended") },
               ]}
             />
             <RechercheAdmin
@@ -304,17 +306,17 @@ export default async function AdminComptes({
               unite={t("comptes.unite")}
               part={(pourcent) => t("comptes.part", { part: pourcent })}
               parts={[
-                { cle: "actifs", libelle: t("comptes.statuts.active"), valeur: compteurs.comptesActifs, trait: "var(--color-ds-succes)" },
-                { cle: "suspendus", libelle: t("comptes.statuts.suspended"), valeur: compteurs.comptesSuspendus, trait: "var(--color-ds-erreur)" },
+                { cle: "actifs", libelle: t("comptes.statutsPluriel.active"), valeur: compteurs.comptesActifs, trait: "var(--color-ds-succes)" },
+                { cle: "suspendus", libelle: t("comptes.statutsPluriel.suspended"), valeur: compteurs.comptesSuspendus, trait: "var(--color-ds-erreur)" },
               ]}
             />
           </section>
-          {doublons.identifiants === 0 ? (
+          {doublons === null || doublons.identifiants === 0 ? (
             <section className="bloc adm-bloc" aria-labelledby="adm-doublons">
               <header className="bloc__tete">
                 <div>
                   <h2 id="adm-doublons">{t("doublons.titre")}</h2>
-                  <p className="adm-aide">{t("doublons.vide")}</p>
+                  <p className="adm-aide">{doublons === null ? t("panneau.doublonsIndisponibles") : t("doublons.vide")}</p>
                 </div>
               </header>
             </section>

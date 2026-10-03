@@ -1701,11 +1701,11 @@
     }
   },
   "admin": {
+    "dateHeure": "{jour} {heure}",
     "navigation": "后台管理",
     "bandeau": "后台管理",
     "comptes": {
       "titre": "账户",
-      "sousTitre": "每次访问本页都会连同您的邮箱和时间一起记录。",
       "recherche": "搜索账户",
       "recherchePlaceholder": "邮箱地址或店铺名称…",
       "chercher": "搜索",
@@ -1731,6 +1731,10 @@
         "active": "正常",
         "suspended": "已停用"
       },
+      "statutsPluriel": {
+        "active": "正常",
+        "suspended": "已停用"
+      },
       "videCompte": "没有账户。",
       "videRecherche": "没有符合该搜索条件的账户。",
       "pageSuivante": "查看更多",
@@ -1739,7 +1743,6 @@
       "trace": "本次访问及所用的搜索条件都会写入审计日志。打开一个账户会再增加一条记录。",
       "sansNom": "尚未命名",
       "ouvrir": "打开",
-      "decompte": "{total, plural, other {# 个账户}} · {suspendus, plural, other {# 个已停用}}",
       "tuileTotal": "账户总数",
       "tuileNouveaux": "新注册",
       "tuileActifs": "活跃账户",
@@ -1779,10 +1782,9 @@
         "comptes_doublons": "查看重复账户"
       },
       "vide": "目前没有任何记录。",
-      "surTotalAuDela": "显示 {affichees} 条，总数超过 {total, number} 条",
+      "surTotalAuDela": "显示 {affichees} 条，总数超过 {total, number} 条 · 不可修改，也不可删除",
       "surTotal": "显示 {affichees} 条，{total, plural, other {共 # 条}} · 不可修改，也不可删除",
       "pageSuivante": "查看更多",
-      "decompteAuDela": "超过 {total, number} 条记录 · 不可修改，也不可删除",
       "decompte": "{total, plural, other {# 条记录}} · 不可修改，也不可删除",
       "garantie": "本日志不可修改也不可删除，并且在相关账户被删除后依然保留。查看它不会写入任何内容。",
       "famille": {
@@ -1812,7 +1814,7 @@
       "surLaFenetre": "所选时间窗内",
       "liste": "条目列表",
       "listeTotal": "共 {total, number} 条",
-      "listeTotalAuDela": "超过 {total} 条",
+      "listeTotalAuDela": "超过 {total, number} 条",
       "repartition": "日志分布",
       "unite": "条",
       "part": "{part}%",
@@ -1830,7 +1832,7 @@
       "commandes": "订单",
       "colis": "包裹",
       "retour": "返回账户列表",
-      "resume": "{email} · {type} · 注册于 {date}",
+      "typeInscrit": "{type} · 注册于 {date}",
       "trace": "打开本页已连同您的身份写入审计日志。此处无法从任何入口查看该卖家的订单内容。",
       "medias": "文件",
       "stockage": "存储用量",
@@ -2109,7 +2111,6 @@
     },
     "boutiques": {
       "titre": "店铺",
-      "sousTitre": "每个账户占用了多少，按存储量排序。本页不显示任何内容：既无客户姓名，也无商品编号或备注。每次访问都会连同您的邮箱和时间一起记录。",
       "recherche": "搜索店铺",
       "recherchePlaceholder": "店铺名称或邮箱地址…",
       "chercher": "搜索",
@@ -2128,7 +2129,8 @@
         "colis": "包裹"
       },
       "decompte": "每个账户一个店铺 · {total, plural, other {共 # 个}}",
-      "trace": "本次访问及所用的搜索条件（含筛选）都会写入审计日志。",
+      "stockageInfo": "服务端重新读取 {taille}",
+      "trace": "每个账户占用了多少，按存储量排序。本页不显示任何内容：既无客户姓名，也无商品编号或备注。本次访问及所用的搜索条件（含筛选）都会写入审计日志。",
       "filtre": {
         "toutes": "全部",
         "supplier": "供货商",
@@ -2292,6 +2294,7 @@
       "aucunTransporteur": "无承运商"
     },
     "statistiques": {
+      "surFenetre": "{jours} 天内",
       "titre": "统计",
       "sousTitre": "分析 DropLink 的增长与使用情况。",
       "vsAvant": "较上一周期",

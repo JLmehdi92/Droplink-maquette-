@@ -1510,6 +1510,31 @@ défauts trouvés, et corrigés :
 - Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1301/1302 (alarme Railway) ;
   fumée sans violation CSP ni erreur ; `/p` 289,0 Ko hors médias.
 
+### ▶️ 03/10/2026 — second tour d'audit, administration (session cloud)
+
+Nouvel agent indépendant, sur le CODE (l'administration exige la double authentification).
+Les correctifs du premier tour sont vérifiés ; il en restait des morceaux, et de nouveaux
+écarts — corrigés : « plus de 10000 entrées » non formaté et pied du Journal au-delà de 10 000
+sans « ni modifiables ni effaçables » ; forme `eteint` morte et en-tête des Paramètres qui
+comptait encore « quatorze » réglages ; l'origine qui repassait en date longue après un
+enregistrement (un seul format nommé, `origine` : « 20 sept. 2026, 14:05 » — le mois court de
+la maquette, l'HEURE gardée, deux changements du même jour devant rester discernables) ; filtres et anneau de Comptes au pluriel (« Actifs », « Suspendus ») ; encart
+de Boutiques au texte complet de la maquette ; sous-titres et garantie qui disparaissaient
+sous 768 px (cinq écrans et le Journal) — rendus partout comme la maquette ; en-tête de la
+fiche « Revendeur · inscrit le 14 juin 2026 » (la date n'existait plus au téléphone) ; un
+comptage des doublons en panne qui faisait tomber toute la liste des Comptes ; « 30 sept. à
+11:42 » (règle de traduction) ; date courte du dialogue de contestation ; « 1 suspendu » ;
+périodes des Statistiques dans l'ordre 30 / 7 / 90 et « sur 30 jours » ; « 4,5 Go relus côté
+serveur » ; la règle de panne sous chaque jauge de Surveillance ; trois chaînes mortes.
+
+**Gardés, avec leur raison** : « Ce que ce compte a fait » en liste datée et non en tuiles de
+totaux — `lire_compte_admin` ne rend que les six derniers couples (type, jour), des totaux
+demanderaient une migration (§ 9) ; « Colis » marqué FACTURÉ et la ligne « Couleur » de la
+fiche (données réelles) ; « Débloquer le lien » retiré d'une ligne contestée (débloquer passe
+par la lecture tracée de la contestation) ; sélecteur 7/30/90 de la courbe du panneau, filtre
+de date de Commandes, adresse du compte visé en texte dans le Journal.
+**Non corrigé, et dit à Mehdi (§ 9)** : le 404 de l'administration a un corps VIDE.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de
@@ -1549,6 +1574,17 @@ défauts trouvés, et corrigés :
   ne rend pas 500 : elle dit « Les contestations en attente n'ont pas pu être lues ».
 - [x] Trancher la mention de facturation de Tarifs — **décidé le 03/10/2026 (D4b) : elle reste au
   gris secondaire** (`.tf-note`, comme la maquette).
+- [ ] **Sécurité, à trancher (second tour d'audit, 03/10/2026)** : `/fr/admin*` répond 404 avec
+  un corps VIDE (`middleware.ts`, trois `new NextResponse(null, { status: 404 })`), quand
+  toute autre adresse inventée répond la page « Cette page n'existe pas » (≈ 11,7 Ko). Le
+  préfixe `/admin` se reconnaît donc à la taille ou à l'écran du navigateur — l'inverse de ce
+  que le 404 doit cacher. Correctif proposé : `NextResponse.rewrite` vers une route
+  inexistante de la même langue, avec le statut 404, pour servir exactement le corps de
+  `global-not-found`. NON appliqué depuis le cloud : la sonde de fumée (« le refus pèse comme
+  une route admin inventée ») et la suite 404, non désactivables, ne tournent que sur ton poste.
+- [ ] **« Ce que ce compte a fait »** (fiche admin) : la maquette montre des TUILES de totaux par
+  type d'événement ; `lire_compte_admin` ne rend que les six derniers couples (type, jour). Une
+  migration (nouvelle fonction de comptage) le permettrait — à décider.
 - [ ] **Menu mobile des pages publiques (décision D du 03/10)** : sans « Créer un compte », et le
   bouton de la barre est masqué sous 640 px — au téléphone, une page publique sans appel dans son
   corps (pages légales, signalement, article de blog sans encart final) n'a plus de chemin vers
