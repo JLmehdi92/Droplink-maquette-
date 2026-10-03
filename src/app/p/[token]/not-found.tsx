@@ -2,7 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ArrowRight, House, MessageCircle, PackageOpen } from "lucide-react";
-import symbole from "@/../public/marque/logo-symbole.png";
+// LE SYMBOLE À L'ENCRE (#0B0B18), pas au dégradé : cet écran est NEUTRE (décision de
+// Mehdi du 02/10/2026, règle 3 de CLAUDE.md sous /p). Tiré du symbole de marque, forme et
+// transparence identiques, seule la couleur change.
+import symbole from "@/../public/marque/logo-symbole-encre.png";
 
 /**
  * L'ÉCRAN D'UN LIEN QUI NE MÈNE NULLE PART — refonte du 02/10/2026, maquette

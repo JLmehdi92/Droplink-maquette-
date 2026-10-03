@@ -204,7 +204,7 @@ badge « Pro » demande une migration, donc une écriture en production par Mehd
 3. Landing : afficher les quotas et le prix lus en base (la page cesse d'être purement statique, sauf revalidation périodique), ou une landing sans chiffres.
 4. Landing : retirer aussi, comme les témoignages, la ligne « Utilisé par des vendeurs sur Vinted, eBay… » (faux logos), le formulaire « Restez informé » (non branché) et les icônes de réseaux du pied (décoratives).
 5. Bouton « Créer une commande » dans la barre du haut de chaque écran vendeur (il porte alors le seul dégradé de l'écran).
-6. Aperçu de la page client au survol d'une commande (tableau de bord, liste).
+6. Aperçu de la page client au survol d'une commande (tableau de bord, liste). — **retiré, décision de Mehdi du 03/10/2026**
 7. Titre de la fiche commande : la référence (produit) ou le nom du client / « Nouvelle commande » (maquette).
 8. Paramètres en six onglets (maquette) ou en une page à deux colonnes (produit).
 9. Ma marque : bascule Mobile / Desktop de l'aperçu, validation en direct, glisser-déposer du logo.
@@ -596,8 +596,8 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   curseur, bande de cinq compteurs, graphique à bascule (douze semaines de commandes / ouvertures
   des liens jour par jour), dernières commandes, actions rapides, puis répartition, transporteurs et
   activité. Composants neufs sous `components/tableau/` (`CompteursApp`, `GrapheTableau`,
-  `SelecteurPeriode`, `ApercuSurvol`, `blocs-tableau`), écrits pour être repris par les Analyses.
-- **Décisions de Mehdi appliquées** : n° 6, l'aperçu au survol d'une commande est la VRAIE page
+  `SelecteurPeriode`, `ApercuSurvol`, `blocs-tableau`), écrits pour être repris par les Analyses. — **retiré, décision de Mehdi du 03/10/2026**
+- **Décisions de Mehdi appliquées** : n° 6, l'aperçu au survol d'une commande est la VRAIE page — **retiré, décision de Mehdi du 03/10/2026**
   (`/p/<jeton>/apercu`, aucune vue comptée), à la souris seulement, après 450 ms ; chaque page
   ouverte garde son cadre (cinq au plus) pour ne pas recharger une page client à chaque retour.
   N° 10, la période change sans recharger : navigation du routeur, l'URL reste l'état, le serveur
@@ -623,7 +623,7 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   pouvait afficher une période non servie, trois zéros inventés (ouvertures, délai illisible,
   « 0 dernières semaines »), points du graphe muets au clavier (annonce `aria-live`), bascule
   `tablist` sans panneau (devenue boutons pressés), visée décalée sur la courbe, iframe rechargée à
-  chaque survol, rAF non annulé, panne de lecture des dernières commandes sans trace, `data-jeton`
+  chaque survol, rAF non annulé, panne de lecture des dernières commandes sans trace, `data-jeton` — **retiré, décision de Mehdi du 03/10/2026**
   non déclaré, flèches qui empilaient l'historique (+ Début/Fin), tracé rejoué au redimensionnement,
   clés orphelines, code mort.
 - **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.

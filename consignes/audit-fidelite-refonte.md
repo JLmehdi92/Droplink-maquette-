@@ -52,7 +52,7 @@
 >   `tableau-envois.tsx:224`) au lieu de l'estompe sur place.
 > - « Copier le lien » d'une ligne : l'état d'échec ne revient jamais au repos
 >   (`copier-lien-ligne.tsx:31-33`).
-> - Aperçu au survol : l'intention n'est annulée qu'en quittant la LISTE (`apercu-survol.tsx:73-76`)
+> - Aperçu au survol : l'intention n'est annulée qu'en quittant la LISTE (`apercu-survol.tsx:73-76`) — **retiré, décision de Mehdi du 03/10/2026**
 >   et cinq iframes restent actives masquées (`:101-110`).
 > - Second clic pendant la sortie de 110 ms ignoré (`transitions-ecran.tsx:173`) ; `data-sens`
 >   posé même sur un clic modifié (`navigation-vendeur.tsx:138-143`) ; `dl-sans-entree` laissé

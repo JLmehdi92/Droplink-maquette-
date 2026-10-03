@@ -214,11 +214,11 @@ Période : searchParam `periode` ∈ {7j, 30j, 90j} (`PERIODES`), défaut 30j. T
   - Table cachée « Voir les valeurs » (`<details>`, `table-vue`, `tableau.html:47`) : alternative texte au graphique.
   - Sélecteur de période en `radiogroup` avec curseur coulissant (`analytique.js:202-217`) : le produit navigue par liens.
   - Compteurs : chiffre qui se fond avec flou lors du changement de période (`changer`, `analytique.js:54-61`), pas de rechargement.
-  - Aperçu flottant de la page client au survol d'une commande (`tableau.js:63-103`).
+  - Aperçu flottant de la page client au survol d'une commande (`tableau.js:63-103`). — **retiré, décision de Mehdi du 03/10/2026**
   - Fil d'Ariane ; l'en-tête avec titre 22 px.
   - Pas d'icône dans les compteurs (bande à filets).
 - **Fonctionnalités nouvelles à signaler**
-  - **Aperçu de la page client au survol** (450 ms d'intention, `tableau.js:98`). Il réutiliserait `/p/<jeton>/apercu`, mais ce chemin compte aucune vue et mettrait un `<iframe>` en jeu : c'est une surface à valider (CSP/`frame-ancestors` ; `next.config.ts` n'autorise le cadrage que par DropLink).
+  - **Aperçu de la page client au survol** (450 ms d'intention, `tableau.js:98`). Il réutiliserait `/p/<jeton>/apercu`, mais ce chemin compte aucune vue et mettrait un `<iframe>` en jeu : c'est une surface à valider (CSP/`frame-ancestors` ; `next.config.ts` n'autorise le cadrage que par DropLink). — **retiré, décision de Mehdi du 03/10/2026**
   - **Changement de période sans rechargement** : demande soit un composant client avec les trois périodes préchargées (3× lectures serveur), soit une navigation (comme aujourd'hui).
   - Les données de la maquette sont fictives : « 24 commandes créées sur 30 jours » etc. Aucun impact produit.
   - La maquette n'a pas de `CarteLancement`, donc l'unique bouton dégradé de l'écran est celui de la barre du haut.
@@ -511,7 +511,7 @@ Période : searchParam `periode` ∈ {7j, 30j, 90j} (`PERIODES`), défaut 30j. T
 - Détail du CSS mobile des écrans (`app.css` L447-500, 600-660, 692-705) ; je n'ai lu que les paliers de la coque.
 - `lib/analyses/activite.ts` hors signatures ; `repartition-colis`, `parts-transporteurs`, `activite-recente`, `plus-consultees`, `bandeau-analyses`, `panneau.tsx`, `badge-statut.tsx`, `frise-suivi.tsx` non relus.
 - Colonne « Interrogations » du tableau d'envois et le contenu exact du palier mobile du tableau de bord.
-- La page `/p/<jeton>/apercu` comme source d'aperçu pour le survol/la modale.
+- La page `/p/<jeton>/apercu` comme source d'aperçu pour le survol/la modale. — **retiré, décision de Mehdi du 03/10/2026**
 
 ## Fichiers clés (chemins absolus)
 - Coque : `/home/user/droplink2/src/app/[locale]/(app)/layout.tsx`, `/home/user/droplink2/src/components/app/{barre-superieure,navigation-vendeur,recherche-globale,cloche-alertes,fond-application,en-tete-ecran,tuile-metrique}.tsx`

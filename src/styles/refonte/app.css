@@ -166,8 +166,6 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 .actions-rapides__bouton .ic { width: 16px; height: 16px; color: var(--corps); }
 .actions-rapides__bouton .ic:last-child { margin-left: auto; width: 14px; height: 14px; color: var(--sourdine); transition: transform 160ms var(--ease-sortie); }
 /* L'aperçu est la VRAIE page client, dessinée à 390 px puis réduite à l'échelle du téléphone */
-.apercu-flottant__page { display: block; width: 390px; height: calc(100% / var(--z)); border: 0; transform: scale(var(--z)); transform-origin: 0 0; }
-.apercu-flottant__page[hidden] { display: none; }
 .bloc__lien { display: inline-flex; align-items: center; gap: 2px; min-height: 32px; font-size: 13px; font-weight: 500; color: var(--corps); transition: color 120ms var(--ease); }
 .bloc__lien .ic { width: 14px; height: 14px; }
 @media (hover: hover) and (pointer: fine) { .bloc__lien:hover { color: var(--encre); } }
@@ -260,17 +258,12 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 @media (hover: hover) and (pointer: fine) { .activite a:hover { background: var(--survol-ligne); } }
 
 /* ---------- aperçu de la page client ---------- */
-.apercu-flottant { position: fixed; z-index: 60; left: 0; top: 0; pointer-events: none; opacity: 0; transform: translate(var(--x, 0), var(--y, 0)) scale(.96); transform-origin: 100% 50%; transition: opacity 160ms var(--ease-sortie), transform 200ms var(--ease-sortie); }
-.apercu-flottant.est-visible { opacity: 1; transform: translate(var(--x, 0), var(--y, 0)); }
-.telephone--apercu { width: 236px; --z: .564; padding: 8px; border-radius: 40px; box-shadow: 0 24px 60px rgba(28, 22, 78, .24), 0 0 0 1px rgba(28, 22, 78, .06); }
-.telephone--apercu::before { top: 16px; width: 70px; height: 20px; }
-.telephone--apercu .telephone__ecran { border-radius: 32px; border-top-width: 34px; }
 
 .toast { position: fixed; left: 50%; bottom: 24px; z-index: 90; translate: -50% 0; padding: 10px 14px; border-radius: 10px; background: var(--encre); color: var(--fond); font-size: 13.5px; font-weight: 500; box-shadow: var(--ombre-lg); opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 180ms var(--ease-sortie), transform 220ms var(--ease-sortie); max-width: calc(100vw - 32px); }
 .toast.est-visible { opacity: 1; transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .periodes__curseur, .apercu-flottant, .toast { transition-property: opacity; }
+  .periodes__curseur, .toast { transition-property: opacity; }
   .compte[open] .compte__menu, .alertes__panneau { animation: none; }
 }
 

@@ -80,8 +80,6 @@ export function LienEcran({
   readonly "data-vue-active"?: "true" | undefined;
   /** Une tuile de compteur qui appelle un geste (maquette, `[data-alerte]`). */
   readonly "data-alerte"?: string | undefined;
-  /** Le jeton de la page client, lu par l'aperçu au survol (`ApercuSurvol`). */
-  readonly "data-jeton"?: string;
   /**
    * `false` sur la surface d'administration : son plafond de requêtes compte
    * les préchargements (voir `tests/unit/admin-sans-prechargement.test.ts`).

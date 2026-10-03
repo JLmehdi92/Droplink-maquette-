@@ -19,7 +19,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { LienEcran } from "@/components/lien-ecran";
-import { ApercuSurvol } from "@/components/tableau/apercu-survol";
 import { creerBrouillon } from "@/lib/commandes/actions";
 import { referenceCourte } from "@/lib/commandes/reference";
 import { decrireSilence } from "@/lib/tracking/silence";
@@ -108,8 +107,7 @@ export async function DernieresCommandesBloc({
       {commandes.length === 0 ? (
         <p className="bloc__vide">{t("dernieres.vide")}</p>
       ) : (
-        <ApercuSurvol>
-          <ul className="dernieres">
+        <ul className="dernieres">
             {commandes.map((c) => {
               const silence = decrireSilence(c.colisBougeLe === null ? null : new Date(c.colisBougeLe), maintenant, c.statut);
               const [libelle, ton] =
@@ -118,7 +116,7 @@ export async function DernieresCommandesBloc({
                   : [tc(`statut.${c.statut}`), c.statut === "livre" ? "livre" : c.statut === "preparation" ? "attente" : "transit"];
               return (
                 <li key={c.id}>
-                  <LienEcran href={`/${langue}/commandes/${c.id}`} className="derniere" data-jeton={c.jetonPublic}>
+                  <LienEcran href={`/${langue}/commandes/${c.id}`} className="derniere">
                     {c.vignettes[0] === undefined ? (
                       <span className="derniere__vide" aria-hidden="true">
                         <Images className="ic" />
@@ -144,7 +142,6 @@ export async function DernieresCommandesBloc({
               );
             })}
           </ul>
-        </ApercuSurvol>
       )}
     </section>
   );
