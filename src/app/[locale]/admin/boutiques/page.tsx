@@ -177,7 +177,7 @@ export default async function AdminBoutiques({
       {/* « CONFIGURÉES » ET NON « ACTIVES » : une boutique naît à l'inscription
           et n'a pas d'état propre. Ce qui distingue deux boutiques, c'est qu'un
           vendeur soit allé jusqu'à se donner un nom. */}
-      <Tuiles etiquette={t("boutiques.titre")} colonnes={4}>
+      <Tuiles etiquette={t("chiffresCles")} colonnes={4}>
         <TuileVolume libelle={t("boutiques.tuileTotal")} valeur={format.number(compteurs.boutiques)} complement={t("boutiques.tuileTotalAide")} />
         <TuileVolume
           libelle={t("boutiques.tuileConfigurees")}

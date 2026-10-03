@@ -196,7 +196,7 @@ export default async function AdminCommandes({
 
       {/* SIX TUILES ET AUCUNE N'EST INVENTÉE : les quatre étapes de la frise
           (décision 4), le total, et les commandes créées ce mois-ci. */}
-      <Tuiles etiquette={t("commandes.titre")} colonnes={6}>
+      <Tuiles etiquette={t("chiffresCles")} colonnes={6}>
         <TuileVolume libelle={t("commandes.tuileTotal")} valeur={nombre(repartition?.total)} valeurEnSourdine={repartition === null} complement={t("commandes.tuileTotalAide")} />
         <TuileVolume
           libelle={t("commandes.tuilePreparation")}

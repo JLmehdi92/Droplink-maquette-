@@ -35,6 +35,9 @@ declare global {
 
 const SORTIE_MS = 110;
 
+/** Demande l'estompe de la liste avant une navigation sur place faite par programme. */
+export const EVENEMENT_ESTOMPE = "droplink:estomper";
+
 export function TransitionsEcran() {
   const router = useRouter();
   const chemin = usePathname();
@@ -350,11 +353,19 @@ export function TransitionsEcran() {
     };
     const finComposition = (e: Event): void => programmer(e.target);
 
+    // UN CHANGEMENT DE VUE AU CLAVIER (vues de Commandes) passe par `router.replace`, pas par
+    // un clic : il demande l'estompe par cet évènement (audit final du 03/10/2026).
+    const surDemandeEstompe = (): void => {
+      window.__changementSurPlace = true;
+      estomper();
+    };
+    window.addEventListener(EVENEMENT_ESTOMPE, surDemandeEstompe);
     document.addEventListener("click", clic, true);
     document.addEventListener("submit", envoi, true);
     document.addEventListener("input", saisie);
     document.addEventListener("compositionend", finComposition);
     return () => {
+      window.removeEventListener(EVENEMENT_ESTOMPE, surDemandeEstompe);
       document.removeEventListener("submit", envoi, true);
       document.removeEventListener("input", saisie);
       document.removeEventListener("compositionend", finComposition);

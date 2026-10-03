@@ -117,6 +117,25 @@ export function FeuilleHistorique({
       libererFond();
     };
     // Échap : la sortie animée plutôt que la fermeture sèche du navigateur.
+    // LE FOCUS RESTE DANS LA FEUILLE (maquette `client.js:175-179`) : `showModal()` rend le fond
+    // inerte, mais Tab depuis le dernier contrôle partait sur `<body>` (audit final du 03/10/2026).
+    const surTab = (e: KeyboardEvent): void => {
+      if (e.key !== "Tab" || !d.open) return;
+      const liste = [...d.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter(
+        (x) => x.offsetParent !== null || x === document.activeElement,
+      );
+      const premier = liste[0];
+      const dernier = liste[liste.length - 1];
+      if (premier === undefined || dernier === undefined) return;
+      const actif = document.activeElement;
+      if (e.shiftKey && (actif === premier || !liste.includes(actif as HTMLElement))) {
+        e.preventDefault();
+        dernier.focus();
+      } else if (!e.shiftKey && (actif === dernier || !liste.includes(actif as HTMLElement))) {
+        e.preventDefault();
+        premier.focus();
+      }
+    };
     const surAnnulation = (e: Event): void => {
       e.preventDefault();
       fermer();
@@ -176,6 +195,7 @@ export function FeuilleHistorique({
     d.addEventListener("cancel", surAnnulation);
     d.addEventListener("submit", surEnvoi);
     d.addEventListener("click", surClic);
+    d.addEventListener("keydown", surTab);
     poignee?.addEventListener("pointerdown", saisir);
     poignee?.addEventListener("pointermove", tirer);
     poignee?.addEventListener("pointerup", lacher);
@@ -188,6 +208,7 @@ export function FeuilleHistorique({
       d.removeEventListener("cancel", surAnnulation);
       d.removeEventListener("submit", surEnvoi);
       d.removeEventListener("click", surClic);
+      d.removeEventListener("keydown", surTab);
       poignee?.removeEventListener("pointerdown", saisir);
       poignee?.removeEventListener("pointermove", tirer);
       poignee?.removeEventListener("pointerup", lacher);

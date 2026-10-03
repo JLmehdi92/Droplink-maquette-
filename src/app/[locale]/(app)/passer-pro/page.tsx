@@ -224,7 +224,7 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
         ))}
       </div>
 
-      <section className="bloc pro-comparer" aria-label={t("comparaison")}>
+      <section className="bloc pro-comparer" aria-label={t("comparaisonCourt")}>
         <div className="tp pro-tp">
           <table className="tp__table">
             <caption className="visuellement-cache">{t("comparaison")}</caption>

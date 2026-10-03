@@ -215,7 +215,8 @@ export default async function Parametres({
       </div>
 
       <div className="reglages__corps">
-        <div className="barre-liste reglages__onglets">
+        {/* Une NAVIGATION nommée « Paramètres » autour des onglets, comme la maquette. */}
+        <nav className="barre-liste reglages__onglets" aria-label={t("titre")}>
           <VuesListe
             etiquette={t("onglets.titre")}
             onglets={{ panneau: "panneau-reglages", toutesTouches: true }}
@@ -231,7 +232,7 @@ export default async function Parametres({
               ),
             }))}
           />
-        </div>
+        </nav>
 
         <div className="reglages">
           <TraductionsClient espaces={["parametres"]}>

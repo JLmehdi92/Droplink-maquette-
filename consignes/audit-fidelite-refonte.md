@@ -1,5 +1,49 @@
 # Audit de fidélité de la refonte (03/10/2026)
 
+> ## ▶️ ÉTAT FINAL DU 03/10/2026, APRÈS LE CONTRE-AUDIT ET TROIS TOURS D'AUDIT INDÉPENDANTS
+>
+> Chaque point du contre-audit ci-dessous, et ce qu'il est devenu (journal § 8 de
+> `refonte-design.md` pour les mesures ; commits sur le bac à sable) :
+>
+> | Point du contre-audit | État | Où |
+> |---|---|---|
+> | Règle dure : logo au dégradé sur le lien invalide de `/p` | **Corrigé** : symbole à l'encre, mesuré sans dégradé | e78573a |
+> | Aperçu au survol (intention, iframes) | **Retiré**, décision de Mehdi | e78573a |
+> | Menu « ••• » qui postait l'ancien jeton après révocation | **Corrigé** : jeton relu en base ; test RLS écrit | 6c0f275 |
+> | Historique de la fiche relu une seule fois, sans `aria-live` ni test | **Corrigé** : 700 ms / 1,5 s / 3 s jusqu'à la ligne, série complète après un geste rapproché, `aria-live`, 10 tests | 6c0f275, ce38298 |
+> | Filtres, période, recherches en rechargement complet | **Corrigé** : navigation sur place avec l'estompe, recherche d'envois à la frappe, adresses sans champs vides | a78d5a7, ce38298 |
+> | « Copier le lien » bloqué sur l'échec | **Corrigé** (ligne et fiche, une seule minuterie) | 6c0f275, ce38298 |
+> | Second clic pendant la sortie, `data-sens` sur clic modifié, `dl-sans-entree` | **Corrigé** : le dernier geste gagne, drapeau daté | a78d5a7 |
+> | « Créer une commande » sans sortie animée | **Corrigé** ; un échec ne détruit plus la coque | a78d5a7, ce38298 |
+> | `/p` : fourchette « 1 au 2 octobre », intertitres courts, aria de la carte Propulsé | **Corrigé**, trois langues, héros et carte de livraison | d935c50 |
+> | `/p` : lieux du trajet | **Porté**, décision D2 de Mehdi (lieu et date du même passage) | d935c50 |
+> | Bascule du graphique et onglets des Paramètres sans clavier | **Corrigé** (tablist, flèches, Début/Fin, tabindex mobile ; vues de Commandes aussi) | ecc7553, ce38298, 43f8b18 |
+> | Déroulants sans focus, cloche sans `aria-expanded` | **Corrigé** (menus de ligne compris) | ecc7553 |
+> | Admin : pied « X sur N » | **Corrigé** : sans filtre et en première page sur Commandes et Comptes ; toutes les pages au Journal | 99f1533, 29424fc |
+> | Admin : cartes de Paramètres, Boutiques, `<title>` des barres, prop morte | **Corrigé** comme la maquette | 99f1533, 656b188 |
+> | Admin : alerte « contestation en attente » | **Portée**, migration 213 (décision D3), à appliquer par Mehdi | 99f1533 |
+> | Docs : encart, « Signaler un contenu », adresse cliquable | **Corrigé** | ecc7553 |
+> | Blog « N min », icône Éditeur, refus de l'adresse au nouveau mot de passe | **Corrigé** | ecc7553 |
+> | Landing : menu mobile, opacité du héros, en-tête sans flou ; note des Tarifs | **Corrigé** / mesuré déjà conforme / gardé gris (D4) | ecc7553 |
+> | Aperçu de `/bienvenue` | **Corrigé** (fourchette, une seule langue, blocs qui entrent) | ecc7553, ce38298, 43f8b18 |
+> | Fluidité : rAF sur défilement et pointeur, `MutationObserver` | **Corrigé** / vérifié | ecc7553 |
+>
+> **Les trois tours d'audit indépendants** (agents en lecture seule, « ne crois pas la
+> session qui a corrigé ») ont encore trouvé, et tout a été corrigé : 1er tour — l'échec de
+> création qui effaçait l'application, le 404 générique du blog, l'admin sans unités ni
+> formats (656b188, ce38298) ; 2e tour — les outils de Commandes qui disparaissaient sur un
+> filtre vide, le focus de la feuille de `/p` sous mouvement réduit, l'historique empilé par
+> les flèches, sous-titres admin masqués au téléphone, boutons écrasés à 44 px, pieds de page
+> (7dd3cb2, 43f8b18) ; 3e tour — une régression du 2e (estompe au clavier) et des noms
+> accessibles (dernier commit). Aucun tour n'a trouvé de défaut bloquant.
+>
+> **Laissés à Mehdi (§ 9 de `refonte-design.md`)** : appliquer la migration 213 (avec 210, 211,
+> 212 — jamais 211 sans 212) avant le push vers droplink2 ; le 404 de l'administration au corps
+> VIDE, reconnaissable (correctif proposé, non appliqué : ses gardes ne tournent qu'au poste) ;
+> les tuiles d'activité de la fiche admin (migration) ; le menu mobile sans « Créer un compte ».
+> **Non mesuré ici** : toute l'administration au navigateur, `test:rls`, `couverture`, `fumee`
+> (`verification-finale-locale.md`).
+
 > ## ▶️ ÉTAT AU 02/10/2026, APRÈS LES LOTS 1 À 10 (session cloud)
 >
 > **Tout ce que ce document listait comme MANQUANT est porté** (§ 1 et § 2), et les trois

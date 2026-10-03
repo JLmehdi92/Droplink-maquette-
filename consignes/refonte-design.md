@@ -1555,6 +1555,23 @@ sont vérifiés réels. Restaient, corrigés et remesurés :
 - Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1301/1302 (alarme Railway) ;
   fumée sans violation CSP ni erreur ; `/p` 289,1 Ko hors médias.
 
+### ▶️ 03/10/2026 — troisième tour d'audit, tout le produit (session cloud)
+
+Agent indépendant : les correctifs de 7dd3cb2 et 43f8b18 sont vérifiés réels (au navigateur
+pour le vendeur et le public, sur le code pour l'administration). Trouvé, et corrigé :
+- **Régression du second tour** : les vues de Commandes changées au clavier n'estompaient plus
+  la table (`router.replace` sans l'estompe). `TransitionsEcran` écoute désormais une demande
+  d'estompe ; mesuré : 1 → 0,35 → 1, et toujours 0 entrée d'historique.
+- La feuille d'historique de `/p` garde le focus (Tab et Maj+Tab bouclent, mesuré à 390 réduit
+  et 1 440) ; noms accessibles de la maquette (« Aperçu de votre page client », « À propos des
+  analyses », « Gratuit et Pro », la navigation « Paramètres » autour des onglets, « Chiffres
+  clés » pour les tuiles de l'administration) ; date courte de la fiche de compte ; pied court
+  de la landing en chinois (« © 2026 DropLink »).
+- **Gardés, décisions déjà prises** : « première sur trois » absent de l'alerte (consigne de
+  Mehdi) ; titres d'onglet des catalogues (arbitrage du § 5 : « on garde les titres »).
+- **Donnée du jeu de test** : sur `/p`, « No carrier information yet » avec des passages datés —
+  `dernier_mouvement` est vide dans la fixture ; l'ingestion le pose en production.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

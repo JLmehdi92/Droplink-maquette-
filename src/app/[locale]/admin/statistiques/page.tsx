@@ -371,7 +371,7 @@ export default async function AdminStatistiques({
       {/* SIX TUILES : les colis pris en charge prennent la place des « nouveaux
           abonnements » du kit (interdits), les liens comptent ceux qui ont été
           OUVERTS. QUE DES NOMBRES : rien n'est écrit au journal (migration 161). */}
-      <Tuiles etiquette={t("statistiques.titre")} colonnes={6}>
+      <Tuiles etiquette={t("chiffresCles")} colonnes={6}>
         <TuileVolume libelle={t("statistiques.tuileCommandes")} valeur={nombre(ind.commandes)} complement={dessous(null, ecart(ind.commandes, ind.commandes_avant))} />
         <TuileVolume
           libelle={t("statistiques.tuileLiens")}

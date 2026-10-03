@@ -250,7 +250,7 @@ export default async function PanneauAdmin({
           produit qui corresponde à une facture. */}
       <h2 className="adm-h2">{t("panneau.volumes")}</h2>
       {panneau.compteurs === null ? <p className="adm-aide">{t("panneau.compteursIndisponibles")}</p> : null}
-      <Tuiles etiquette={t("panneau.volumes")} colonnes={5}>
+      <Tuiles etiquette={t("chiffresCles")} colonnes={5}>
         <TuileVolume libelle={t("panneau.commandes")} valeur={chiffre(panneau.compteurs?.commandesCreeesCeMois)} complement={t("panneau.ceMoisCi")} />
         <TuileVolume
           libelle={t("panneau.comptesActifs")}

@@ -136,7 +136,7 @@ export default async function AdminJournal({
       {/* LES FAMILLES DU JOURNAL, qui sont exactement celles du filtre : un
           journal de GESTES d'administration n'a ni niveau, ni code de retour,
           ni latence. */}
-      <Tuiles etiquette={t("journal.titre")} colonnes={4}>
+      <Tuiles etiquette={t("chiffresCles")} colonnes={4}>
         <TuileVolume
           libelle={t("journal.tuileTotal")}
           valeurEnSourdine={repartition === null}

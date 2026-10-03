@@ -908,6 +908,7 @@
     "compteurMotDePasse": "<b>{n}</b> / 至少 {min} 个字符。用一句话比用复杂的单词更好。"
   },
   "onboarding": {
+    "apercuEtiquette": "您的客户页面预览",
     "titre": "把您的名字放到页面上",
     "sousTitre": "这是客户会看到的内容。之后随时可以修改。",
     "etape": "第 1 步，共 2 步",
@@ -1242,6 +1243,7 @@
       "commande": "订单"
     },
     "bandeau": {
+      "aria": "关于数据分析",
       "titre": "简洁实用的数据分析",
       "aide": "追踪发货效果，提升客户体验。",
       "propulse": "技术支持",
@@ -1701,6 +1703,7 @@
     }
   },
   "admin": {
+    "chiffresCles": "关键数据",
     "dateHeure": "{jour} {heure}",
     "navigation": "后台管理",
     "bandeau": "后台管理",
@@ -2885,6 +2888,7 @@
     "motif": "原因："
   },
   "passerPro": {
+    "comparaisonCourt": "免费版与专业版",
     "titre": "升级至 Pro",
     "sousTitre": "Pro 套餐会改变什么，又不会改变什么。",
     "eyebrow": "Pro 套餐",
@@ -3222,7 +3226,7 @@
       "confidentialite": "隐私政策",
       "mentions": "法律声明",
       "signalement": "举报内容",
-      "droits": "© {annee} DropLink 版权所有"
+      "droits": "© {annee} DropLink"
     }
   },
   "acces": {

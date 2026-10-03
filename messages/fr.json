@@ -908,6 +908,7 @@
     "compteurMotDePasse": "<b>{n}</b> / {min} caractères minimum. Prenez plutôt une phrase qu’un mot compliqué."
   },
   "onboarding": {
+    "apercuEtiquette": "Aperçu de votre page client",
     "titre": "Mettons votre nom sur la page",
     "sousTitre": "C’est ce que verra votre client. Vous pourrez tout changer plus tard.",
     "etape": "Étape 1 sur 2",
@@ -1242,6 +1243,7 @@
       "commande": "Commande"
     },
     "bandeau": {
+      "aria": "À propos des analyses",
       "titre": "Des analyses simples et utiles",
       "aide": "Suivez l'efficacité de vos envois et améliorez l'expérience de vos clients.",
       "propulse": "Propulsé par",
@@ -1701,6 +1703,7 @@
     }
   },
   "admin": {
+    "chiffresCles": "Chiffres clés",
     "dateHeure": "{jour} à {heure}",
     "navigation": "Administration",
     "bandeau": "ADMINISTRATION",
@@ -2885,6 +2888,7 @@
     "motif": "Motif :"
   },
   "passerPro": {
+    "comparaisonCourt": "Gratuit et Pro",
     "titre": "Passer au Pro",
     "sousTitre": "Ce que le plan Pro change, et ce qu'il ne change pas.",
     "eyebrow": "Plan Pro",

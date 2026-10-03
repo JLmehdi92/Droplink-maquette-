@@ -129,7 +129,8 @@ export default async function FicheCompte({
                   masqué sous 768 px (audit final du 03/10/2026). */}
               {t("fiche.typeInscrit", {
                 type: typeLisible,
-                date: format.dateTime(new Date(fiche.creeLe), { dateStyle: "long" }),
+                // « 14 juin 2026 » comme toutes les dates de la fiche dans la maquette : mois court.
+                date: format.dateTime(new Date(fiche.creeLe), { day: "numeric", month: "short", year: "numeric" }),
               })}
             </p>
           </div>

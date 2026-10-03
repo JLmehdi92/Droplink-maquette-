@@ -353,7 +353,7 @@ export function FormulaireOnboarding({
 
       {/* L'APERÇU, MASQUÉ SOUS 1 020 px : il ne porte aucune information dont le formulaire
           dépende, et au téléphone il repousserait le bouton sous trois écrans. */}
-      <section className="onb__apercu" aria-label={t("apercuTitre")}>
+      <section className="onb__apercu" aria-label={t("apercuEtiquette")}>
         <p className="onb__apercu-titre">
           <span className="direct">
             <i aria-hidden="true" />

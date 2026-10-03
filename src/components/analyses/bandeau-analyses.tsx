@@ -10,7 +10,7 @@ import symbole from "@/../public/marque/logo-symbole.png";
 export async function BandeauAnalyses() {
   const t = await getTranslations("analyses.bandeau");
   return (
-    <aside className="bandeau-analyses" aria-label={t("titre")}>
+    <aside className="bandeau-analyses" aria-label={t("aria")}>
       <div>
         <p className="bandeau-analyses__titre">{t("titre")}</p>
         <p>{t("aide")}</p>

@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { LienEcran } from "@/components/lien-ecran";
 import { useRouter } from "next/navigation";
+import { EVENEMENT_ESTOMPE } from "@/components/app/transitions-ecran";
 
 /**
  * LES VUES DE LA LISTE (maquette, `.vues-liste` : un trait qui glisse sous la vue
@@ -122,7 +123,11 @@ export function VuesListe({
       // trois flèches ajoutaient trois entrées d'historique (audit final du 03/10/2026). Et
       // sans le fondu du panneau, comme les Paramètres de la maquette (`anime: false`).
       const href = lien.getAttribute("href");
-      if (href !== null) routeur.replace(href, { scroll: false });
+      if (href === null) return;
+      // Les vues de Commandes estompent la table comme au clic (`commandes.js`, `rafraichir`) ;
+      // les Paramètres changent d'onglet sans fondu.
+      if (!toutesTouches) window.dispatchEvent(new Event(EVENEMENT_ESTOMPE));
+      routeur.replace(href, { scroll: false });
     };
     return (
       <div ref={rangee as React.RefObject<HTMLDivElement | null>} className="vues-liste" role="tablist" aria-label={etiquette}>

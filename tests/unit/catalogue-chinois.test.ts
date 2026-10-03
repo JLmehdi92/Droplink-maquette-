@@ -79,6 +79,7 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   /* Le commentaire du client sous son arbitrage (18/09/2026) : SA phrase, entre
      les guillemets du chinois simplifié. Le gabarit n'a rien d'autre à dire. */
   ["editeur.historique.commentaire", "Les guillemets chinois “ ” autour du texte du client, seuls."],
+  ["accueil.pied.droits", "« © 2026 DropLink » : la mention courte de la landing, un symbole, une année et la marque, identique dans les trois langues."],
   ["admin.dateHeure", "Le jour puis l'heure : le chinois les juxtapose sans mot de liaison (« 9月30日 11:42 »)."],
   ["page-publique.trajetLu.etape", "La ponctuation chinoise « ： » entre l'étape et son état, seule : les deux sont déjà traduits."],
   ["page-publique.trajetLu.enCoursAvec", "La virgule chinoise « ， » entre « en cours » et le lieu, seule : le lieu vient du transporteur."],

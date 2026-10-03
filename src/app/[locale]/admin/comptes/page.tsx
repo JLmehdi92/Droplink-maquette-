@@ -146,7 +146,7 @@ export default async function AdminComptes({
       {/* QUATRE TUILES, PAS SIX : le kit compte aussi les plans, que la liste ne
           lit pas (le plan ne se lit que sur la fiche). « Nouveaux inscrits »
           dit sa FENÊTRE plutôt qu'un écart calculé sur rien. */}
-      <Tuiles etiquette={t("comptes.titre")} colonnes={4}>
+      <Tuiles etiquette={t("chiffresCles")} colonnes={4}>
         <TuileVolume
           libelle={t("comptes.tuileTotal")}
           valeur={format.number(compteurs.comptes)}

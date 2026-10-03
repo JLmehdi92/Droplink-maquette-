@@ -908,6 +908,7 @@
     "compteurMotDePasse": "<b>{n}</b> / {min} characters minimum. A sentence works better than a complicated word."
   },
   "onboarding": {
+    "apercuEtiquette": "Preview of your customer page",
     "titre": "Let’s put your name on the page",
     "sousTitre": "This is what your customer will see. You can change everything later.",
     "etape": "Step 1 of 2",
@@ -1242,6 +1243,7 @@
       "commande": "Order"
     },
     "bandeau": {
+      "aria": "About analytics",
       "titre": "Simple, useful analytics",
       "aide": "Track how well your shipments perform and improve your customers' experience.",
       "propulse": "Powered by",
@@ -1701,6 +1703,7 @@
     }
   },
   "admin": {
+    "chiffresCles": "Key figures",
     "dateHeure": "{jour} at {heure}",
     "navigation": "Administration",
     "bandeau": "ADMINISTRATION",
@@ -2885,6 +2888,7 @@
     "motif": "Reason:"
   },
   "passerPro": {
+    "comparaisonCourt": "Free and Pro",
     "titre": "Upgrade to Pro",
     "sousTitre": "What the Pro plan changes — and what it doesn't.",
     "eyebrow": "Pro plan",
