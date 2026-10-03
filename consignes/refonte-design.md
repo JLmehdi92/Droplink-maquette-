@@ -1894,6 +1894,22 @@ Chemin dans `legal.pages` (ou `legal.*`), avant → après :
   - **zh-CN** `legal.pages.mentions.sections.1.blocs.0.p` : « Mahfoud SEDDIKI（即网站发布方本人）。 » → « Mahfoud SEDDIKI。 »
 
 
+### ▶️ 03/10/2026 — passe de finition, lot 3 : le blog (session cloud)
+
+- `vendre-sans-boutique` : le chiffre « abonnement à 300 € par mois » ne s'appuyait sur rien,
+  il est retiré ; la description disait « pas d'abonnement mensuel », ce qui laissait croire que
+  DropLink n'en a aucun alors que le Pro existe — elle parle désormais d'une boutique en ligne à
+  payer.
+- `ou-est-mon-colis` : « Aucun mouvement depuis huit jours » → « douze jours » — le produit ne
+  signale le silence qu'à partir de 10 jours (`SEUIL_SILENCE_JOURS`).
+- `lien-qui-expire` : « Sept jours en gratuit, vingt-huit en payant » citait un service sans le
+  nommer ni le sourcer (description, résumé, chapeau) → une formulation vraie et générale (« un
+  lien de transfert expire souvent en quelques jours, parfois en quelques semaines »).
+- Descriptions : 152, 155, 159, 148, 155 caractères, toutes différentes (garde de `seo.test.ts`).
+- Revue native : trois remarques de naturel appliquées (« votre client tombe alors sur une page
+  morte », « ce qui n'est que du décor », « Une fois expiré »).
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1311/1312 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

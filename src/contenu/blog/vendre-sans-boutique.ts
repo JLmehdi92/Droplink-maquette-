@@ -11,9 +11,9 @@ export const article: Article = {
   titre: "Vendre sans boutique : ce dont on a vraiment besoin",
   titreMeta: "Vendre sans boutique : ce qu'il faut vraiment",
   description:
-    "Pas de site à construire, pas d'abonnement mensuel. La liste courte de ce qui manque réellement quand on vend en message privé, et ce qui n'est qu'un décor.",
+    "Pas de site à construire ni de boutique en ligne à payer. La liste courte de ce qui manque quand on vend en message privé, et de ce qui n'est que du décor.",
   resume:
-    "Pas d'abonnement à 300 € par mois ni de site à construire. La liste courte de ce qui manque réellement.",
+    "Pas de boutique en ligne à payer ni de site à construire. La liste courte de ce qui manque réellement.",
   date: "2026-09-08",
   minutes: 8,
   etiquette: "VENDRE EN DIRECT",

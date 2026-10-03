@@ -12,9 +12,9 @@ export const article: Article = {
   titre: "Envoyer des photos à un client sans que le lien expire",
   titreMeta: "Envoyer des photos sans lien qui expire",
   description:
-    "Sept jours en gratuit, vingt-huit en payant : ensuite, le lien de votre client ne mène plus nulle part. Pourquoi, et comment livrer des photos qui restent.",
+    "Un lien de transfert expire souvent en quelques jours : votre client tombe alors sur une page morte. Pourquoi, et comment livrer des photos qui restent.",
   resume:
-    "Sept jours en gratuit, vingt-huit en payant : après quoi votre client clique sur un lien mort. Voilà pourquoi, et quoi faire.",
+    "Un lien de transfert expire souvent en quelques jours : votre client clique alors sur un lien mort. Voilà pourquoi, et quoi faire.",
   date: "2026-09-08",
   minutes: 6,
   etiquette: "SUIVI & PARTAGE",
@@ -22,7 +22,7 @@ export const article: Article = {
     {
       type: "chapeau",
       texte:
-        "Sept jours en gratuit, vingt-huit en payant. Passé ce délai, le lien que vous avez envoyé à votre client ne mène plus nulle part, et c'est souvent le moment où il y revient.",
+        "Beaucoup de liens de transfert de fichiers expirent au bout de quelques jours, parfois de quelques semaines. Une fois expiré, le lien que vous avez envoyé à votre client ne mène plus nulle part, et c'est souvent le moment où il y revient.",
     },
     { type: "titre", texte: "Pourquoi le lien meurt" },
     {

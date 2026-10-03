@@ -56,7 +56,7 @@ export const article: Article = {
         "Une adresse unique, envoyée une fois, où tout se trouve : les photos, le suivi, l'état de la commande.",
         "Une mise à jour automatique, pour que la page dise aujourd'hui autre chose qu'hier sans que vous y touchiez.",
         "Un vocabulaire de client, pas de transporteur : « expédié », « en transit », « livré », pas de codes ni de sigles.",
-        "Une phrase quand rien ne bouge, plutôt qu'un écran figé. « Aucun mouvement depuis huit jours » se comprend ; le silence, non.",
+        "Une phrase quand rien ne bouge, plutôt qu'un écran figé. « Aucun mouvement depuis douze jours » se comprend ; le silence, non.",
       ],
     },
     { type: "titre", texte: "Le gain réel n'est pas le temps gagné" },
