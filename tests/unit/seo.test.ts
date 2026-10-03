@@ -377,3 +377,86 @@ describe("Le blog ne promet pas de traductions qui n'existent pas", () => {
     expect(trop, "Ces titres seront tronqués par Google, en perdant leur fin.").toEqual([]);
   });
 });
+
+/**
+ * LES TITRES ET DESCRIPTIONS DE RECHERCHE DES PAGES TRILINGUES TIENNENT DANS LE
+ * RÉSULTAT — audit SEO du 03/10/2026.
+ *
+ * Mesuré au premier passage : 35 écarts sur 21 pages — « Tarifs — DropLink »
+ * (17 caractères), des descriptions anglaises de 88 caractères, chinoises de 63,
+ * une française de 189 que Google coupait au milieu de la promesse.
+ *
+ * Google tronque en PIXELS : un caractère chinois occupe environ la place de
+ * deux lettres latines. La largeur compte donc 2 par caractère chinois ou de
+ * ponctuation pleine chasse, 1 sinon — d'où une seule fourchette pour les trois
+ * langues : titre 30 à 60, description 120 à 160.
+ */
+describe("Les titres et descriptions de recherche tiennent dans le résultat", () => {
+  const PAGES: ReadonlyArray<readonly [string, string]> = [
+    ["landing.metaTitre", "landing.metaDescription"],
+    ["tarifs.metaTitre", "tarifs.metaDescription"],
+    ["legal.conditionsMetaTitre", "legal.conditionsMetaDescription"],
+    ["legal.confidentialiteMetaTitre", "legal.confidentialiteMetaDescription"],
+    ["legal.mentionsMetaTitre", "legal.mentionsMetaDescription"],
+    ["legal.signalementMetaTitre", "legal.signalementMetaDescription"],
+    ["docs.metaTitre", "docs.metaDescription"],
+  ];
+  const largeur = (s: string): number =>
+    [...s].reduce((n, c) => n + (/[　-〿㐀-鿿＀-￯]/.test(c) ? 2 : 1), 0);
+  const lire = (catalogue: unknown, cle: string): string => {
+    const v = cle.split(".").reduce<unknown>((o, k) => (o as Record<string, unknown> | undefined)?.[k], catalogue);
+    return typeof v === "string" ? v.replace("{prix}", "20 €") : "";
+  };
+
+  for (const langue of ["fr", "en", "zh-CN"] as const) {
+    test(`${langue} : chaque page a un titre de 30 à 60 et une description de 120 à 160, tous uniques`, () => {
+      const catalogue: unknown = JSON.parse(readFileSync(join(process.cwd(), "messages", `${langue}.json`), "utf8"));
+      const ecarts: string[] = [];
+      const vus = new Set<string>();
+      for (const [cleTitre, cleDescription] of PAGES) {
+        const titre = lire(catalogue, cleTitre);
+        const description = lire(catalogue, cleDescription);
+        // UN ENSEMBLE VIDE PASSE TOUT : une clé renommée doit rougir, pas disparaître.
+        expect(titre, `${langue} ${cleTitre} introuvable`).not.toBe("");
+        expect(description, `${langue} ${cleDescription} introuvable`).not.toBe("");
+        const lt = largeur(titre);
+        const ld = largeur(description);
+        if (lt < 30 || lt > 60) ecarts.push(`${cleTitre} : ${lt} « ${titre} »`);
+        if (ld < 120 || ld > 160) ecarts.push(`${cleDescription} : ${ld}`);
+        for (const texte of [titre, description]) {
+          if (vus.has(texte)) ecarts.push(`doublon : « ${texte} »`);
+          vus.add(texte);
+        }
+      }
+      expect(ecarts).toEqual([]);
+    });
+  }
+});
+
+describe("Le blog tient aussi dans le résultat de recherche", () => {
+  /*
+   * Le blog n'a pas de catalogue : ses textes de recherche vivent dans
+   * `blog/page.tsx` et dans `src/contenu/blog`. Mesuré au premier passage de
+   * l'audit (03/10/2026) : la description du blog à 181, deux articles à 175 et
+   * 186. Même fourchette que les pages trilingues.
+   */
+  test("titre et description de recherche du blog, description de chaque article", () => {
+    const ecarts: string[] = [];
+    const page = readFileSync(join(RACINE_APP, "[locale]", "blog", "page.tsx"), "utf8");
+    const titre = /const TITRE = "([^"]+)"/.exec(page)?.[1] ?? "";
+    const description = /const DESCRIPTION_META =\s*"([^"]+)"/.exec(page)?.[1] ?? "";
+    // UN ENSEMBLE VIDE PASSE TOUT : une constante renommée doit rougir.
+    expect(titre, "TITRE du blog introuvable").not.toBe("");
+    expect(description, "DESCRIPTION_META du blog introuvable").not.toBe("");
+    if (titre.length < 30 || titre.length > 60) ecarts.push(`blog TITRE : ${titre.length}`);
+    if (description.length < 120 || description.length > 160) ecarts.push(`blog DESCRIPTION_META : ${description.length}`);
+    const fichiers = readdirSync(join(process.cwd(), "src", "contenu", "blog"));
+    expect(fichiers.length, "aucun article lu").toBeGreaterThan(0);
+    for (const fichier of fichiers) {
+      const source = readFileSync(join(process.cwd(), "src", "contenu", "blog", fichier), "utf8");
+      const d = /description:\s*"([^"]+)"/.exec(source)?.[1] ?? "";
+      if (d.length < 120 || d.length > 160) ecarts.push(`${fichier} description : ${d.length}`);
+    }
+    expect(ecarts).toEqual([]);
+  });
+});

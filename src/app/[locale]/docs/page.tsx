@@ -52,7 +52,9 @@ export async function generateMetadata({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   const t = await getTranslations({ locale: langue, namespace: "docs" });
   return {
-    title: t("titre"),
+    // Le titre de recherche dit ce que la page EST (« le guide complet ») ; le h1, plus
+    // court, reste `titre` (audit SEO du 03/10/2026 : 18 caractères en anglais).
+    title: t("metaTitre"),
     description: t("metaDescription"),
     alternates: alternatesDe(langue, "/docs"),
     /* ⚠️ L'APERÇU DE PARTAGE EST OBLIGATOIRE SUR UNE PAGE INDEXABLE, et la sonde
@@ -61,7 +63,7 @@ export async function generateMetadata({
        dans la conversation, à qui n'ouvre pas le lien. Ici la page est publique
        et ne porte aucune donnée de compte. */
     openGraph: openGraphDe(langue, "/docs", {
-      titre: t("titre"),
+      titre: t("metaTitre"),
       description: t("metaDescription"),
     }),
   };

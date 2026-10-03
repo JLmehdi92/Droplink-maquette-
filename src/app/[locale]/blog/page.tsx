@@ -29,9 +29,12 @@ const CHEMIN = "/blog";
 
 /** Le nom de la page, tel que l'étiquette l'affiche et que le fil d'Ariane le dit. */
 const NOM = "Le blog";
-const TITRE = `${NOM} — DropLink`;
+const TITRE = "Le blog DropLink : vendre en direct, sans boutique";
 const DESCRIPTION =
-  "Ce qu'on apprend en parlant à des vendeurs qui envoient leurs commandes en message privé : les outils, les pièges, et ce qui fait qu'un client cesse de demander où en est son colis.";
+  "Ce qu'on apprend en parlant à des vendeurs qui envoient leurs commandes en message privé : les outils, les pièges, et ce qui fait qu'un client cesse de demander où en est son colis.";
+/** La description de RECHERCHE : celle de la page (le chapeau) dépasse 160 caractères. */
+const DESCRIPTION_META =
+  "Ce qu'on apprend auprès des vendeurs qui envoient leurs commandes en message privé : les outils, les pièges, et comment ne plus entendre « où est mon colis ? ».";
 
 /**
  * ⚠️ ON NE PRÉREND QUE LA LANGUE DU BLOG. Rendre les trois créerait deux pages
@@ -61,9 +64,9 @@ export async function generateMetadata({
   const langue = estLangueSupportee(locale) ? locale : LANGUE_DEFAUT;
   return {
     title: TITRE,
-    description: DESCRIPTION,
+    description: DESCRIPTION_META,
     alternates: alternatesUneSeuleLangue(langue, CHEMIN),
-    openGraph: openGraphDe(langue, CHEMIN, { titre: TITRE, description: DESCRIPTION }),
+    openGraph: openGraphDe(langue, CHEMIN, { titre: TITRE, description: DESCRIPTION_META }),
   };
 }
 
@@ -82,7 +85,7 @@ export default async function Blog({ params }: { params: Promise<{ locale: strin
      textes vivent dans `lib/blog/articles`, pas dans les catalogues. */
   return (
     <CoqueSite locale={locale} page="blog">
-      <GrapheJsonLd graphe={donneesPage(langue, CHEMIN, { nom: NOM, description: DESCRIPTION }, "CollectionPage")} />
+      <GrapheJsonLd graphe={donneesPage(langue, CHEMIN, { nom: NOM, description: DESCRIPTION_META }, "CollectionPage")} />
       <main id="contenu" className="pub">
         <section className="pub-tete conteneur">
           <p className="l4-etiquette">

@@ -11,7 +11,7 @@ export const article: Article = {
   slug: "suivre-un-colis-sans-boutique-en-ligne",
   titre: "Suivre un colis sans boutique en ligne",
   description:
-    "Les outils de suivi personnalisé supposent tous une boutique Shopify ou WooCommerce. Comment suivre un colis et tenir son client informé quand on vend en direct, sans site marchand.",
+    "Les outils de suivi personnalisé supposent une boutique Shopify ou WooCommerce. Comment tenir son client informé quand on vend en direct, sans site.",
   resume:
     "Les outils de suivi supposent tous une boutique en ligne. Ce qu'on peut faire quand on vend en message privé.",
   date: "2026-09-08",

@@ -28,8 +28,8 @@
     "accueilDropLink": "DropLink，仪表盘"
   },
   "landing": {
-    "metaTitre": "DropLink — 一个链接，搞定整个订单的物流查询",
-    "metaDescription": "上传照片、填入运单号，DropLink 即生成专属链接，客户可随时查看包裹进度，承运商状态自动更新，无需人工维护。",
+    "metaTitre": "DropLink — 只需一个物流链接，跟踪整笔订单",
+    "metaDescription": "上传订单照片并填入运单号，DropLink 就会生成一个专属链接：您的客户可以在这个链接里自行跟踪自己的包裹，承运商的物流状态也会自动更新。",
     "fonctionnalites": {
       "titre": "页面包含什么"
     },
@@ -91,16 +91,16 @@
       "copieSelection": "已选中，请复制",
       "sujet": "{titre}：{categorie}"
     },
-    "conditionsMetaTitre": "使用条款 — DropLink",
-    "conditionsMetaDescription": "DropLink 的使用条款：服务内容、卖家账户、内容、免费版与专业版、终止与责任。",
-    "confidentialiteMetaTitre": "隐私政策 — DropLink",
-    "confidentialiteMetaDescription": "DropLink 处理哪些数据、为什么、保存多久、使用哪些服务商，以及卖家和其客户享有的权利。",
-    "signalementMetaTitre": "举报内容 — DropLink",
-    "signalementMetaDescription": "举报 DropLink 上托管的内容。请说明相关链接和原因：每一条举报都会被查看，页面可以被立即关闭。",
+    "conditionsMetaTitre": "DropLink 使用条款：服务、卖家账户与订阅规则",
+    "conditionsMetaDescription": "这是 DropLink 的使用条款，规定了服务内容、卖家账户、卖家上传的内容、免费版与 Pro 订阅、账户的终止方式，以及各方应承担的责任。",
+    "confidentialiteMetaTitre": "DropLink 隐私政策：我们处理的数据与您的权利",
+    "confidentialiteMetaDescription": "了解 DropLink 处理哪些数据、为何处理、保存多长时间、交由哪些服务商处理，以及您享有哪些权利——无论您是卖家，还是卖家的客户。",
+    "signalementMetaTitre": "举报内容：DropLink 的通知与下架流程",
+    "signalementMetaDescription": "如需举报托管在 DropLink 上的内容，请说明涉及的页面链接和举报原因：我们收到的每一条举报都会由专人阅读，相关页面可以被立即下线。",
     "editeurNom": "Mahfoud SEDDIKI",
     "mentionsTitre": "法律声明",
-    "mentionsMetaTitre": "法律声明 — DropLink",
-    "mentionsMetaDescription": "DropLink 的法律声明：发布方、出版负责人、托管服务商和联系方式。",
+    "mentionsMetaTitre": "法律声明：DropLink 的发布方与托管服务商",
+    "mentionsMetaDescription": "查看 DropLink 的法律声明：本网站的发布方、出版负责人、为本服务提供托管的各家服务商，以及您写信联系我们时可以使用的地址。",
     "misAJourDate": "最近更新：{date}",
     "editeurLigne": "发布方：{nom}",
     "pages": {
@@ -2489,6 +2489,7 @@
   "docs": {
     "etiquette": "使用文档",
     "titre": "DropLink 如何运作",
+    "metaTitre": "DropLink 如何运作：完整使用指南",
     "auteur": "DropLink 产品团队",
     "source": "依据线上正式版本撰写",
     "duree": "阅读约 7 分钟",
@@ -2607,7 +2608,7 @@
     "ctaTitre": "准备创建第一个链接了吗？",
     "ctaTexte": "免费账户，无需银行卡，一分钟内完成。",
     "ctaBouton": "创建账户",
-    "metaDescription": "DropLink 完整指南：创建订单、上传照片、填写运单号并分享客户链接。",
+    "metaDescription": "这份 DropLink 完整使用指南会一步步介绍如何创建订单、上传订单照片、粘贴承运商的运单号，以及如何把客户链接分享给您的客户。",
     "resumeEtiquette": "简而言之：",
     "param1": "账户：姓名、邮箱与密码；修改邮箱和密码须输入当前密码。",
     "param2": "偏好：界面语言。客户页面的语言在“我的品牌”中设置。",
@@ -2998,8 +2999,8 @@
     }
   },
   "tarifs": {
-    "metaTitre": "价格 — DropLink",
-    "metaDescription": "免费开始，无需银行卡。Pro 套餐每月 {prix}，无需长期绑定：以你的名义生成链接、客户页面不显示 DropLink 标识、上限每月重置。",
+    "metaTitre": "DropLink 价格：免费版与 Pro 套餐对比",
+    "metaDescription": "免费开始，无需银行卡。Pro 套餐每月 {prix}，无需长期合约：以您命名的链接、不显示 DropLink 标识的客户页面，以及按月计算的订单上限。",
     "eyebrow": "价格",
     "titre": "免费起步，业务增长后升级 Pro",
     "intro": "照片、视频、自动物流跟踪和品牌配色页面：DropLink 的核心功能，免费版已经全部包含。Pro 只增加四项。",

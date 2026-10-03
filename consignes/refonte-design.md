@@ -1743,6 +1743,35 @@ ponctuation demi-chasse collée à un idéogramme.
   « （即网站发布方本人）» et deux adresses « France », absents du français.
 - Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1302/1303 (alarme Railway).
 
+### ▶️ 03/10/2026 — audit SEO, lot 2 : titres et descriptions de recherche (session cloud)
+
+Les 35 écarts restants du lot 1 étaient des longueurs : « Tarifs — DropLink » (17 caractères),
+« Pricing — DropLink », des descriptions anglaises de 88 à 117 caractères, chinoises de 63 à 105,
+une française de 189 (tarifs) et deux articles à 175 et 186 que Google coupait au milieu.
+- **Règle retenue, une seule pour les trois langues** : Google tronque en PIXELS, un idéogramme
+  vaut environ deux lettres latines ; la largeur compte donc 2 par idéogramme ou ponctuation
+  pleine chasse, 1 sinon. Titre 30 à 60, description 120 à 160, tous uniques.
+- **Réécrits, sans rien promettre que la page ne dise** : tarifs (fr, en, zh), mentions légales
+  (fr, en, zh), conditions et confidentialité (en, zh), signalement (en, zh), landing (zh) ; le
+  guide reçoit un titre de recherche à lui (`docs.metaTitre`, « … le guide complet »), son h1
+  ne change pas ; le blog, un titre et une description de recherche distincts du chapeau affiché
+  (181 caractères, gardé) ; deux descriptions d'article raccourcies. Les valeurs chinoises sont
+  celles du relecteur chinois (largeurs 31 à 43 et 120 à 131).
+- **Garde nouvelle** (`seo.test.ts`) : les sept pages trilingues × trois langues, dans les
+  bornes et uniques ; vue rouge deux fois (titre français raccourci, description chinoise
+  doublée), puis verte ; une seconde garde couvre le blog (son titre et sa description de
+  recherche, la description de chaque article), vue rouge deux fois aussi. La revue a relevé une
+  formulation inexacte (« des vendeurs qui LIVRENT en message privé ») : corrigée.
+- **Remesuré, production locale** : la sonde rend **0 défaut** sur les 27 pages indexables
+  (title, description, un seul h1, hiérarchie, `lang`, canonique, hreflang réciproques +
+  `x-default`, Open Graph et `og:locale`, Twitter, JSON-LD, `alt`, dimensions, liens internes) ;
+  le validateur hors ligne du pack (`hooks/validate-schema.py`, lancé en environnement vide sur les
+  HTML enregistrés) rend 0 sur dix pages, et 2 sur un contre-test `HowTo` — il inspecte bien ;
+  le plan de site annonce 27 URL, aucune privée. `/p` : **279,3 Ko hors médias** (< 300),
+  `noindex`, aucune balise Open Graph — mesuré sur une commande jetable de la base de tests,
+  jeton gardé en mémoire et compte purgé. Core Web Vitals (CPU ×4) : rien de dégradé.
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1306/1307 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de
@@ -1799,6 +1828,10 @@ ponctuation demi-chasse collée à un idéogramme.
   règles `.menu-mobile__connexion` et `.menu-mobile__inscription`). Mesuré dans la maquette à 360 et
   390 px sur cinq pages : bouton de 52 px de haut, accent avec texte sur accent, mène à
   l'inscription, aucun débordement. Le produit est à remesurer au poste de Mehdi.
+- [ ] **(Audit SEO, 03/10/2026) LCP de la landing CHINOISE au bureau ≈ 2,8 s** en local (CPU
+  ×4), contre 0,5 à 0,8 s en français et en anglais : l'élément mesuré est la ligne « 整笔订单。 »
+  du titre, révélée par l'animation d'entrée. Antérieur à l'audit. À regarder sur les vraies
+  Core Web Vitals (Search Console) avant de toucher à l'animation.
 - [x] Défaut antérieur à la refonte : le menu « ••• » d'une commande poste l'ancien jeton après une
   révocation — **corrigé le 03/10/2026** (jeton relu en base ; preuve RLS à faire tourner au poste).
 

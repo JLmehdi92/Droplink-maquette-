@@ -12,7 +12,7 @@ export const article: Article = {
   titre: "Envoyer des photos à un client sans que le lien expire",
   titreMeta: "Envoyer des photos sans lien qui expire",
   description:
-    "Sept jours en gratuit, vingt-huit en payant : après quoi le lien envoyé à votre client ne mène plus nulle part. Pourquoi ça arrive, et comment livrer des photos qui restent consultables.",
+    "Sept jours en gratuit, vingt-huit en payant : ensuite, le lien de votre client ne mène plus nulle part. Pourquoi, et comment livrer des photos qui restent.",
   resume:
     "Sept jours en gratuit, vingt-huit en payant : après quoi votre client clique sur un lien mort. Voilà pourquoi, et quoi faire.",
   date: "2026-09-08",
