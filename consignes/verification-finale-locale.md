@@ -193,6 +193,23 @@ démo de page client et l'aperçu de Ma marque. À remesurer ICI, parce que le c
   libellé tronqué, `letter-spacing` 0 ;
 - `pnpm test:rls` et `pnpm couverture` : aucun fichier de `src/lib/` n'a été ajouté ; un seul
   composant (`src/components/seo/graphe-json-ld.tsx`), exercé par la fumée sur chaque page publique.
+- PASSE DE FINITION (151e2b5 à 0fea2ff) — à remesurer aussi :
+  - à 390 px, dans les TROIS langues, les titres modifiés : `/verification` (« Double
+    authentification » / « Two-factor authentication » / « 双重验证 » — mesuré dans le cloud par
+    substitution seulement, la page exige un facteur enrôlé : 2 lignes au plus attendues),
+    Paramètres → Sécurité (titre 2FA), la tuile « Dernière ouverture le … » de l'éditeur, l'état
+    vide de Commandes (« Moins d'une minute suffit »), le guide (« Préparation »), et sur `/p`
+    « Moved yesterday / Moved today » ;
+  - `pnpm fumee` : la NOUVELLE garde « les N pages du plan de site servent une carte Twitter/X
+    complète » doit être verte (27 URL avec l'adresse de signalement, 24 sans) ;
+  - `scripts/ecarts-declares.json` : 28 textes déclarés ont été mis à jour sur les nouveaux
+    textes (dont les 8 « Double authentification (2FA) », « Double authentification »,
+    « Préparation » et le début de « Une frise de suivi : Préparation… »). Relance la
+    soustraction sur Paramètres, Vérification, `/docs`, Ma marque et les Statistiques admin : la
+    MAQUETTE porte encore les anciens textes (« Pas encore scanné », « Vérification en deux
+    étapes », « Authentification à deux facteurs », « Photos uploadées », « Desktop »,
+    « Email ») — ces écarts sont voulus (la langue gagne) et se déclarent, ou la maquette se
+    resynchronise.
 Puis, après la mise en ligne seulement (étape 8, sur mon ordre) :
 - Google Search Console : propriété de domaine droplink.fr, soumettre `https://droplink.fr/sitemap.xml`
   (27 URL), inspecter `/fr`, `/en`, `/zh-CN` et un article (canonique retenue, hreflang lus),

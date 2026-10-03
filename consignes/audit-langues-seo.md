@@ -83,13 +83,11 @@ bureau (≈ 2,8 s, antérieur à l'audit, voir plus bas). Rien n'a été dégrad
 
 - Le LCP de la landing chinoise au bureau (≈ 2,8 s en local) : la ligne « 整笔订单。 » du titre,
   révélée par l'animation d'entrée.
-- « Trois minutes suffisent » contre « moins d'une minute » ; « Pas encore scanné » (guide)
-  contre « Préparation » (page client) ; le « 20 » écrit en dur dans
-  `blocageVendeur.erreur.saisie` ; la ligne « Export limité à … lignes » du CSV, en français
-  quelle que soit la langue.
-- Textes légaux anglais : « sole trader » et « by post » (britanniques) — écartés, c'est du fond.
-- Textes légaux chinois : 专业版 / 封禁 / 暂停 contre Pro / 停用 dans l'interface ; « 任何订阅 »
-  pour « son abonnement éventuel » ; deux ajouts absents du français dans les mentions.
+- Le « 20 » écrit en dur dans `blocageVendeur.erreur.saisie` ; la ligne « Export limité à …
+  lignes » du CSV, en français quelle que soit la langue.
+- Textes légaux anglais : « sole trader » et « by post » (britanniques) — écartés, c'est de la
+  terminologie. « French » / « 法国 » devant le registre et la CNIL : gardés (traduction du nom
+  de l'institution).
 - Les autres dates longues du produit passent par `Intl` sans « 1er » (« inscrit le 1 juin ») :
   seules les fourchettes de livraison le disent.
 - `passerPro.features.commandes.texteNombre` reçoit un nombre déjà mis en texte : pas de pluriel
@@ -97,6 +95,47 @@ bureau (≈ 2,8 s, antérieur à l'audit, voir plus bas). Rien n'a été dégrad
 - Hors de l'audit, constaté en passant : `/fr/signalement` sans adresse configurée rend la page 404
   anglaise par défaut de Next (prérendue), et la page « lien mort » de `/p` a un corps vide dans le
   HTML serveur (rendue au client) — toutes deux `noindex`.
+- **Tranchés depuis par la passe de finition** (voir plus bas) : « Trois minutes » contre
+  « moins d'une minute » (aligné sur « moins d'une minute »), « Pas encore scanné » du guide
+  (aligné sur « Préparation »), le vocabulaire des textes légaux chinois (Pro, 停用), « 任何订阅 »
+  et les ajouts des mentions.
+
+## Passe de finition (151e2b5 à 0fea2ff)
+
+Contre-vérification de l'audit par deux agents, puis une passe point par point décidée par Mehdi.
+
+| Lot | Commit | Ce qui change |
+|---|---|---|
+| Langue | `151e2b5` | **15 clés fr, 16 en, 48 zh** : « Dernière ouverture le », « moins d'une minute », « Préparation » dans le guide, un seul terme pour la double authentification par langue, nombres formatés (`{x, number}`), « 他 » neutralisé, tournures anglaises ; un défaut réel corrigé (« NaN suspendus » sur le panneau d'administration) ; 28 déclarations de `ecarts-declares.json` mises à jour |
+| Légal | `6ce1100` | **5 feuilles en, 19 zh** : chaque langue dit exactement ce que dit le français ; `DERNIERE_MAJ` au 3 octobre 2026 ; liste à reporter dans le kit au § 8 du journal |
+| Blog | `8a376ea` | trois affirmations sans appui retirées (« 300 € par mois », « huit jours », « sept jours / vingt-huit ») |
+| SEO | `0fea2ff` | preuve de la carte Twitter/X dans la fumée ; filet `noindex` sur les layouts privés |
+
+**Corrections par catégorie (passe de finition)**, comptées dans les diffs :
+- nombres passés en `{x, number}` : 35 clés en chinois, 6 en français, 6 en anglais (dont un
+  défaut réel corrigé dans le code : « NaN suspendus ») ;
+- terminologie (double authentification, « Préparation », « Dernière ouverture ») : 8 clés en
+  français, 4 en anglais, 3 en chinois ;
+- durée promise alignée : 1 clé par langue ;
+- neutralité (« 他 ») : 6 clés en chinois ; tournures : 5 en anglais, 2 en chinois ; date : 1 en
+  chinois ;
+- textes légaux : 5 feuilles en anglais, 19 en chinois (additions, omissions, écarts au
+  français, terminologie de l'interface) ;
+- blog : 6 chaînes dans 3 articles.
+
+**⚠️ Correction de l'audit précédent** : il comptait les balises Twitter/X comme à vérifier ;
+elles étaient en réalité déjà servies, DÉRIVÉES de l'Open Graph par Next 16. Rien n'est ajouté
+au code ; la fumée en apporte désormais la preuve (27 pages sur 27 mesurées ici).
+
+**Gardes ajoutées** : `tests/unit/nombres-formates.test.ts` (35 clés rendues avec 1248 dans les
+trois langues, vue rouge avant correction) ; un test de `seo.test.ts` qui exige le `noindex` de
+chaque layout privé ; la garde Twitter/X de la fumée.
+
+**Non touchés, avec leur raison** : « Le blog » en dur (`donnees-structurees.ts`,
+`blog/page.tsx`) — le blog est français seul et répond `notFound()` ailleurs ; `PRIX_PRO_EUR`
+dans la description de `/tarifs` — la source unique du prix, voulue.
+
+⚠️ **Les textes légaux restent à faire relire par un juriste** avant l'ouverture publique.
 
 ## Ce qui n'a pas pu se faire d'ici
 
