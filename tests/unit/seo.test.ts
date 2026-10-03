@@ -341,6 +341,16 @@ describe("Le blog ne promet pas de traductions qui n'existent pas", () => {
     }
   });
 
+  test("aucune page du blog n'annonce d'autres locales Open Graph", () => {
+    // Contre-inventaire de l'audit SEO (03/10/2026) : `og:locale:alternate` en_US et
+    // zh_CN partaient sur les six pages du blog, qui n'existent qu'en français.
+    for (const p of PAGES_BLOG) {
+      const code = codeSansCommentaires(join(RACINE_APP, p));
+      expect(code, `${p} n'emploie pas openGraphDe()`).toContain("openGraphDe(");
+      expect(code, `${p} annonce les autres locales Open Graph`).toMatch(/uneSeuleLangue:\s*true/);
+    }
+  });
+
   test("chaque page du blog REFUSE les autres langues", () => {
     /*
      * Servir le français sous `/en/blog` serait pire que refuser : une page

@@ -867,7 +867,7 @@
       "lien": "This link is incomplete. Some email apps cut it short — request a new one below.",
       "expire": "This link has expired or has already been used. Request a new one below.",
       "profil": "Your account could not be opened. Try again, and write to us if it happens again.",
-      "service": "The service is momentarily unreachable. Your session is intact: try again in a moment.",
+      "service": "The service is temporarily unreachable. Your session is intact: try again in a moment.",
       "session": "Your session has expired. Log in again to continue.",
       "suspendu": "This account is suspended. Write to us to find out why.",
       "indisponible": "Google sign-in is temporarily unavailable. Log in with your email address and password below.",
@@ -1157,7 +1157,7 @@
   },
   "analyses": {
     "titre": "Analytics",
-    "indisponible": "This section is unreadable right now — this is not “no data”. Try again in a moment.",
+    "indisponible": "This section is unreadable right now — this is not “no data.” Try again in a moment.",
     "indisponibleCourt": "Not available right now",
     "periode": {
       "titre": "Period",
@@ -1402,7 +1402,7 @@
     "lienBloque": "Link blocked",
     "quota": {
       "gratuitTitre": "Free plan limit reached",
-      "gratuitTexte": "The free plan includes {n} orders in total: this is a lifetime limit that never resets. Upgrade to Pro to keep creating orders.",
+      "gratuitTexte": "The free plan includes {n, plural, one {# order} other {# orders}} in total: this is a lifetime limit that never resets. Upgrade to Pro to keep creating orders.",
       "gratuitTexteSansNombre": "You have reached your free plan limit: it is a lifetime limit that never resets. Upgrade to Pro to keep creating orders.",
       "mensuelTitre": "Monthly limit reached",
       "mensuelTexte": "You have created your {n} orders for this month. The limit resets on the 1st of the month.",
@@ -1448,7 +1448,7 @@
     "sectionExpedition": "Status",
     "sectionQc": "Photo status",
     "reference": "Product reference",
-    "referenceExemple": "e.g. blue jacket size M",
+    "referenceExemple": "e.g., blue jacket size M",
     "suivi": "Tracking number",
     "suiviExemple": "Paste the carrier's tracking number",
     "suiviAide": "A tracking number you just pasted often hasn't been scanned yet — that's normal, the carrier has published nothing. If the parcel ships from abroad, tracking may only start on arrival; an origin shipping number follows the whole journey.",
@@ -1456,7 +1456,7 @@
     "notesExemple": "Purchase price, remarks, anything that must not leave this page.",
     "notesPrivees": "Never visible to the customer, and absent from the export.",
     "client": "Customer name or handle",
-    "clientExemple": "e.g. Yanis, or @handle",
+    "clientExemple": "e.g., Yanis, or @handle",
     "clientAide": "Free text. Your customer has no account.",
     "enregistre": "Saved",
     "enregistrement": "Saving…",
@@ -1528,7 +1528,7 @@
     "compteur": "<b>{n}</b> of {max}",
     "deposer": "Click or drop your files here",
     "plein": "Limit reached for this order.",
-    "formats": "JPEG, PNG, WebP or MP4 · {videos} videos maximum",
+    "formats": "JPEG, PNG, WebP or MP4 · {videos, plural, one {# video} other {# videos}} maximum",
     "apercu": "Preview of media {position}",
     "estUneVideo": "Video",
     "couverture": "Cover",
@@ -1937,7 +1937,7 @@
     "panneau": {
       "titre": "Overview",
       "aucuneAlerte": "No alerts. Nothing is over the thresholds, and background tasks are sending heartbeats normally.",
-      "alertesIndisponibles": "Alerts unreadable right now — this is NOT “no alerts”. Try again in a moment.",
+      "alertesIndisponibles": "Alerts unreadable right now — this is NOT “no alerts.” Try again in a moment.",
       "compteursIndisponibles": "Counters unreadable right now. The dashes do not mean zero.",
       "alerte": {
         "colis_au_dessus_du_seuil": "One account is over the parcel limit: {valeur} against a threshold of {seuil}",
@@ -2074,7 +2074,7 @@
         },
         "medias_par_commande": {
           "titre": "Media per order",
-          "aide": "Including at most {videos} videos"
+          "aide": "Including at most {videos, plural, one {# video} other {# videos}}"
         },
         "poids_video": {
           "titre": "Maximum video size",
@@ -2173,7 +2173,7 @@
       "titre": "Monitoring",
       "sousTitre": "What runs with nobody watching.",
       "taches": "Background tasks",
-      "tachesIndisponibles": "Task status unreadable right now — this is NOT “never ran”. Try again in a moment.",
+      "tachesIndisponibles": "Task status unreadable right now — this is NOT “never ran.” Try again in a moment.",
       "indicateursIndisponibles": "Usage unreadable right now. The dashes do not mean zero.",
       "friseIndisponible": "Parcel history unreadable right now.",
       "nonMesure": "Not measured",
@@ -2364,7 +2364,7 @@
       "debloquer": "Unblock the link",
       "bloquerLong": "Block the link for {reference}",
       "debloquerLong": "Unblock the link for {reference}",
-      "aideBlocage": "Their customer will see “This link is no longer valid”. The link is not destroyed: unblocking restores it as it was. You do not see the order's content.",
+      "aideBlocage": "Their customer will see “This link is no longer valid.” The link is not destroyed: unblocking restores it as it was. You do not see the order's content.",
       "aideDeblocage": "The page comes back on the same link, the one the customer already received.",
       "motif": "Reason",
       "motifAide": "At least {n} characters. It appears in plain text in the audit log, and it is what will be read back if the decision is challenged.",
@@ -2519,7 +2519,7 @@
     "etape2": "Name your shop",
     "etape2Texte": "The name and logo appear at the top of every customer page.",
     "etape3": "Create your first order",
-    "etape3Texte": "You get a link to share straight away.",
+    "etape3Texte": "You get a link to share right away.",
     "combienTitre": "How long it takes",
     "combienTexte": "Creating an account takes under a minute, and the first tracking link goes out in the same session. There is no carrier integration to configure beforehand.",
     "marque": "Setting up your brand",
@@ -2539,7 +2539,7 @@
     "commande": "Creating an order",
     "commandeTexte": "The <b>Create an order</b> button sits on the orders list. The form fits in three blocks, with the customer page preview alongside.",
     "blocClient": "Customer details",
-    "blocClientTexte": "The customer's name or handle, and an optional email. The email is only used to send the link; it creates no account.",
+    "blocClientTexte": "The customer's name or handle, as free text: it creates no account.",
     "blocMedias": "Photos and videos",
     "blocMediasTexte": "Drop your files: the order, the packing, the sealed parcel.",
     "blocSuivi": "Tracking and shipping",
@@ -2554,7 +2554,7 @@
     "suivi": "Carrier and tracking",
     "suiviTexte": "You have no status to enter. Paste the tracking number: DropLink queries the carrier and updates the page.",
     "suiviAlerteTitre": "A freshly pasted number has not been scanned yet",
-    "suiviAlerteTexte": "It is not an error: the carrier simply has not published anything. The page says so, and never “number not found”.",
+    "suiviAlerteTexte": "It is not an error: the carrier simply has not published anything. The page says so, and never “number not found.”",
     "statuts": "Order statuses",
     "statutsTexte": "The tracker has four steps, and it never goes backwards. Finer detail lives in the tracking history, not in the tracker.",
     "stPreparation": "Not scanned yet",
@@ -2765,7 +2765,7 @@
       "inclusTotal": "{n, plural, one {# order in total} other {# orders in total}}",
       "proLien": "The link under your name",
       "proMarque": "Without the “Powered by DropLink” card",
-      "proPlafond": "Monthly cap, not lifetime",
+      "proPlafond": "Monthly limit, not lifetime",
       "bouton": "Upgrade to Pro",
       "nonInclus": "Not included:",
       "detail": "What the Pro plan changes"
@@ -2893,7 +2893,7 @@
     "sousTitre": "What the Pro plan changes — and what it doesn't.",
     "eyebrow": "Pro plan",
     "accroche": "Your links, under your name",
-    "intro": "Four things change, and they are the only ones. Everything else, photos, videos, automatic tracking and your colors, is already in the free plan.",
+    "intro": "Four things change, and they are the only ones. Everything else — photos, videos, automatic tracking and your colors — is already in the free plan.",
     "gratuit": "Free",
     "pro": "Pro",
     "parMois": "{prix} / month",
@@ -2913,7 +2913,7 @@
       "commandes": {
         "titre": "A cap that resets",
         "texte": "A free account is capped at a lifetime total of orders. On Pro, the cap becomes monthly again.",
-        "texteNombre": "A free account is capped at {n} orders FOR LIFE. On Pro, the cap becomes monthly again."
+        "texteNombre": "A free account is capped at {n} orders for life. On Pro, the cap becomes monthly again."
       },
       "colis": {
         "titre": "Tracking that keeps up",
@@ -3105,7 +3105,7 @@
       "copie": "Link copied",
       "laCommande": "The order",
       "champClient": "Customer name or handle",
-      "exClient": "E.g. Léa M.",
+      "exClient": "E.g., Léa M.",
       "aideClient": "Free text. Your customer has no account.",
       "champRef": "Product reference",
       "valeurRef": "Sneakers size 39, sweatshirt, joggers and cap",
@@ -3206,7 +3206,7 @@
       "r2": "Paste the tracking number: the carrier is detected automatically, and you can pick it by hand if it isn't. The steps update without you having to come back to the order.",
       "q3": "Can I edit the order after sending the link?",
       "r3": "Yes, as often as you like. Photos, number, status: your customer sees the up-to-date version on the same link, which never changes.",
-      "q4": "What happens after the {n} free orders?",
+      "q4": "What happens after {n, plural, one {your free order} other {the # free orders}}?",
       "q4SansNombre": "What happens after the free orders?",
       "r4": "The free plan includes {gratuit} orders in total. To create more, upgrade to Pro: {pro} orders per month for {prix}, with no commitment.",
       "r4SansNombre": "The free plan includes a limited number of orders in total. To create more, upgrade to Pro, for {prix} per month, with no commitment."

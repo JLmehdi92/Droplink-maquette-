@@ -963,7 +963,7 @@
     "sousTitre": "定制客户页面，强化品牌形象。",
     "identiteTitre": "品牌信息",
     "nomTitre": "店铺名称",
-    "nomAide": "如果既没有店名也没有Logo，客户的页面会直接从内容开始。",
+    "nomAide": "如果既没有店名也没有 Logo，客户的页面会直接从内容开始。",
     "nomPlaceholder": "例如：北方工作室",
     "erreurNom": "名称不能超过 60 个字符。",
     "logoRemplacer": "更换 Logo",
@@ -978,7 +978,7 @@
       "reseau": "上传未完成。请检查网络后重试。",
       "confirmation": "图片已发出，但我们未能保存。请重试。",
       "illisible": "您的浏览器无法读取这张图片。请尝试 PNG、JPG 或 WebP。",
-      "retrait": "无法移除Logo，请重试。"
+      "retrait": "无法移除 Logo，请重试。"
     },
     "couleurTitre": "个性化",
     "couleurAide": "选择代表您品牌的配色。",
@@ -986,7 +986,7 @@
     "couleurAjustee": "在客户页面上，这个颜色上的文字会被稍微调暗或调亮以保持可读。您的颜色本身不会被改动。",
     "erreurCouleur": "请输入井号加六位数字或字母，例如 #0058be。",
     "langueTitre": "客户页面语言",
-    "langueAide": "无论客户身在何处，看到的始终是这个语言。",
+    "langueAide": "无论客户身在何处，看到的始终是这种语言。",
     "langue": {
       "fr": "法语",
       "en": "英语",
@@ -1198,7 +1198,7 @@
       "suivis": "个跟踪中的包裹"
     },
     "consultees": {
-      "titre": "浏览最多的订单",
+      "titre": "查看次数最多的订单",
       "aide": "客户反复查看自己的页面，说明他很放心。",
       "sansNom": "未填写收件人",
       "vide": "此周期内还没有链接被打开。",
@@ -1214,9 +1214,9 @@
       "tauxTexte": "的回复确认了照片",
       "aucuneReponse": "暂无回复"
     },
-    "sousTitreEcran": "追踪业务表现与发货效率。",
-    "livreesSur": "{total} 单中的 {n} 单",
-    "reponsesSur": "{total} 单中有 {n} 单已回复",
+    "sousTitreEcran": "跟踪业务表现与发货效率。",
+    "livreesSur": "已创建 {total} 笔中的 {n} 笔",
+    "reponsesSur": "{total} 笔中有 {n} 笔已回复",
     "surColisLivres": "基于 {n} 个已送达包裹",
     "jours": "{n, number} 天",
     "evolution": {
@@ -1245,11 +1245,11 @@
     "bandeau": {
       "aria": "关于数据分析",
       "titre": "简洁实用的数据分析",
-      "aide": "追踪发货效果，提升客户体验。",
+      "aide": "跟踪发货效果，提升客户体验。",
       "propulse": "技术支持",
       "slogan": "简单而强大的物流链接。"
     },
-    "vuesParCommande": "每个已打开订单 {n, number} 次查看"
+    "vuesParCommande": "每笔已打开的订单 {n, number} 次查看"
   },
   "commandes": {
     "titre": "订单",
@@ -1345,8 +1345,8 @@
       "exportAvertissement": "该文件包含您订单的公开链接：拿到文件的人就能打开您客户的页面。",
       "exportTelecharger": "下载 CSV",
       "enCours": "处理中…",
-      "selectionUn": "已选 # 单",
-      "selectionPlusieurs": "已选 # 单",
+      "selectionUn": "已选 # 笔",
+      "selectionPlusieurs": "已选 # 笔",
       "toutDeselectionner": "取消全选"
     },
     "vues": {
@@ -1632,7 +1632,7 @@
       "silence": "包裹已登记并在跟踪中。经过海关时出现这样的间隔并不少见——我们每天都会向承运商查询。",
       "arrete": "承运商不再提供该运单号的信息。如果您尚未收到包裹，请联系卖家。",
       "silenceTitre": "已有 {n} 天没有更新",
-      "attenteTitre": "等待承运商揽收",
+      "attenteTitre": "等待承运商信息",
       "attenteTexte": "包裹已交给承运商，首次扫描信息还没有到——最初几天这很常见。详细物流会自动显示在这里。"
     },
     "reseaux": {
@@ -2334,7 +2334,7 @@
       "typeRevendeurs": "分销商",
       "typeSans": "未声明类型",
       "uniteComptes": "个账户",
-      "pagesConsultees": "客户页面浏览量",
+      "pagesConsultees": "已查看的客户页面",
       "tauxConsultes": "链接打开率",
       "tauxValeur": "{valeur}%",
       "delaiLivraison": "平均送达时长",
@@ -2376,7 +2376,7 @@
         "introuvable": "找不到该订单。",
         "ecriture": "没有任何改动。请重试。"
       },
-      "motifAideBlocage": "至少 {n} 个字符。卖家会在其订单中看到，并写入日志。",
+      "motifAideBlocage": "至少 {n} 个字符。卖家会在其订单中看到该原因，它也会写入日志。",
       "annonceBloque": "链接已停用。卖家会在订单中看到原因。",
       "annonceDebloque": "链接已恢复。页面恢复为原链接。"
     },
@@ -2539,7 +2539,7 @@
     "commande": "创建订单",
     "commandeTexte": "<b>“创建订单”</b>按钮位于订单列表。表单分为三块，旁边同时显示客户页面预览。",
     "blocClient": "客户信息",
-    "blocClientTexte": "客户的名称或昵称，以及可选邮箱。邮箱仅用于发送链接，不会创建任何账户。",
+    "blocClientTexte": "客户的名称或昵称，自由填写：不会创建任何账户。",
     "blocMedias": "照片与视频",
     "blocMediasTexte": "拖入文件：商品、打包过程、封箱包裹。",
     "blocSuivi": "物流与发货",
@@ -2547,7 +2547,7 @@
     "sauvegardeTitre": "没有“保存”按钮",
     "sauvegardeTexte": "填写过程中订单会自动保存。之后补上运单号即可开始跟踪。",
     "medias": "照片与视频",
-    "mediasTexte": "媒体文件是 DropLink 的核心：它们取代了来回的消息。可拖放或选择文件添加，并可用鼠标或键盘重新排序。",
+    "mediasTexte": "照片和视频文件是 DropLink 的核心：它们取代了来回的消息。可拖放或选择文件添加，并可用鼠标或键盘重新排序。",
     "media1": "支持照片与视频。第一张图片作为封面。",
     "media2": "每笔订单最多 20 个文件，其中视频最多 3 个。",
     "media3": "客户可全屏查看每张照片，并在页面内播放视频。",
@@ -2716,7 +2716,7 @@
       "activeLe": "最近活动：{date}",
       "appareilInconnu": "未识别的设备",
       "lectureImpossible": "暂时无法读取您的会话，请重试。",
-      "fermerAide": "退出您的其他所有设备，本设备保持登录。",
+      "fermerAide": "让您的其他所有设备退出登录，本设备保持登录。",
       "appareilsFiables": {
         "titre": "受信任的设备",
         "aide": "无需再次输入验证码的设备。",
@@ -3076,7 +3076,7 @@
       "titre2": "永远是那几句。",
       "q1": "我的包裹到哪了？",
       "q2": "能再发一下照片吗？",
-      "q3": "物流单号是多少？",
+      "q3": "运单号是多少？",
       "q4": "什么时候到？",
       "q5": "你真的发货了吗？",
       "q6": "从昨天到现在有动静吗？",
@@ -3174,7 +3174,7 @@
       "etiquette": "价格",
       "titre1": "免费开始。",
       "titre2": "成长后升级 Pro。",
-      "legende": "免费版与 Pro 版对比",
+      "legende": "免费版与 Pro 对比",
       "coin": "两种套餐都会自动跟踪包裹，并且从头到尾使用同一个链接。",
       "gratuit": "免费版",
       "sansCarte": "无需银行卡",

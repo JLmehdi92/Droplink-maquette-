@@ -66,7 +66,7 @@ export async function generateMetadata({
     title: TITRE,
     description: DESCRIPTION_META,
     alternates: alternatesUneSeuleLangue(langue, CHEMIN),
-    openGraph: openGraphDe(langue, CHEMIN, { titre: TITRE, description: DESCRIPTION_META }),
+    openGraph: openGraphDe(langue, CHEMIN, { titre: TITRE, description: DESCRIPTION_META }, { uneSeuleLangue: true }),
   };
 }
 

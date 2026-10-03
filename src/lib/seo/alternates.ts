@@ -130,6 +130,13 @@ export function openGraphDe(
   langue: Langue,
   chemin: string,
   textes: { readonly titre: string; readonly description: string },
+  /*
+   * Une page qui n'existe que dans SA langue (le blog) n'annonce pas d'autres
+   * locales : `og:locale:alternate` en_US et zh_CN y promettaient des versions
+   * qui rendent 404 (contre-inventaire de l'audit SEO, 03/10/2026) — l'écho Open
+   * Graph de `alternatesUneSeuleLangue`.
+   */
+  options: { readonly uneSeuleLangue?: boolean } = {},
 ): Metadata["openGraph"] {
   const origine = origineConfiguree();
   if (origine === null) return undefined;
@@ -143,7 +150,9 @@ export function openGraphDe(
     images: [{ url: `${origine}/og-droplink.jpg`, width: 1200, height: 630, alt: textes.titre }],
     locale: LOCALE_OPEN_GRAPH[langue],
     // Les autres langues, pour qu'un aperçu partagé sache qu'elles existent.
-    alternateLocale: LANGUES.filter((l) => l !== langue).map((l) => LOCALE_OPEN_GRAPH[l]),
+    ...(options.uneSeuleLangue === true
+      ? {}
+      : { alternateLocale: LANGUES.filter((l) => l !== langue).map((l) => LOCALE_OPEN_GRAPH[l]) }),
   };
 }
 

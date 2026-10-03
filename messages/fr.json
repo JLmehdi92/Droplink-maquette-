@@ -1215,7 +1215,7 @@
       "aucuneReponse": "aucune réponse pour l’instant"
     },
     "sousTitreEcran": "Suivez les performances de votre activité et l'efficacité de vos envois.",
-    "livreesSur": "{n} sur {total} créées",
+    "livreesSur": "{n} sur {total, plural, one {# créée} other {# créées}}",
     "reponsesSur": "{n, plural, one {# réponse} other {# réponses}} sur {total}",
     "surColisLivres": "sur {n, plural, one {# colis livré} other {# colis livrés}}",
     "jours": "{n, plural, one {# jour} other {# jours}}",
@@ -1402,7 +1402,7 @@
     "lienBloque": "Lien bloqué",
     "quota": {
       "gratuitTitre": "Quota du compte gratuit atteint",
-      "gratuitTexte": "Le compte gratuit comprend {n} commandes au total : ce quota est à vie, il ne se recharge pas. Passez au Pro pour continuer à créer des commandes.",
+      "gratuitTexte": "Le compte gratuit comprend {n, plural, one {# commande} other {# commandes}} au total : ce quota est à vie, il ne se recharge pas. Passez au Pro pour continuer à créer des commandes.",
       "gratuitTexteSansNombre": "Vous avez atteint le quota de votre compte gratuit : il est à vie, il ne se recharge pas. Passez au Pro pour continuer à créer des commandes.",
       "mensuelTitre": "Plafond du mois atteint",
       "mensuelTexte": "Vous avez créé vos {n} commandes de ce mois-ci. Le plafond se recharge le 1er du mois.",
@@ -1528,7 +1528,7 @@
     "compteur": "<b>{n}</b> sur {max}",
     "deposer": "Cliquez ou déposez vos fichiers ici",
     "plein": "Plafond atteint pour cette commande.",
-    "formats": "JPEG, PNG, WebP ou MP4 · {videos} vidéos au maximum",
+    "formats": "JPEG, PNG, WebP ou MP4 · {videos, plural, one {# vidéo} other {# vidéos}} au maximum",
     "apercu": "Aperçu du média {position}",
     "estUneVideo": "Vidéo",
     "couverture": "Couverture",
@@ -1695,7 +1695,7 @@
     "trajetLu": {
       "etape": "{etape} : {etat}",
       "enCoursAvec": "{enCours}, {detail}",
-      "estimation": "livraison estimée {dates}"
+      "estimation": "livraison estimée : {dates}"
     },
     "fourchette": {
       "memeMois": "{jourDu, select, 1 {1er} other {{jourDu}}} au {jourAu, select, 1 {1er} other {{jourAu}}} {moisAu}",
@@ -2074,7 +2074,7 @@
         },
         "medias_par_commande": {
           "titre": "Médias par commande",
-          "aide": "Dont {videos} vidéos au maximum"
+          "aide": "Dont {videos, plural, one {# vidéo} other {# vidéos}} au maximum"
         },
         "poids_video": {
           "titre": "Poids maximum d'une vidéo",
@@ -2539,7 +2539,7 @@
     "commande": "Créer une commande",
     "commandeTexte": "Le bouton <b>Créer une commande</b> est disponible depuis la liste des commandes. Le formulaire tient en trois blocs, et l'aperçu de la page client s'affiche en parallèle.",
     "blocClient": "Informations du client",
-    "blocClientTexte": "Nom ou pseudo du client, et e-mail facultatif. L'e-mail sert uniquement à envoyer le lien ; il ne crée aucun compte.",
+    "blocClientTexte": "Nom ou pseudo du client, en texte libre : il ne crée aucun compte.",
     "blocMedias": "Photos et vidéos",
     "blocMediasTexte": "Glissez vos fichiers : commande, préparation, colis fermé.",
     "blocSuivi": "Suivi et expédition",
@@ -2566,7 +2566,7 @@
     "stLivre": "Livré",
     "stLivreE": "Le transporteur a confirmé la remise du colis.",
     "silenceTitre": "Le silence est nommé au-delà de dix jours",
-    "silenceTexte": "Un colis sans mouvement depuis plus de dix jours est signalé, sur l'écran Envois comme sur la page client. Un silence nommé est une information ; un silence subi se lit comme une panne.",
+    "silenceTexte": "Un colis sans mouvement depuis plus de dix jours est signalé, sur l'écran Suivi d'envois comme sur la page client. Un silence nommé est une information ; un silence subi se lit comme une panne.",
     "lien": "Le lien client",
     "lienTexte": "Chaque commande possède son propre lien. Votre client l'ouvre sans compte, sur mobile comme sur ordinateur, et il y retrouve vos photos, le statut du colis, l'historique des mouvements et vos coordonnées si vous les avez renseignées.",
     "lienAlerteTitre": "Le lien ne change jamais tout seul",
@@ -2913,7 +2913,7 @@
       "commandes": {
         "titre": "Un plafond qui se recharge",
         "texte": "Un compte gratuit est borné à un total de commandes à vie. En Pro, le plafond redevient mensuel.",
-        "texteNombre": "Un compte gratuit est borné à {n} commandes À VIE. En Pro, le plafond redevient mensuel."
+        "texteNombre": "Un compte gratuit est borné à {n} commandes à vie. En Pro, le plafond redevient mensuel."
       },
       "colis": {
         "titre": "Le suivi qui suit",
@@ -3206,7 +3206,7 @@
       "r2": "Collez le numéro de suivi : le transporteur est détecté automatiquement, et vous pouvez le choisir à la main s'il ne l'est pas. Les étapes se mettent à jour sans que vous ayez à revenir sur la commande.",
       "q3": "Je peux modifier la commande après avoir envoyé le lien ?",
       "r3": "Oui, autant que vous voulez. Photos, numéro, statut : votre client voit la version à jour sur le même lien, qui ne change jamais.",
-      "q4": "Que se passe-t-il après les {n} commandes gratuites ?",
+      "q4": "Que se passe-t-il après {n, plural, one {la commande gratuite} other {les # commandes gratuites}} ?",
       "q4SansNombre": "Que se passe-t-il après les commandes gratuites ?",
       "r4": "Le plan gratuit compte {gratuit} commandes au total. Pour en créer de nouvelles, passez au Pro : {pro} commandes par mois pour {prix}, sans engagement.",
       "r4SansNombre": "Le plan gratuit compte un nombre limité de commandes au total. Pour en créer de nouvelles, passez au Pro, pour {prix} par mois, sans engagement."

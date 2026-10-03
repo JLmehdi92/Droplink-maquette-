@@ -1772,6 +1772,25 @@ une française de 189 (tarifs) et deux articles à 175 et 186 que Google coupait
   jeton gardé en mémoire et compte purgé. Core Web Vitals (CPU ×4) : rien de dégradé.
 - Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1306/1307 (alarme Railway).
 
+### ▶️ 03/10/2026 — langues et SEO : contrôle final (session cloud)
+
+Second passage indépendant dans chaque langue, sur les catalogues finaux : **5 fautes en
+français** (un pluriel « 1 sur 1 créées », « À VIE » en capitales, « l'écran Envois » qui
+n'existe pas, et le guide qui annonçait un **e-mail client saisi par le vendeur — l'éditeur n'a
+pas ce champ**, la migration 188 en retire même le droit), **20 en anglais** (16 retenues : quatre
+pluriels ICU, « momentarily », points dans les guillemets, « e.g., » ; 4 écartées parce qu'elles
+changeaient la terminologie des textes légaux — « sole trader », « by post »), **18 en chinois**
+(glossaire, « 等待承运商揽收 » qui disait le colis pas encore pris en charge). Les quatre pluriels
+anglais ont leurs pendants français, alignés. Un contrôle du delta a trouvé trois oublis
+(l'e-mail client encore annoncé en anglais et en chinois, « FOR LIFE », « la 1 commande ») :
+corrigés, puis **zéro défaut**.
+Contre-inventaire SEO indépendant (extraction propre, `html.parser`, sur le HTML serveur des 41
+pages) : **un écart**, `og:locale:alternate` en_US et zh_CN annoncés par les six pages du blog,
+français seul → `openGraphDe(…, { uneSeuleLangue: true })`, garde nouvelle vue rouge deux fois.
+Sonde de l'auteur remesurée : 0 défaut. Bilan complet : `consignes/audit-langues-seo.md` ;
+remesures au poste de Mehdi : étape 6 TER de `verification-finale-locale.md`.
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1307/1308 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

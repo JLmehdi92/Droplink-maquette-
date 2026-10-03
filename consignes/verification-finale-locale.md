@@ -177,6 +177,30 @@ moi, ne les tranche pas seul :
   son corps ne mène plus à l'inscription — à confirmer avec moi ;
 - scripts/ecarts-declares.json est périmé : la référence est désormais la maquette.
 
+ÉTAPE 6 TER — LES LANGUES ET LE SEO (session cloud du 03/10/2026, consignes/audit-langues-seo.md)
+Cinq commits (bdd3c07 à 2fc1aae) ont touché les trois catalogues, le blog, le pied public, la
+démo de page client et l'aperçu de Ma marque. À remesurer ICI, parce que le cloud ne l'a pas pu :
+- `pnpm fumee` : elle lit les catalogues et compare au HTML servi. 236 chaînes françaises ont
+  reçu une espace insécable (U+00A0) ; ses contrôles du plan de site filtrent désormais
+  `/signalement` selon `canalOuvert`. Relève le décompte et toute ligne ECHEC qui cite un texte ;
+- la soustraction au kit sur les écrans dont un texte ou une balise a changé : landing (titres
+  de la démo `h4` → `div.pc__titre`), pied des pages publiques (`h3` → `h2`), Ma marque et
+  `/bienvenue` (aperçu, « Ordinateur » au lieu de « Desktop »), éditeur de commande, analyses
+  (pluriels), tableau de bord. Les écarts de TEXTE nés de la relecture se déclarent, ils ne se
+  « corrigent » pas en revenant à l'ancien texte ;
+- `node scripts/verifier-ecran-migre.mjs` en zh-CN, à 390 et au bureau, sur les écrans
+  d'ADMINISTRATION (double authentification, non mesurés d'ici) : aucun débordement, aucun
+  libellé tronqué, `letter-spacing` 0 ;
+- `pnpm test:rls` et `pnpm couverture` : aucun fichier de `src/lib/` n'a été ajouté ; un seul
+  composant (`src/components/seo/graphe-json-ld.tsx`), exercé par la fumée sur chaque page publique.
+Puis, après la mise en ligne seulement (étape 8, sur mon ordre) :
+- Google Search Console : propriété de domaine droplink.fr, soumettre `https://droplink.fr/sitemap.xml`
+  (27 URL), inspecter `/fr`, `/en`, `/zh-CN` et un article (canonique retenue, hreflang lus),
+  vérifier dans « Améliorations » que les fils d'Ariane sont reconnus sans erreur ;
+- le test des résultats enrichis de Google sur `/fr`, `/fr/tarifs` et un article ;
+- les VRAIES Core Web Vitals (rapport Search Console ou PageSpeed Insights, données de terrain) :
+  surveiller le LCP de la landing chinoise au bureau (≈ 2,8 s mesuré en local, CPU ×4).
+
 ÉTAPE 7 — LA PRODUCTION, SANS Y TOUCHER
 `pnpm verif:prod` (lecture seule). Liste les migrations que la production n'a pas encore.
 

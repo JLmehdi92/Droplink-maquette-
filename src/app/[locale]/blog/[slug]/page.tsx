@@ -53,7 +53,12 @@ export async function generateMetadata({
 
   const chemin = `/blog/${article.slug}`;
   // Sans origine, `openGraphDe` ne rend rien : on n'ajoute alors pas un `og:type` orphelin.
-  const ogArticle = openGraphDe(langue, chemin, { titre: article.titre, description: article.description });
+  const ogArticle = openGraphDe(
+    langue,
+    chemin,
+    { titre: article.titre, description: article.description },
+    { uneSeuleLangue: true },
+  );
   return {
     title: `${article.titreMeta ?? article.titre} — DropLink`,
     description: article.description,
