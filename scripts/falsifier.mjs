@@ -3862,6 +3862,21 @@ $$;
     },
   },
 
+  // L'alerte de la vue d'ensemble (213) : sans sa garde, un vendeur lirait le nombre de
+  // contestations de TOUTES les boutiques et la référence de la plus ancienne.
+  "contestations-alerte-sans-garde": {
+    casserDepuisMigration: {
+      fichier: "213_l_alerte_des_contestations.sql",
+      depuis: "create function public.compter_contestations_en_attente_admin(",
+      remplacer: "  if not public.est_admin() then\n    raise exception 'introuvable' using errcode = 'DL031';\n  end if;\n",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "213_l_alerte_des_contestations.sql",
+      depuis: "create function public.compter_contestations_en_attente_admin(",
+    },
+  },
+
 };
 
 /**

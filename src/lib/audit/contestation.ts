@@ -76,6 +76,43 @@ export async function contestationsEnAttenteParmi(
   return { statut: "ok", ids: new Set(data.filter((v): v is string => typeof v === "string")) };
 }
 
+/**
+ * L'ALERTE DE LA VUE D'ENSEMBLE (migration 213, décision de Mehdi du 03/10/2026) : combien de
+ * contestations attendent, et la plus ancienne — sa référence courte et sa date d'envoi. Des
+ * nombres et une référence, aucun contenu : rien n'est tracé.
+ *
+ * TROIS ÉTATS, jamais deux : « aucune » n'est pas « illisible ». Une lecture en panne qui se
+ * tairait comme une file vide laisserait un vendeur attendre une réponse que personne ne
+ * saurait devoir donner (contrainte n° 8).
+ */
+export type AlerteContestations =
+  | { readonly statut: "ok"; readonly nombre: number; readonly reference: string; readonly envoyeeLe: string }
+  | { readonly statut: "aucune" }
+  | { readonly statut: "illisible" };
+
+const LigneAlerte = z.object({
+  en_attente: z.coerce.number().int().nonnegative(),
+  plus_ancienne_ref: z.string().nullable(),
+  plus_ancienne_le: z.string().nullable(),
+});
+
+export async function lireAlerteContestations(supabase: ClientAdmin): Promise<AlerteContestations> {
+  const { data, error } = await supabase.rpc("compter_contestations_en_attente_admin");
+  const ligne = error === null && Array.isArray(data) ? LigneAlerte.safeParse(data[0]) : null;
+  if (ligne === null || !ligne.success) {
+    console.error(
+      "[admin] alerte des contestations illisible : " + (error?.message ?? "réponse hors forme"),
+    );
+    return { statut: "illisible" };
+  }
+  const { en_attente: nombre, plus_ancienne_ref: reference, plus_ancienne_le: envoyeeLe } = ligne.data;
+  if (nombre === 0) return { statut: "aucune" };
+  // Un nombre sans sa plus ancienne contredirait la base : on le dit illisible plutôt que
+  // d'inventer une référence.
+  if (reference === null || envoyeeLe === null) return { statut: "illisible" };
+  return { statut: "ok", nombre, reference, envoyeeLe };
+}
+
 /** Même plancher que le motif d'un blocage : c'est ce que le vendeur lira. */
 export const DemandeRefus = z.object({
   contestationId: z.string().uuid(),

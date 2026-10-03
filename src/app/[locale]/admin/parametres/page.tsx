@@ -94,41 +94,38 @@ type Rangee =
  */
 const CARTES: readonly {
   readonly id: string;
-  readonly colonne: "gauche" | "droite";
+  /**
+   * LA RANGÉE DE LA MAQUETTE (`admin-parametres.html`, contre-audit du 03/10/2026) :
+   * Plafonds | Suivi, puis Interrupteurs | Débit, puis « Constaté, changé au
+   * déploiement » sur toute la largeur — les valeurs qu'aucun écran ne change.
+   */
+  readonly rangee: 1 | 2 | 3;
   readonly rangees: readonly Rangee[];
 }[] = [
   {
     id: "plafonds",
-    colonne: "gauche",
+    rangee: 1,
     rangees: [
       /*
        * LES DEUX QUOTAS, ET ILS NE MESURENT PAS LA MÊME CHOSE. Le premier
-       * s'applique aux comptes GRATUITS et compte toute leur vie ; le second
-       * aux comptes PRO et compte le mois. Les montrer côte à côte est
+       * s'applique aux comptes PRO et compte le mois ; le second aux comptes
+       * GRATUITS et compte toute leur vie. Les montrer côte à côte est
        * délibéré : c'est la seule façon de voir qu'un vendeur n'est jamais
        * soumis aux deux, et lequel des deux on est en train de changer.
        */
-      { genre: "reglage", cle: "plafond_commandes_gratuit_a_vie" },
       { genre: "reglage", cle: "plafond_commandes_mensuel" },
-      { genre: "absent", id: "stockage_par_compte" },
-      { genre: "constate", id: "medias_par_commande" },
-      { genre: "constate", id: "poids_video" },
+      { genre: "reglage", cle: "plafond_commandes_gratuit_a_vie" },
     ],
   },
   {
     id: "suivi",
-    colonne: "gauche",
+    rangee: 1,
     rangees: [
-      { genre: "reglage", cle: "seuil_colis_par_compte" },
       /*
-       * LE BUDGET DE SUIVI — ÉCART ASSUMÉ, comme le retard du veilleur juste
-       * plus bas : la planche ne le dessine pas.
-       *
-       * Il est ici parce que c'est le SEUL budget du produit qui ne se recharge
-       * pas — 200 prises en charge à vie, pour tous les comptes réunis — et
-       * qu'aucun plafond par compte ne peut le voir. Le laisser sans écran
-       * ferait d'un nombre décisif une valeur qu'il faut une migration pour
-       * corriger le jour où le palier change.
+       * LE BUDGET DE SUIVI — c'est le SEUL budget du produit qui ne se recharge
+       * pas, pour tous les comptes réunis, et aucun plafond par compte ne peut
+       * le voir. Le laisser sans écran ferait d'un nombre décisif une valeur
+       * qu'il faut une migration pour corriger le jour où le palier change.
        */
       { genre: "reglage", cle: "budget_suivi_total" },
       /*
@@ -138,18 +135,22 @@ const CARTES: readonly {
        * fournisseur ne coincident pas.
        */
       { genre: "reglage", cle: "budget_suivi_deja_consomme" },
-      { genre: "constate", id: "silence_jours" },
-      { genre: "constate", id: "abandon_jours" },
-      { genre: "constate", id: "purge_jours" },
-      // ÉCART ASSUMÉ : la planche ne dessine pas ce réglage. Le retirer le
-      // rendrait inatteignable alors qu'il est modifiable et qu'il pilote une
-      // alerte — un réglage réel sans écran est pire qu'un écran sans réglage.
+      { genre: "reglage", cle: "seuil_colis_par_compte" },
       { genre: "reglage", cle: "retard_veilleur_minutes" },
     ],
   },
   {
+    id: "interrupteurs",
+    rangee: 2,
+    rangees: [
+      { genre: "reglage", cle: "inscriptions_ouvertes" },
+      { genre: "reglage", cle: "suivi_actif" },
+      { genre: "eteint", id: "notifications_email" },
+    ],
+  },
+  {
     id: "debit",
-    colonne: "droite",
+    rangee: 2,
     rangees: [
       { genre: "constate", id: "debit_inconnu", sansAide: true },
       { genre: "constate", id: "debit_valide", sansAide: true },
@@ -157,12 +158,17 @@ const CARTES: readonly {
     ],
   },
   {
-    id: "interrupteurs",
-    colonne: "droite",
+    // La purge des médias (`purge_jours`) n'est pas dessinée par la maquette : c'est une
+    // valeur réelle du produit, constatée comme les autres, et elle reste dite.
+    id: "constate",
+    rangee: 3,
     rangees: [
-      { genre: "reglage", cle: "inscriptions_ouvertes" },
-      { genre: "reglage", cle: "suivi_actif" },
-      { genre: "eteint", id: "notifications_email" },
+      { genre: "absent", id: "stockage_par_compte" },
+      { genre: "constate", id: "medias_par_commande" },
+      { genre: "constate", id: "poids_video" },
+      { genre: "constate", id: "silence_jours" },
+      { genre: "constate", id: "abandon_jours" },
+      { genre: "constate", id: "purge_jours" },
     ],
   },
 ];
@@ -269,15 +275,16 @@ export default async function ParametresAdmin({
     );
   };
 
-  const cartesDe = (cote: "gauche" | "droite") =>
-    CARTES.filter((c) => c.colonne === cote).map((c) => (
+  const cartesDe = (rangee: 1 | 2 | 3) =>
+    CARTES.filter((c) => c.rangee === rangee).map((c) => (
       <CarteReglages
         key={c.id}
         id={c.id}
         titre={t("carte." + c.id + ".titre")}
         sousTitre={t("carte." + c.id + ".sousTitre")}
       >
-        {c.rangees.map(rendreRangee)}
+        {/* La carte pleine largeur range ses valeurs sur deux colonnes, comme la maquette. */}
+        {rangee === 3 ? <div className="adm-constates">{c.rangees.map(rendreRangee)}</div> : c.rangees.map(rendreRangee)}
       </CarteReglages>
     ));
 
@@ -287,10 +294,9 @@ export default async function ParametresAdmin({
       {/* ⚠️ SANS CE PROVIDER, L'ÉCRAN LÈVE AU RENDU : les deux composants de
           réglage sont CLIENTS et appellent `useTranslations`. */}
       <TraductionsClient espaces={["admin.parametres"]}>
-        <div className="adm-rangee adm-rangee--2">
-          <div className="adm-colonne">{cartesDe("gauche")}</div>
-          <div className="adm-colonne">{cartesDe("droite")}</div>
-        </div>
+        <div className="adm-rangee adm-rangee--2">{cartesDe(1)}</div>
+        <div className="adm-rangee adm-rangee--2">{cartesDe(2)}</div>
+        {cartesDe(3)}
       </TraductionsClient>
       {/* CE QUI N'EST PAS ICI EST DIT, plutôt que laissé à deviner : un écran de
           paramètres muet sur les secrets laisse chercher où les régler. */}

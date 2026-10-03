@@ -8,7 +8,9 @@ import { echelle } from "@/components/admin/echelle";
  *
  * Le SVG est une IMAGE des chiffres (`role="img"` et son libellé) : un lecteur
  * d'écran qui annoncerait trente barres n'apprendrait rien de plus que le
- * libellé. Chaque barre porte son chiffre en `<title>` et en `data-info`.
+ * libellé. Chaque barre porte son chiffre en `data-info`, que la bulle de la maquette
+ * lit au survol ; plus de `<title>` natif (contre-audit du 03/10/2026) : il doublait
+ * la bulle d'une seconde infobulle du navigateur.
  */
 const L = 600;
 const H = 160;
@@ -52,9 +54,7 @@ export async function BarresAdmin({
                 className={i === valeurs.length - 1 ? "est-dernier" : undefined}
                 style={{ "--i": String(i) } as React.CSSProperties}
                 data-info={v.info}
-              >
-                <title>{v.info}</title>
-              </rect>
+              />
             );
           })}
         </svg>

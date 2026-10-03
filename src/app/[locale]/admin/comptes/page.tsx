@@ -268,11 +268,21 @@ export default async function AdminComptes({
             </div>
           )}
 
-          {lienSuivant === null ? null : (
+          {/* « X SUR N » COMME LA MAQUETTE, N seulement SANS FILTRE (`compteurs_admin`,
+              tous les comptes) : filtré, aucune fonction ne compte les comptes qui
+              correspondent, et le total de la plateforme se lirait comme le leur. */}
+          {page.lignes.length === 0 ? null : (
             <footer className="adm-pied">
-              <LienEcran prefetch={false} href={lienSuivant} className="bouton-outil">
-                {t("comptes.pageSuivante")}
-              </LienEcran>
+              <span>
+                {parametres.q === "" && parametres.statut === "tous"
+                  ? t("comptes.surTotal", { affichees: page.lignes.length, total: compteurs.comptes })
+                  : t("comptes.affichees", { affichees: page.lignes.length })}
+              </span>
+              {lienSuivant === null ? null : (
+                <LienEcran prefetch={false} href={lienSuivant} className="bouton-outil">
+                  {t("comptes.pageSuivante")}
+                </LienEcran>
+              )}
             </footer>
           )}
         </section>

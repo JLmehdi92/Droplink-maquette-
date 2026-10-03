@@ -54,9 +54,15 @@ main. Montre-moi la liste des conflits et ce que tu as gardé.
 - Vérifie que .env.test.local existe et vise la base de TESTS (jamais la référence de
   production nommée dans scripts/portes.mjs).
 - pnpm install, puis pnpm exec next typegen.
-- La refonte n'a écrit AUCUNE migration (vérifie-le : `git diff --stat origin/master...refonte
-  -- supabase/migrations` doit être vide). Si master en a de nouvelles, applique-les
-  UNIQUEMENT à la base de tests : `pnpm db:migrate:tests` puis `pnpm db:types:tests`.
+- La refonte a écrit UNE migration, la 213 (`213_l_alerte_des_contestations.sql`, décision de
+  Mehdi du 03/10/2026) : `git diff --stat origin/master...refonte -- supabase/migrations` doit
+  montrer ce seul fichier. Applique-la, avec celles que master aurait ajoutées, UNIQUEMENT à
+  la base de tests : `pnpm db:migrate:tests` puis `pnpm db:types:tests`. Les types de la 213
+  ont été écrits À LA MAIN dans src/lib/supabase/types-base.ts (le cloud ne joint pas
+  Postgres) : après `db:types:tests`, `git diff src/lib/supabase/types-base.ts` doit être
+  vide ou ne différer que par l'ordre — sinon, garde la version générée et dis-le-moi.
+- Si master a lui aussi pris le numéro 213, renumérote la migration de la refonte (nouveau
+  numéro libre, jamais un fichier déjà appliqué rouvert) et dis-le-moi.
 - La session cloud a créé sur la base de TESTS trois comptes de mesure :
   refonte-demo@, refonte-onb@ et refonte-admin@droplink-test.invalid (ce dernier
   administrateur, avec un facteur TOTP). Si un compteur des gardes d'administration s'en
@@ -69,6 +75,17 @@ main. Montre-moi la liste des conflits et ce que tu as gardé.
 - Tout autre rouge : trouve la cause racine, corrige, relance. Un test sauté n'est pas un
   test qui passe. Aucun test désactivé, sauté ou affaibli pour passer.
 - Puis `pnpm test:perf` (gardé par scripts/suite.mjs, plancher de 45 mesures).
+- Les TESTS ÉCRITS PAR LE CLOUD QUI N'ONT JAMAIS TOURNÉ (ils exigent Postgres) — regarde-les
+  passer UN PAR UN, et vois-les rougir une fois :
+  · tests/rls/contestation.test.ts : « l'alerte de la vue d'ensemble compte et désigne la plus
+    ancienne, sans rien tracer (213) » et « un vendeur et un anonyme reçoivent le refus d'une
+    surface inexistante (213) » ;
+  · tests/rls/commandes-cycle.test.ts : « il rend le jeton QUE LA BASE PORTE, y compris après
+    une révocation » ;
+  · tests/rls/catalogue.test.ts : la déclaration de `compter_contestations_en_attente_admin`
+    dans FONCTIONS_OUVERTES_ADMISES ;
+  · la falsification neuve : `pnpm falsifier casser contestations-alerte-sans-garde` → la
+    suite contestation doit ROUGIR → `pnpm falsifier reparer contestations-alerte-sans-garde`.
 
 ÉTAPE 4 — CHAQUE ÉCRAN, AU NAVIGATEUR
 Pour CHAQUE écran porté (liste au § 8 du journal), applique la méthode de CLAUDE.md
@@ -94,6 +111,22 @@ CE QUE LE CLOUD N'A PAS PU MESURER, À FAIRE EN PRIORITÉ :
 - la page de signalement exige NEXT_PUBLIC_CONTACT_ABUS au build (sinon 404) ;
 - l'administration au bureau ET dans le tiroir, ses quatre dialogues modaux (Échap et
   annulation bloqués pendant la requête, recopie d'adresse sans collage ni dépôt).
+- ⚠️ TOUTE L'ADMINISTRATION EST « NON MESURÉE » APRÈS LE CONTRE-AUDIT DU 03/10/2026 (C3, D3 ;
+  le cloud ne voit pas l'admin, qui exige la double authentification) — à remesurer contre la
+  maquette, écran par écran :
+  · vue d'ensemble : l'alerte « Contestation du blocage de #XXXXXX » (une contestation en
+    attente) puis au pluriel (deux ou plus), sa date d'envoi, « Examiner » qui mène à
+    /admin/commandes?q=#XXXXXX et y trouve la ligne ; « Aucune alerte » seulement quand les
+    TROIS lectures ont abouti ; AVANT la 213, la ligne « Les contestations en attente n'ont pas
+    pu être lues » et aucun 500 ;
+  · journal : le pied « X sur N entrées » aussi sur la DERNIÈRE page ;
+  · commandes et comptes : « X sur N » sans filtre, « N affichées » avec un filtre ; vérifie
+    que N égale bien la liste non filtrée (sinon dis-le, ne l'ajuste pas à la main) ;
+  · paramètres : Plafonds | Suivi, puis Interrupteurs | Débit, puis « Constaté, changé au
+    déploiement » en pleine largeur sur deux colonnes ;
+  · boutiques : les sept colonnes de la maquette, la boutique est le lien vers le compte
+    (cible tactile, nom accessible « Voir le compte de … ») ;
+  · graphique des barres : plus d'infobulle native, la bulle de la maquette seule.
 - (fidélité du mouvement, 02/10/2026) côté administration : chaque dialogue SORT (160 ms)
   puis la page se recharge et la bulle d'annonce dit le geste (« Lien bloqué… »,
   « Contestation acceptée… », « Effectué. Compte suspendu… », « Effectué. Changement de
@@ -131,13 +164,13 @@ qui est réel, puis relance pnpm gates. Pour les constats écartés : un par un,
 
 ÉTAPE 6 BIS — LES POINTS LAISSÉS OUVERTS PAR LE CLOUD (journal § 8, bilan) : présente-les-
 moi, ne les tranche pas seul :
-- l'alerte « contestation en attente » de la vue d'ensemble admin (maquette) n'est pas
-  portée : il faudrait une fonction qui compte les contestations, donc une migration ;
-- le badge « Pro » de la liste des comptes admin (maquette) : il faudrait étendre
-  `lister_comptes_admin` (nouvelle arité, `drop` explicite) ;
-- la mention de facturation de Tarifs est au gris secondaire (3,16:1) ;
-- le menu « ••• » d'une commande poste l'ancien jeton après une révocation (défaut antérieur
-  à la refonte) ;
+- TRANCHÉS par Mehdi le 03/10/2026 (ne pas rouvrir) : l'alerte « contestation en attente » est
+  portée (migration 213) ; le badge « Pro » de la LISTE des comptes reste absent ; la mention
+  de facturation de Tarifs reste au gris secondaire ; le menu « ••• » relit le jeton en base
+  (corrigé, preuve RLS ci-dessus) ;
+- le menu mobile des pages publiques n'a plus « Créer un compte » (décision de Mehdi), et le
+  bouton de la barre est masqué sous 640 px : au téléphone, une page publique sans appel dans
+  son corps ne mène plus à l'inscription — à confirmer avec moi ;
 - scripts/ecarts-declares.json est périmé : la référence est désormais la maquette.
 
 ÉTAPE 7 — LA PRODUCTION, SANS Y TOUCHER
@@ -148,7 +181,8 @@ Donne-moi :
 - le décompte de chaque porte, et de test:perf ;
 - écran par écran : mesuré oui ou non, et les écarts restants ;
 - les défauts trouvés et corrigés, avec leurs commits ;
-- les migrations à appliquer en production, dans l'ordre ;
+- les migrations à appliquer en production, dans l'ordre : 210, 211 ET 212 (jamais la 211
+  sans la 212), puis 213 — TOUTES avant le push vers droplink2 ;
 - l'ordre exact de mise en ligne : (1) railway.json recopié dans Railway puis supprimé,
   (2) `pnpm db:migrate` en production lancé PAR MOI, (3) vérification à la main du rôle
   authenticator (pgrst.db_pre_request), (4) `pnpm verif:prod`, (5) seulement alors la

@@ -2755,3 +2755,7 @@ img.compte__avatar { object-fit: cover; }
 /* Le lien « Signaler un contenu » de la documentation est seul sur sa ligne : une cible
    tactile de 44 px (règle 5), sans changer son allure de lien de texte. */
 .doc-section .doc-lien { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; }
+/* La boutique EST le lien vers son compte (contre-audit du 03/10/2026) : la colonne « Voir »
+   est partie avec la maquette. Elle garde l'allure d'une cellule, et le dit au survol. */
+a.adm-qui--lien { border-radius: 8px; text-decoration: none; }
+@media (hover: hover) and (pointer: fine) { a.adm-qui--lien:hover b { text-decoration: underline; text-underline-offset: 3px; } }

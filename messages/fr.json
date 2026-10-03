@@ -1729,6 +1729,8 @@
       "videCompte": "Aucun compte.",
       "videRecherche": "Aucun compte ne correspond à cette recherche.",
       "pageSuivante": "Voir la suite",
+      "surTotal": "{affichees} sur {total, plural, one {# compte} other {# comptes}}",
+      "affichees": "{affichees, plural, one {# compte affiché} other {# comptes affichés}}",
       "trace": "Cette consultation est écrite au journal d'audit, avec les critères employés. Ouvrir un compte y ajoute une entrée.",
       "sansNom": "Pas encore nommée",
       "ouvrir": "Ouvrir",
@@ -1972,6 +1974,9 @@
       "periode": "{jours} derniers jours",
       "periodeEtiquette": "Fenêtre de la courbe",
       "alerteDoublons": "{comptes, plural, one {# compte} other {# comptes}}, sur {identifiants, plural, one {# identifiant partagé} other {# identifiants partagés}}",
+      "alerteContestation": "{n, plural, one {Contestation du blocage de {reference}} other {# contestations de blocage en attente, la plus ancienne pour {reference}}}",
+      "alerteContestationDetail": "Envoyée par le vendeur le {date}.",
+      "contestationsIndisponibles": "Les contestations en attente n’ont pas pu être lues.",
       "barre": "{jour} : {n, plural, one {# commande} other {# commandes}}"
     },
     "parametres": {
@@ -2005,6 +2010,10 @@
         "interrupteurs": {
           "titre": "Interrupteurs",
           "sousTitre": "Effet immédiat sur toute la plateforme."
+        },
+        "constate": {
+          "titre": "Constaté, changé au déploiement",
+          "sousTitre": "Les valeurs grisées se changent au déploiement."
         }
       },
       "cles": {
@@ -2137,7 +2146,6 @@
       "stockageAide": "relu côté serveur au dépôt",
       "filtreType": "Filtrer par type de compte",
       "videFiltre": "Aucune boutique ne correspond à ce filtre.",
-      "colonneCreation": "Création",
       "legendeConfigurees": "Configurées",
       "legendeSansNom": "Sans nom"
     },
@@ -2269,6 +2277,8 @@
       "videTout": "Aucune commande n'a encore été créée.",
       "videFiltre": "Aucune commande ne correspond à ces filtres.",
       "pageSuivante": "Voir la suite",
+      "surTotal": "{affichees} sur {total, plural, one {# commande} other {# commandes}}",
+      "affichees": "{affichees, plural, one {# commande affichée} other {# commandes affichées}}",
       "repartition": "Répartition des statuts",
       "lienBloque": "Lien bloqué",
       "aucunTransporteur": "Aucun transporteur"

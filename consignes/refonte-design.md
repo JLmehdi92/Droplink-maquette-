@@ -1416,6 +1416,41 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
 - **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1299/1300 (alarme
   Railway).
 
+### ▶️ 03/10/2026 — lot 16 : l'alerte des contestations (D3, migration 213) et l'administration (C3) (session cloud)
+
+- **D3 — migration 213** `compter_contestations_en_attente_admin()` : `security definer`,
+  `stable`, `search_path = ''`, garde `est_admin()` → `DL031` (donc double authentification,
+  186), fermée à `public` et `anon`, ouverte à `authenticated`. Elle rend un NOMBRE, la
+  référence courte (`#` + 6 derniers caractères, la règle de `referenceCourte`) et la date
+  d'envoi de la plus ancienne — aucun contenu, donc aucune trace, comme
+  `compter_doublons_admin`. Déclarée dans `FONCTIONS_OUVERTES_ADMISES` avec sa raison ;
+  falsification `contestations-alerte-sans-garde` ; types écrits à la main comme ceux de
+  `compter_doublons_admin`. Lecture serveur à TROIS états (`ok`, `aucune`, `illisible`) :
+  test unitaire vu rouge sur deux falsifications (une panne dite « aucune », une file vide
+  dite « aucune » sans référence). Deux tests RLS écrits (l'administrateur lit, sans trace ;
+  vendeur et anonyme reçoivent le refus d'une surface inexistante) — **jamais exécutés ici**
+  (pas de Postgres depuis le cloud), listés pour Mehdi avec la falsification.
+- **L'alerte à l'écran** : « Contestation du blocage de #XXXXXX », « Envoyée par le vendeur le
+  … » ; au pluriel « N contestations de blocage en attente, la plus ancienne pour #XXXXXX »
+  (sans « première sur trois », que la base ne sait pas dire ici). « Examiner » mène à
+  `/admin/commandes?q=#XXXXXX` : la maquette pointe une ANCRE de ligne, que la liste paginée
+  ne garantit pas — la recherche par référence existe déjà (160). « Aucune alerte » exige
+  désormais les trois lectures. Tant que la 213 n'est pas en production, la vue d'ensemble
+  dit « Les contestations en attente n'ont pas pu être lues » au lieu de rendre 500.
+- **C3** : pied « X sur N entrées » du Journal aussi sur la dernière page. Commandes et
+  Comptes : « X sur N » SANS filtre (N = `repartir_commandes_admin.total`,
+  `compteurs_admin.comptes`) ; AVEC un filtre, seulement « X affichées » — aucune fonction ne
+  compte les lignes filtrées, et le total de la plateforme se lirait comme celui du filtre
+  (contrainte n° 8). Paramètres : Plafonds | Suivi, puis Interrupteurs | Débit, puis
+  « Constaté, changé au déploiement » sur toute la largeur, comme la maquette ; la purge des
+  médias, valeur réelle non dessinée, y reste. Boutiques : les sept colonnes de la maquette ;
+  la colonne « Voir », seul chemin d'une boutique vers son compte, devient la boutique
+  elle-même (lien, nom accessible « Voir le compte de … »). Barres : plus de `<title>` natif.
+  Prop `carte` morte retirée de `BlocageLien` et `ContestationLien`.
+- **NON MESURÉ** : aucun écran d'administration ne se voit d'ici (double authentification) —
+  vérifié seulement qu'ils rendent 404 à un anonyme. Tous listés dans
+  `verification-finale-locale.md`.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de
@@ -1438,14 +1473,27 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
   le fichier, avant le 01/12/2026.
 - [ ] Confirmer quelle branche Railway déploie (Railway, service, Settings, Source). Tant que ce
   n'est pas confirmé, rien n'est poussé sur le vrai dépôt (le bac à sable du § 10, lui, ne déploie rien).
-- [ ] Trancher le flou de l'en-tête de la landing : le garder (autorisé par `CLAUDE.md`), ou le
-  retirer pour la fluidité comme la maquette.
+- [x] Trancher le flou de l'en-tête de la landing — **décidé le 03/10/2026 (D4a) : comme la
+  maquette, sans flou** ; mesuré, c'était déjà le cas.
 - [x] Créer le dépôt bac à sable (§ 10, étape 1) — `JLmehdi92/Droplink-maquette-`, 02/10/2026.
 - [ ] **Lancer la vérification finale sur ton poste** : `consignes/verification-finale-locale.md`
   (portes complètes, écrans non mesurables d'ici, revue ECC). Rien ne part sur le vrai dépôt avant.
-- [ ] Trancher : l'alerte « contestation en attente » de la vue d'ensemble admin et le badge « Pro »
-  de la liste des comptes demandent chacun une migration — les porter, ou non ?
-- [ ] Trancher : la mention de facturation de Tarifs au gris secondaire (3,16:1).
+- [x] Trancher l'alerte « contestation en attente » et le badge « Pro » — **décidé le 03/10/2026
+  (D3)** : l'alerte est portée par la **migration 213** ; le badge « Pro » de la LISTE des comptes
+  reste un écart gardé (pas de migration).
+- [ ] **Appliquer la migration 213** (`compter_contestations_en_attente_admin`) : sur ton poste,
+  `pnpm db:migrate:tests` puis `pnpm db:types:tests` (les types écrits à la main doivent alors
+  ressortir identiques), puis `pnpm test:rls` (deux tests neufs dans `tests/rls/contestation`)
+  et `pnpm falsifier casser contestations-alerte-sans-garde` → rouge → `reparer`. Puis **EN
+  PRODUCTION, par toi, AVANT le push vers droplink2**, avec les 210, 211 et 212 qui attendent
+  déjà — **jamais la 211 sans la 212**. Tant que la 213 manque en production, la vue d'ensemble
+  ne rend pas 500 : elle dit « Les contestations en attente n'ont pas pu être lues ».
+- [x] Trancher la mention de facturation de Tarifs — **décidé le 03/10/2026 (D4b) : elle reste au
+  gris secondaire** (`.tf-note`, comme la maquette).
+- [ ] **Menu mobile des pages publiques (décision D du 03/10)** : sans « Créer un compte », et le
+  bouton de la barre est masqué sous 640 px — au téléphone, une page publique sans appel dans son
+  corps (pages légales, signalement, article de blog sans encart final) n'a plus de chemin vers
+  l'inscription. À confirmer, ou à rouvrir.
 - [x] Défaut antérieur à la refonte : le menu « ••• » d'une commande poste l'ancien jeton après une
   révocation — **corrigé le 03/10/2026** (jeton relu en base ; preuve RLS à faire tourner au poste).
 

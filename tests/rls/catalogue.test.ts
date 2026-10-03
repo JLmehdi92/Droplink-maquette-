@@ -856,6 +856,14 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "`est_admin()`, éprouvée par le falsificateur (doublons-comptes-sans-garde).",
     ],
     [
+      "compter_contestations_en_attente_admin",
+      "Un NOMBRE, la référence courte et la date d'envoi de la plus ancienne " +
+        "contestation en attente, pour l'alerte de la vue d'ensemble (213). " +
+        "`stable` et SANS trace : aucun contenu (ni message, ni image, ni " +
+        "boutique), même règle que `compter_doublons_admin`. Garde interne " +
+        "`est_admin()`, éprouvée par le falsificateur (contestations-alerte-sans-garde).",
+    ],
+    [
       "lire_compte_admin",
       "Détail d'un compte. Trace la consultation AVEC sa cible, et le fait même " +
         "quand le compte n'existe pas : ne consigner que les succès laisserait " +

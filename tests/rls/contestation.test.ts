@@ -2,9 +2,15 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { promouvoirAdmin } from "../aide/admin";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
-import { creerUtilisateur, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
+import { clientAnonyme, creerUtilisateur, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
 import { bloquerLienCommande, debloquerLienCommande } from "@/lib/audit/blocage-lien";
-import { contestationsEnAttenteParmi, lireContestationAdmin, refuserContestation } from "@/lib/audit/contestation";
+import {
+  contestationsEnAttenteParmi,
+  lireAlerteContestations,
+  lireContestationAdmin,
+  refuserContestation,
+} from "@/lib/audit/contestation";
+import { referenceCourte } from "@/lib/commandes/reference";
 import { cleContestationAppartient, contester, lireEtatBlocage } from "@/lib/commandes/contestation";
 
 /**
@@ -195,6 +201,50 @@ describe("L'administration lit — et c'est tracé — puis répond", () => {
     // Un vendeur n'a pas accès à cette vue d'ensemble.
     const refus = await contestationsEnAttenteParmi(vendeur.client, [commandeId]);
     expect(refus.statut).toBe("erreur");
+  });
+
+  test("l'alerte de la vue d'ensemble compte et désigne la plus ancienne, sans rien tracer (213)", async () => {
+    const traces = async () =>
+      Number(
+        (
+          await interroger<{ n: string }>(
+            catalogue,
+            "select count(*) as n from public.admin_audit_log where admin_id = $1",
+            [admin.profilId],
+          )
+        )[0]?.n,
+      );
+    const avant = await traces();
+    const r = await lireAlerteContestations(admin.client);
+    // La vérité, lue par le catalogue : la base de tests peut porter d'autres dossiers.
+    const attendu = await interroger<{ n: string; commande: string; le: Date }>(
+      catalogue,
+      `select (select count(*) from public.link_contests where status = 'en_attente') as n,
+              order_id as commande, created_at as le
+         from public.link_contests where status = 'en_attente'
+        order by created_at, id limit 1`,
+    );
+    const premiere = attendu[0];
+    if (premiere === undefined) throw new Error("aucune contestation en attente : le test ne prouverait rien");
+    expect(r).toEqual({
+      statut: "ok",
+      nombre: Number(premiere.n),
+      reference: referenceCourte(premiere.commande),
+      envoyeeLe: expect.any(String),
+    });
+    if (r.statut === "ok") expect(new Date(r.envoyeeLe).getTime()).toBe(new Date(premiere.le).getTime());
+    expect(await traces(), "l'alerte a écrit au journal").toBe(avant);
+  });
+
+  test("un vendeur et un anonyme reçoivent le refus d'une surface inexistante (213)", async () => {
+    const parVendeur = await vendeur.client.rpc("compter_contestations_en_attente_admin");
+    expect(parVendeur.error?.code).toBe("DL031");
+    expect(parVendeur.data).toBeNull();
+    const parAnonyme = await clientAnonyme().rpc("compter_contestations_en_attente_admin");
+    expect(parAnonyme.error, "un anonyme lit l'alerte").not.toBeNull();
+    expect(parAnonyme.data).toBeNull();
+    // Par le module : le refus devient « illisible », jamais « aucune ».
+    expect(await lireAlerteContestations(vendeur.client)).toEqual({ statut: "illisible" });
   });
 
   test("la lecture rend l'explication, et le journal l'a consignée", async () => {

@@ -324,11 +324,22 @@ export default async function AdminCommandes({
             </TraductionsClient>
           )}
 
-          {lienSuivant === null ? null : (
+          {/* « X SUR N » COMME LA MAQUETTE, mais N seulement SANS FILTRE : le total est
+              celui de la répartition (toute la plateforme). Filtré, le nombre de lignes
+              qui correspondent n'est compté par aucune fonction — l'écrire ferait lire
+              le total de la plateforme comme celui du filtre (contrainte n° 8). */}
+          {page.lignes.length === 0 ? null : (
             <footer className="adm-pied">
-              <LienEcran prefetch={false} href={lienSuivant} className="bouton-outil">
-                {t("commandes.pageSuivante")}
-              </LienEcran>
+              <span>
+                {!filtre && total !== null
+                  ? t("commandes.surTotal", { affichees: page.lignes.length, total })
+                  : t("commandes.affichees", { affichees: page.lignes.length })}
+              </span>
+              {lienSuivant === null ? null : (
+                <LienEcran prefetch={false} href={lienSuivant} className="bouton-outil">
+                  {t("commandes.pageSuivante")}
+                </LienEcran>
+              )}
             </footer>
           )}
         </section>

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { ArrowRight, CircleAlert, Clock, Users } from "lucide-react";
+import { ArrowRight, CircleAlert, Clock, Lock, Users } from "lucide-react";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { lireDernieresActions } from "@/lib/audit/comptes";
+import { lireAlerteContestations } from "@/lib/audit/contestation";
 import { compterDoublons, type NombresDoublons } from "@/lib/audit/doublons";
 import {
   lireCommandesParJour,
@@ -62,10 +63,11 @@ const DERNIERES_ACTIONS = 5;
  * gravité que la donnée contredit, et la même alerte aurait changé de sens
  * selon l'endroit où on la lit.
  *
- * LA TROISIÈME ALERTE DE LA PLANCHE — « 2 signalements de contenu en attente » —
- * N'EST PAS PORTÉE : les signalements partent par `mailto:`, il n'existe aucune
- * table pour les compter. L'afficher demanderait d'inventer un chiffre sur
- * l'écran dont tout le rôle est de porter des chiffres vérifiables.
+ * LES SIGNALEMENTS DE CONTENU de l'ancienne planche (« 2 signalements en attente »)
+ * NE SONT PAS PORTÉS : ils partent par `mailto:`, il n'existe aucune table pour les
+ * compter. L'afficher demanderait d'inventer un chiffre sur l'écran dont tout le
+ * rôle est de porter des chiffres vérifiables. La contestation en attente, elle,
+ * l'est depuis la migration 213 (décision de Mehdi du 03/10/2026).
  *
  * `never_ran` N'EST PAS UNE ALERTE. Une tâche posée ce matin n'a pas encore eu
  * son premier passage : la signaler ferait chercher une panne inexistante, et
@@ -100,7 +102,7 @@ export default async function PanneauAdmin({
   // s'ecrire differemment — et la borne haute de la courbe pourrait tomber un
   // jour plus loin que les dates du journal rendu juste en dessous.
   const maintenant = new Date();
-  const [panneau, actions, repartition, courbe, doublons] = await Promise.all([
+  const [panneau, actions, repartition, courbe, doublons, contestations] = await Promise.all([
     lirePanneau(supabase, seuils),
     lireDernieresActions(supabase, DERNIERES_ACTIONS),
     lireRepartition(supabase),
@@ -109,6 +111,9 @@ export default async function PanneauAdmin({
     // et ne nomme personne. Illisible, il ne pose simplement pas d'alerte (il ne
     // dit pas « aucun doublon »). La liste nominative, elle, s'ouvre en un clic.
     compterDoublons(supabase).catch((): NombresDoublons | null => null),
+    // L'ALERTE DES CONTESTATIONS (213) : un nombre, la référence et la date de la plus
+    // ancienne, sans trace. Trois états : une lecture en panne le DIT, elle ne se tait pas.
+    lireAlerteContestations(supabase),
   ]);
 
   const t = await getTranslations("admin");
@@ -148,10 +153,10 @@ export default async function PanneauAdmin({
       {/* --- CE QUI DEMANDE UNE DÉCISION ---
           TROIS ÉTATS, PAS DEUX : « aucune alerte » sur une lecture qui n'a pas
           abouti ferait conclure que tout va bien. La troisième alerte de la
-          maquette — une contestation en attente — n'est pas portée : aucune
-          fonction ne compte les contestations de toute la plateforme, et en
-          écrire une demanderait une migration (§ 5 de la refonte : on les
-          évite). Les contestations se voient sur l'écran Commandes. */}
+          maquette — une contestation en attente — est portée par la migration 213
+          (décision de Mehdi du 03/10/2026) : elle mène à la liste des Commandes
+          filtrée sur la référence (la maquette pointe une ancre de ligne que la
+          liste paginée ne garantit pas). */}
       <section className="bloc adm-bloc adm-decision" aria-labelledby="adm-decision">
         <header className="bloc__tete">
           <div>
@@ -159,12 +164,17 @@ export default async function PanneauAdmin({
           </div>
         </header>
         {panneau.alertes === null ? <p className="adm-texte pb-4">{t("panneau.alertesIndisponibles")}</p> : null}
-        {/* « Aucune alerte » exige les DEUX lectures : un comptage des doublons
-            illisible ne vaut pas « aucun doublon ». */}
-        {panneau.alertes !== null && panneau.alertes.length === 0 && doublons !== null && doublonsAAlerter === null ? (
+        {contestations.statut === "illisible" ? <p className="adm-texte pb-4">{t("panneau.contestationsIndisponibles")}</p> : null}
+        {/* « Aucune alerte » exige les TROIS lectures : un comptage des doublons ou des
+            contestations illisible ne vaut pas « aucun ». */}
+        {panneau.alertes !== null &&
+        panneau.alertes.length === 0 &&
+        doublons !== null &&
+        doublonsAAlerter === null &&
+        contestations.statut === "aucune" ? (
           <p className="adm-texte pb-4">{t("panneau.aucuneAlerte")}</p>
         ) : null}
-        {(panneau.alertes?.length ?? 0) > 0 || doublonsAAlerter !== null ? (
+        {(panneau.alertes?.length ?? 0) > 0 || doublonsAAlerter !== null || contestations.statut === "ok" ? (
           <ul className="adm-alertes">
             {(panneau.alertes ?? []).map((a) => (
               <li key={a.genre + a.sujet} className="adm-alerte">
@@ -200,6 +210,29 @@ export default async function PanneauAdmin({
                 </div>
                 <Link prefetch={false} className="bouton-outil" href={`/${langue}/admin/comptes/doublons`}>
                   {t("doublons.panneauVoir")}
+                  <ArrowRight aria-hidden="true" className="ic" />
+                </Link>
+              </li>
+            )}
+            {contestations.statut !== "ok" ? null : (
+              <li className="adm-alerte">
+                <i data-ton="attente" aria-hidden="true">
+                  <Lock className="ic" />
+                </i>
+                <div>
+                  <b>{t("panneau.alerteContestation", { n: contestations.nombre, reference: contestations.reference })}</b>
+                  <span>
+                    {t("panneau.alerteContestationDetail", {
+                      date: format.dateTime(new Date(contestations.envoyeeLe), { day: "numeric", month: "short", year: "numeric" }),
+                    })}
+                  </span>
+                </div>
+                <Link
+                  prefetch={false}
+                  className="bouton-outil"
+                  href={`/${langue}/admin/commandes?q=${encodeURIComponent(contestations.reference)}`}
+                >
+                  {t("panneau.examiner")}
                   <ArrowRight aria-hidden="true" className="ic" />
                 </Link>
               </li>

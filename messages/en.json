@@ -1729,6 +1729,8 @@
       "videCompte": "No accounts.",
       "videRecherche": "No account matches this search.",
       "pageSuivante": "Show more",
+      "surTotal": "{affichees} of {total, plural, one {# account} other {# accounts}}",
+      "affichees": "{affichees, plural, one {# account shown} other {# accounts shown}}",
       "trace": "This view is written to the audit log, along with the criteria used. Opening an account adds another entry.",
       "sansNom": "Not named yet",
       "ouvrir": "Open",
@@ -1972,6 +1974,9 @@
       "periode": "Last {jours} days",
       "periodeEtiquette": "Chart window",
       "alerteDoublons": "{comptes, plural, one {# account} other {# accounts}}, across {identifiants, plural, one {# shared identifier} other {# shared identifiers}}",
+      "alerteContestation": "{n, plural, one {Appeal against the block of {reference}} other {# block appeals waiting, the oldest for {reference}}}",
+      "alerteContestationDetail": "Sent by the seller on {date}.",
+      "contestationsIndisponibles": "Pending appeals could not be read.",
       "barre": "{jour}: {n, plural, one {# order} other {# orders}}"
     },
     "parametres": {
@@ -2005,6 +2010,10 @@
         "interrupteurs": {
           "titre": "Switches",
           "sousTitre": "Immediate effect across the platform."
+        },
+        "constate": {
+          "titre": "Observed, changed at deployment",
+          "sousTitre": "Greyed-out values are changed at deployment."
         }
       },
       "cles": {
@@ -2137,7 +2146,6 @@
       "stockageAide": "measured server-side on upload",
       "filtreType": "Filter by account type",
       "videFiltre": "No shop matches this filter.",
-      "colonneCreation": "Created",
       "legendeConfigurees": "Configured",
       "legendeSansNom": "Unnamed"
     },
@@ -2269,6 +2277,8 @@
       "videTout": "No order has been created yet.",
       "videFiltre": "No order matches these filters.",
       "pageSuivante": "Show more",
+      "surTotal": "{affichees} of {total, plural, one {# order} other {# orders}}",
+      "affichees": "{affichees, plural, one {# order shown} other {# orders shown}}",
       "repartition": "Status breakdown",
       "lienBloque": "Link blocked",
       "aucunTransporteur": "No carrier"

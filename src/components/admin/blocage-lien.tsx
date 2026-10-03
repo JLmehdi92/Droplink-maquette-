@@ -28,15 +28,12 @@ export function BlocageLien({
   reference,
   bloque,
   motifMin,
-  carte = false,
 }: {
   readonly commandeId: string;
   readonly reference: string;
   readonly bloque: boolean;
   /** Reçu en propriété : le module qui le définit est `server-only` (voir `DialogueSuspension`). */
   readonly motifMin: number;
-  /** Sur la carte du téléphone, la cible fait 44 px ; dans le tableau, 34 comme « Voir ». */
-  readonly carte?: boolean;
 }) {
   // UNIQUE PAR INSTANCE (26/09/2026) : la ligne est rendue deux fois — tableau du bureau et
   // carte du téléphone —, et `blocage-<commande>` donnait deux titres au même identifiant.
@@ -92,7 +89,7 @@ export function BlocageLien({
         type="button"
         onClick={ouvrir}
         aria-label={t(bloque ? "debloquerLong" : "bloquerLong", { reference })}
-        className={"bouton-outil" + (carte ? " w-full justify-center" : "")}
+        className="bouton-outil"
       >
         {t(bloque ? "debloquer" : "bloquer")}
       </button>

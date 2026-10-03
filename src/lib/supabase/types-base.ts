@@ -1313,6 +1313,14 @@ export type Database = {
           total: number
         }[]
       }
+      compter_contestations_en_attente_admin: {
+        Args: never
+        Returns: {
+          en_attente: number
+          plus_ancienne_le: string
+          plus_ancienne_ref: string
+        }[]
+      }
       compter_doublons_admin: {
         Args: never
         Returns: {

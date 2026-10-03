@@ -252,26 +252,28 @@ export default async function AdminBoutiques({
                     <th scope="col">{t("boutiques.colonnes.medias")}</th>
                     <th scope="col">{t("boutiques.colonnes.stockage")}</th>
                     <th scope="col">{t("boutiques.colonnes.colis")}</th>
-                    <th scope="col">{t("boutiques.colonneCreation")}</th>
-                    {/* « VOIR » MÈNE À LA FICHE DU COMPTE : la maquette n'a aucune
-                        action ici, et c'est le seul chemin d'une boutique vers son
-                        compte (perdu une fois au portage, 29/08). */}
-                    <th scope="col">
-                      <span className="sr">{t("commandes.colonnes.actions")}</span>
-                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {page.lignes.map((b) => (
                     <tr key={b.id}>
                       <td>
-                        <span className="adm-qui">
+                        {/* LES SEPT COLONNES DE LA MAQUETTE (contre-audit du 03/10/2026) : ni
+                            date de création, ni colonne « Voir ». Le chemin d'une boutique vers
+                            son compte — perdu une fois au portage, 29/08 — passe désormais par
+                            la boutique elle-même, qui devient le lien. */}
+                        <Link
+                          prefetch={false}
+                          className="adm-qui adm-qui--lien"
+                          href={`/${langue}/admin/comptes/${b.proprietaireId}`}
+                          aria-label={t("commandes.voirLong", { email: b.email })}
+                        >
                           <AvatarCompte email={b.email} nom={b.nom} />
                           <span>
                             <b>{b.nom ?? <span className="adm-sourdine">{t("boutiques.nonConfiguree")}</span>}</b>
                             <small>{b.email}</small>
                           </span>
-                        </span>
+                        </Link>
                       </td>
                       <td>{b.typeDeCompte === null ? <span className="adm-sourdine">{t("comptes.typeNonDeclare")}</span> : t(`comptes.type.${b.typeDeCompte}`)}</td>
                       <td>{etat(b)}</td>
@@ -291,12 +293,6 @@ export default async function AdminBoutiques({
                           depasse={auDessus(b)}
                           info={t("comptes.colisInfo", { valeur: format.number(b.colisCeMois), seuil: format.number(seuils.colis) })}
                         />
-                      </td>
-                      <td className="adm-date">{format.dateTime(new Date(b.creeLe), { dateStyle: "medium" })}</td>
-                      <td>
-                        <Link prefetch={false} className="bouton-outil adm-ouvrir" href={`/${langue}/admin/comptes/${b.proprietaireId}`} aria-label={t("commandes.voirLong", { email: b.email })}>
-                          {t("commandes.voir")}
-                        </Link>
                       </td>
                     </tr>
                   ))}

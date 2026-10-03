@@ -214,17 +214,21 @@ export default async function AdminJournal({
           )}
 
           {/* LE PIED DIT COMBIEN : « Voir la suite » sans nombre ne dit pas s'il
-              reste dix lignes ou dix mille. */}
-          {lienSuivant === null ? null : (
+              reste dix lignes ou dix mille. Il le dit AUSSI sur la dernière page,
+              comme la maquette (contre-audit du 03/10/2026) : le nombre ne dépend
+              pas de l'existence d'une suite. */}
+          {page.lignes.length === 0 ? null : (
             <footer className="adm-pied">
               <span>
                 {depasse
                   ? t("journal.surTotalAuDela", { affichees: page.lignes.length, total })
                   : t("journal.surTotal", { affichees: page.lignes.length, total })}
               </span>
-              <LienEcran prefetch={false} href={lienSuivant} className="bouton-outil">
-                {t("journal.pageSuivante")}
-              </LienEcran>
+              {lienSuivant === null ? null : (
+                <LienEcran prefetch={false} href={lienSuivant} className="bouton-outil">
+                  {t("journal.pageSuivante")}
+                </LienEcran>
+              )}
             </footer>
           )}
         </section>

@@ -39,12 +39,10 @@ export function ContestationLien({
   commandeId,
   reference,
   motifMin,
-  carte = false,
 }: {
   readonly commandeId: string;
   readonly reference: string;
   readonly motifMin: number;
-  readonly carte?: boolean;
 }) {
   const t = useTranslations("admin.contestation");
   const td = useTranslations("admin.dialogue");
@@ -108,7 +106,7 @@ export function ContestationLien({
         type="button"
         onClick={() => void ouvrir()}
         aria-label={t("voir", { ref: reference })}
-        className={"adm-pastille-contest" + (carte ? " w-full justify-center" : "")}
+        className="adm-pastille-contest"
       >
         <MessageCircle aria-hidden="true" className="ic" />
         {t("pastille")}
