@@ -161,7 +161,7 @@ export default async function PageDoublons({
 
       {/* « EN BREF » DÉCRIT CE QUI EST AFFICHÉ : au-delà de 100 identifiants, la
           phrase du plafond dit le total. */}
-      <Tuiles etiquette={t("doublons.enBref")} colonnes={3}>
+      <Tuiles etiquette={t("chiffresCles")} colonnes={3}>
         <TuileVolume libelle={t("doublons.identifiants")} valeur={format.number(groupes.length)} />
         <TuileVolume libelle={t("doublons.concernes")} valeur={format.number(comptes.size)} />
         <TuileVolume ton={suspendus.size > 0 ? "erreur" : undefined} libelle={t("doublons.suspendus")} valeur={format.number(suspendus.size)} />

@@ -161,6 +161,23 @@ export function TransitionsEcran() {
       }, 8000);
     };
 
+    /**
+     * L'adresse demandée EST celle déjà affichée (aller-retour rapide au clavier ou au clic,
+     * avant la fin du chargement) : aucun rendu ne viendra lever l'estompe, qui restait figée
+     * 8 s (audit final du 03/10/2026). On la lève ici, du même retour de 160 ms.
+     */
+    const leverEstompe = (): void => {
+      window.__changementSurPlace = false;
+      window.clearTimeout(filet);
+      const encours = estompee.current;
+      if (encours.length === 0) return;
+      estompee.current = [];
+      document.querySelectorAll<HTMLElement>("[data-table]").forEach((t) =>
+        t.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 160, easing: "ease-out" }),
+      );
+      encours.forEach((a) => a.cancel());
+    };
+
     /** Un formulaire du vendeur, même écran : estompe, puis le routeur relit la liste. */
     const surPlace = (url: URL, remplacer: boolean): void => {
       const chemin = url.pathname + url.search;
@@ -238,8 +255,12 @@ export function TransitionsEcran() {
       // seulement les écrans de l'application : `/api/…` (exports) reste un vrai lien
       if (url.origin !== location.origin || !/^\/(fr|en|zh-CN)(\/|$)/.test(url.pathname)) return;
       const ici = new URL(location.href);
-      // la même adresse à une ancre près : le navigateur s'en charge
-      if (url.pathname === ici.pathname && url.search === ici.search) return;
+      // la même adresse à une ancre près : le navigateur s'en charge — et une estompe
+      // laissée par un aller-retour rapide est levée
+      if (url.pathname === ici.pathname && url.search === ici.search) {
+        leverEstompe();
+        return;
+      }
 
       /* ---------- même écran, autre filtre : la table s'estompe ----------
          Le LIEN de Next fait la navigation, défilement compris (la pagination de
@@ -355,7 +376,12 @@ export function TransitionsEcran() {
 
     // UN CHANGEMENT DE VUE AU CLAVIER (vues de Commandes) passe par `router.replace`, pas par
     // un clic : il demande l'estompe par cet évènement (audit final du 03/10/2026).
-    const surDemandeEstompe = (): void => {
+    const surDemandeEstompe = (e: Event): void => {
+      const vers = e instanceof CustomEvent && typeof e.detail === "string" ? new URL(e.detail, location.href) : null;
+      if (vers !== null && vers.pathname === location.pathname && vers.search === location.search) {
+        leverEstompe();
+        return;
+      }
       window.__changementSurPlace = true;
       estomper();
     };

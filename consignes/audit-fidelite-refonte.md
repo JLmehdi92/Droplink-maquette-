@@ -35,7 +35,8 @@
 > filtre vide, le focus de la feuille de `/p` sous mouvement réduit, l'historique empilé par
 > les flèches, sous-titres admin masqués au téléphone, boutons écrasés à 44 px, pieds de page
 > (7dd3cb2, 43f8b18) ; 3e tour — une régression du 2e (estompe au clavier) et des noms
-> accessibles (dernier commit). Aucun tour n'a trouvé de défaut bloquant.
+> accessibles (72292b9) ; 4e tour, contrôle final — une régression de l'estompe sur un
+> aller-retour rapide (dernier commit). Aucun tour n'a trouvé de défaut bloquant.
 >
 > **Laissés à Mehdi (§ 9 de `refonte-design.md`)** : appliquer la migration 213 (avec 210, 211,
 > 212 — jamais 211 sans 212) avant le push vers droplink2 ; le 404 de l'administration au corps

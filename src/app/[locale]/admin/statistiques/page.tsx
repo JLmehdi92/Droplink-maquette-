@@ -268,7 +268,7 @@ export default async function AdminStatistiques({
   );
 
   const tuileSeule = (libelle: string, valeur: string, aide: string, sourdine = false) => (
-    <Tuiles etiquette={libelle} colonnes={1}>
+    <Tuiles etiquette={t("chiffresCles")} colonnes={1}>
       <TuileVolume libelle={libelle} valeur={valeur} complement={aide} valeurEnSourdine={sourdine} />
     </Tuiles>
   );

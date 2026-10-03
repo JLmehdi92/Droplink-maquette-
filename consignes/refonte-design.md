@@ -1572,6 +1572,18 @@ pour le vendeur et le public, sur le code pour l'administration). Trouvé, et co
 - **Donnée du jeu de test** : sur `/p`, « No carrier information yet » avec des passages datés —
   `dernier_mouvement` est vide dans la fixture ; l'ingestion le pose en production.
 
+### ▶️ 03/10/2026 — quatrième tour, contrôle final (session cloud)
+
+Agent indépendant sur 72292b9 : les six correctifs sont réels (estompe au clavier, boucle de
+la feuille de `/p`, noms accessibles identiques à la maquette dans les trois langues, `nav`
+des Paramètres au pixel près, date courte, pied chinois). Une régression trouvée et corrigée :
+un aller-retour rapide entre deux vues (→ puis ← avant la fin du chargement) laissait la
+table estompée 8 s, l'adresse finale n'ayant pas changé — l'estompe est désormais levée quand
+l'adresse demandée est celle déjà affichée, au clavier comme au clic. Mesuré : table à 1,00
+tout du long sur l'aller-retour, 0,35 → 1 sur un changement simple. « Chiffres clés » aussi
+sur les tuiles seules des Statistiques et des Doublons. Balayage : aucune violation CSP,
+aucune erreur, aucun débordement.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

@@ -126,7 +126,7 @@ export function VuesListe({
       if (href === null) return;
       // Les vues de Commandes estompent la table comme au clic (`commandes.js`, `rafraichir`) ;
       // les Paramètres changent d'onglet sans fondu.
-      if (!toutesTouches) window.dispatchEvent(new Event(EVENEMENT_ESTOMPE));
+      if (!toutesTouches) window.dispatchEvent(new CustomEvent(EVENEMENT_ESTOMPE, { detail: href }));
       routeur.replace(href, { scroll: false });
     };
     return (
