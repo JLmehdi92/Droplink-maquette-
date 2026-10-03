@@ -170,7 +170,7 @@
       const actif = etat.q || etat.statut || etat.qc || etat.du || etat.au || etat.vue !== "toutes" || ["jamais-ouvert", "bloquees"].includes(etat.tri);
       vide.innerHTML = etat.archives && !actif
         ? `<p class="liste__vide-titre">Aucune commande archivée</p>`
-        : `<p class="liste__vide-titre">Aucune commande ne correspond</p><p>Ce compte contient des commandes, mais aucune ne passe les filtres en cours.</p>${etat.q ? "<p>La recherche ignore les accents : « creme » trouve aussi « Crème ».</p>" : ""}<button type="button" class="bouton-app bouton-app--second" data-tout-effacer>Tout effacer</button>`;
+        : `<p class="liste__vide-titre">Aucune commande ne correspond</p><p>Ce compte contient des commandes, mais aucune ne passe les filtres en cours.</p>${etat.q ? "<p>La recherche ignore les accents : « creme » trouve aussi « Crème ».</p>" : ""}<button type="button" class="bouton-app bouton-app--second" data-tout-effacer>Tout effacer</button>`;
     }
     const total = etat.archives ? COMMANDES.filter((c) => c.archivee).length : actives().length;
     pied.innerHTML = l.length ? `<span>Affichage de ${l.length} sur ${pluriel(total, "# commande", "# commandes")}</span><span>Fin de la liste.</span>` : "";
@@ -199,7 +199,7 @@
     else if (etat.au) p.push(["periode", `Période : jusqu’au ${iso(etat.au)}`]);
     if (etat.archives) p.push(["archives", "Archives"]);
     zonePuces.hidden = !p.length;
-    zonePuces.innerHTML = `<span class="puces__titre">Filtres actifs :</span>${p.map(([k, l]) => `<button type="button" class="puce" data-retirer="${k}" aria-label="Retirer le filtre : ${l}">${l}${ic("x")}</button>`).join("")}<button type="button" class="bouton-texte" data-tout-effacer>Tout effacer</button>`;
+    zonePuces.innerHTML = `<span class="puces__titre">Filtres actifs :</span>${p.map(([k, l]) => `<button type="button" class="puce" data-retirer="${k}" aria-label="Retirer le filtre : ${l}">${l}${ic("x")}</button>`).join("")}<button type="button" class="bouton-texte" data-tout-effacer>Tout effacer</button>`;
     const n = [etat.statut, etat.qc, etat.archives].filter(Boolean).length;
     $("[data-filtres-n]").hidden = !n; $("[data-filtres-n]").textContent = String(n);
     const lib = etat.du && etat.au ? `${iso(etat.du)} au ${iso(etat.au)}` : etat.du ? `À partir du ${iso(etat.du)}` : etat.au ? `Jusqu’au ${iso(etat.au)}` : "Toutes les périodes";

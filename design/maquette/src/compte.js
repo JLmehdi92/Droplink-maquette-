@@ -131,7 +131,7 @@
       desinscrire: ["bell-off", "Ne plus recevoir d'e-mails", "Vous ne recevrez plus d'e-mails de suivi pour cette commande.", "Me désinscrire", "desinscrite"],
       desinscrite: ["circle-check", "C'est fait", "Vous ne recevrez plus d'e-mails pour cette commande."],
       invalide: ["circle-alert", "Ce lien n'est plus valable", "Il a peut-être expiré ou déjà servi. Vous pouvez refaire la demande depuis la page de votre commande."],
-      indisponible: ["clock", "Service momentanément indisponible", "Votre lien reste valable : réessayez dans quelques minutes."],
+      indisponible: ["clock", "Service momentanément indisponible", "Votre lien reste valable : réessayez dans quelques minutes."],
     };
     const bouton = $("[data-notif-bouton]");
     let etat = "confirmer";

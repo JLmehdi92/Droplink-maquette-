@@ -1938,6 +1938,23 @@ Chemin dans `legal.pages` (ou `legal.*`), avant → après :
   illisible rougit la garde au lieu de faire tomber la fumée).
 - Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1312/1313 (alarme Railway).
 
+### 03/10/2026 — troisième passe : ce que les revues avaient laissé ouvert
+
+- **Nombres et pluriels** : `blocageVendeur.erreur.saisie` et `explicationAide` prennent
+  `{n, number}` (plus de « 20 » en dur) ; `passerPro.features.commandes.texteNombre` reçoit le
+  nombre et accorde (`{n, plural}`) ; nouvelle clé `commandes.exportTronque`, la ligne du CSV
+  tronqué suit la langue du profil.
+- **« 1er » du mois** : `src/lib/format/premier-du-mois.ts` (+ `formateur.ts`,
+  `formateur-client.ts`) ; 34 fichiers passent par `getFormateur`/`useFormateur`. Garde dans
+  `premier-du-mois.test.ts`, vue rouge deux fois. Deux exceptions de couverture déclarées
+  (contexte de requête Next, hook React), la logique est testée.
+- **`/signalement` sans adresse** : réécriture du middleware vers un chemin inexistant, en-tête
+  de langue compris ; 404 de la charte dans les trois langues (mesuré).
+- **Maquette** : 172 textes recopiés depuis `messages/*.json` dans 41 fichiers de
+  `design/maquette/src`, maquette reconstruite (49 pages).
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1315/1317 puis la garde des
+  documents corrigée (le seul échec restant : l'alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

@@ -129,7 +129,7 @@
       if (fautes.length) { fautes[0].focus(); return; }
       const categorie = champ("categorie").value;
       const objet = `Signaler un contenu : ${categorie}`;
-      const corps = [`Adresse de la page concernée : ${champ("lien").value.trim()}`, `Nature du signalement : ${categorie}`, `Votre adresse email : ${champ("email").value.trim()}`, "", "Description :", champ("description").value.trim()].join("\n");
+      const corps = [`Adresse de la page concernée : ${champ("lien").value.trim()}`, `Nature du signalement : ${categorie}`, `Votre adresse e-mail : ${champ("email").value.trim()}`, "", "Description :", champ("description").value.trim()].join("\n");
       $("[data-pret-objet]", form).textContent = objet;
       $("[data-pret-corps]", form).textContent = corps;
       $("[data-ouvrir-messagerie]", form).href = `mailto:abus@droplink.fr?subject=${encodeURIComponent(objet)}&body=${encodeURIComponent(corps)}`;

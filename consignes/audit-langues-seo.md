@@ -83,18 +83,12 @@ bureau (≈ 2,8 s, antérieur à l'audit, voir plus bas). Rien n'a été dégrad
 
 - Le LCP de la landing chinoise au bureau (≈ 2,8 s en local) : la ligne « 整笔订单。 » du titre,
   révélée par l'animation d'entrée.
-- Le « 20 » écrit en dur dans `blocageVendeur.erreur.saisie` ; la ligne « Export limité à …
-  lignes » du CSV, en français quelle que soit la langue.
 - Textes légaux anglais : « sole trader » et « by post » (britanniques) — écartés, c'est de la
   terminologie. « French » / « 法国 » devant le registre et la CNIL : gardés (traduction du nom
   de l'institution).
-- Les autres dates longues du produit passent par `Intl` sans « 1er » (« inscrit le 1 juin ») :
-  seules les fourchettes de livraison le disent.
-- `passerPro.features.commandes.texteNombre` reçoit un nombre déjà mis en texte : pas de pluriel
-  ICU possible (« 1 orders » si le plafond gratuit était réglé à 1 ; il vaut 5).
-- Hors de l'audit, constaté en passant : `/fr/signalement` sans adresse configurée rend la page 404
-  anglaise par défaut de Next (prérendue), et la page « lien mort » de `/p` a un corps vide dans le
-  HTML serveur (rendue au client) — toutes deux `noindex`.
+- **Tranchés par la troisième passe (03/10/2026, voir plus bas)** : le « 20 » en dur, l'export
+  CSV tronqué en français, le pluriel de `texteNombre`, le « 1er » des dates longues, la 404
+  anglaise de `/signalement` non configurée, les textes de la maquette.
 - **Tranchés depuis par la passe de finition** (voir plus bas) : « Trois minutes » contre
   « moins d'une minute » (aligné sur « moins d'une minute »), « Pas encore scanné » du guide
   (aligné sur « Préparation »), le vocabulaire des textes légaux chinois (Pro, 停用), « 任何订阅 »
@@ -136,6 +130,26 @@ chaque layout privé ; la garde Twitter/X de la fumée.
 dans la description de `/tarifs` — la source unique du prix, voulue.
 
 ⚠️ **Les textes légaux restent à faire relire par un juriste** avant l'ouverture publique.
+
+## Troisième passe (03/10/2026) — ce que les revues avaient laissé ouvert
+
+| Défaut | Correction | Preuve |
+|---|---|---|
+| « au moins 20 caractères » écrit dans le texte | `{n, number}`, nourri par `explicationMin` du code | `nombres-formates.test.ts` |
+| « 1 orders » possible si le plafond gratuit valait 1 | `{n, plural, …}` en fr/en, `{n, number}` en zh ; la page passe le NOMBRE | idem |
+| ligne « Export limité à … lignes » du CSV en français pour tous | clé `commandes.exportTronque`, traduite dans la langue du PROFIL | idem |
+| « inscrit le 1 juin » | `getFormateur` / `useFormateur` (`src/lib/format/`) enveloppent le formateur de next-intl et écrivent « 1er » en français ; 34 fichiers basculés ; « 1er » aussi dans la date des articles | `premier-du-mois.test.ts`, dont une garde qui interdit `getFormatter`/`useFormatter` hors de `src/lib/format/` (vue rouge deux fois) |
+| `/xx/signalement` sans adresse : 404 générique de Next, en anglais | le middleware réécrit vers un chemin inexistant, avec la langue de l'URL : 404 de la charte | mesuré sur build servi : fr « Cette page n'existe pas », en « This page does not exist », zh « 此页面不存在 », statut 404 |
+| textes de la maquette restés à l'ancienne version | 172 remplacements dans 41 fichiers de `design/maquette/src` (e-mail, Ordinateur, Ex. :, 1er, double authentification, espaces insécables…) | inventaire refait : il ne reste que des commentaires de code et « Pas encore scanné » des écrans VENDEUR, qui est le libellé actuel du produit |
+
+**Laissés, avec leur raison :**
+- la page « lien mort » de `/p` : statut 404, `noindex`, texte présent dans la charge RSC et rendu
+  par le navigateur ; le HTML serveur seul a un corps vide (comportement de Next pour un
+  `notFound` levé sous une racine sans layout commun ; antérieur à cette mission). Sans
+  JavaScript, la page est blanche.
+- deux balises `robots` sur les 404 (celle de Next et la nôtre) : toutes deux `noindex`,
+  combinées par les moteurs ; aucun effet.
+- le LCP de la landing chinoise au bureau : décision de design, pour Mehdi.
 
 ## Ce qui n'a pas pu se faire d'ici
 

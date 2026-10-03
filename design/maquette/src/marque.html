@@ -46,11 +46,11 @@
               <div class="champ-reglage__pile">
                 <label class="champ-reglage">
                   <span class="champ-reglage__etiquette">Nom de la boutique</span>
-                  <input type="text" name="nom" maxlength="60" placeholder="Par exemple : Studio Nord" value="Atelier Nord" autocomplete="organization">
+                  <input type="text" name="nom" maxlength="60" placeholder="Par exemple : Studio Nord" value="Atelier Nord" autocomplete="organization">
                   <small class="champ-reglage__aide">Sans nom ni logo, la page de votre client commence directement par son contenu.</small>
                 </label>
                 <label class="champ-reglage">
-                  <span class="champ-reglage__etiquette">Description (optionnelle) <small class="champ-reglage__compteur" data-compteur-description></small></span>
+                  <span class="champ-reglage__etiquette">Description (facultative) <small class="champ-reglage__compteur" data-compteur-description></small></span>
                   <input type="text" name="description" maxlength="150" placeholder="Vêtements · Sneakers · Accessoires" value="Sneakers et streetwear, expédiés avec soin.">
                   <small class="champ-reglage__aide">Une ligne sous votre nom, sur la page de votre client.</small>
                 </label>
@@ -89,7 +89,7 @@
             <header class="reglage__tete"><span class="reglage__n">4</span><div><h2 id="m-options">Options d'affichage</h2><p>Choisissez les éléments à afficher sur votre page client.</p></div></header>
             <div class="reglage__corps reglage__corps--lignes">
               <div class="option">
-                <div><p class="option__titre">Filigrane sur les photos</p><p class="option__aide" data-aide-filigrane>Votre nom apparaît en discret sur chaque photo agrandie. Cela décourage la réutilisation, mais ne l’empêche pas.</p></div>
+                <div><p class="option__titre">Filigrane sur les photos</p><p class="option__aide" data-aide-filigrane>Votre nom apparaît discrètement sur chaque photo agrandie. Cela décourage la réutilisation, mais ne l’empêche pas.</p></div>
                 <label class="interrupteur"><input type="checkbox" role="switch" name="filigrane" data-filigrane><i></i><span class="sr">Afficher le nom de ma boutique sur les photos</span></label>
               </div>
               <div class="option">
@@ -115,7 +115,7 @@
           </section>
 
           <section class="bloc reglage" aria-labelledby="m-marque">
-            <header class="reglage__tete"><span class="reglage__n">6</span><div><h2 id="m-marque">Marque DropLink <span class="badge-pro">Pro</span></h2><p>Retirez la carte « Propulsé par DropLink » de vos pages client.</p></div></header>
+            <header class="reglage__tete"><span class="reglage__n">6</span><div><h2 id="m-marque">Marque DropLink <span class="badge-pro">Pro</span></h2><p>Retirez la carte « Propulsé par DropLink » de vos pages client.</p></div></header>
             <div class="reglage__corps reglage__corps--lignes">
               <div class="option">
                 <div><p class="option__titre">Masquer la marque DropLink</p><p class="option__aide">Vos clients ne voient plus que votre boutique.</p></div>
@@ -134,13 +134,13 @@
           <header class="bloc__tete"><h2 id="m-apercu">Aperçu de votre page client</h2><p class="direct"><i></i>en direct</p></header>
           <p class="bloc__aide">Voici un aperçu de ce que verront vos clients.</p>
           <div class="apercu-format" role="group" aria-label="Format de l’aperçu" data-formats>
-            <button type="button" aria-pressed="false" data-format="desktop"><svg class="ic"><use href="#i-monitor"/></svg>Desktop</button>
+            <button type="button" aria-pressed="false" data-format="desktop"><svg class="ic"><use href="#i-monitor"/></svg>Ordinateur</button>
             <button type="button" aria-pressed="true" data-format="mobile"><svg class="ic"><use href="#i-smartphone"/></svg>Mobile</button>
             <a class="apercu-format__lien" href="client.html" aria-label="Voir la page client" title="Voir la page client"><svg class="ic"><use href="#i-external-link"/></svg></a>
           </div>
           <div class="apercu-zone" data-apercu-zone>
             <div class="apercu-mobile" data-vue="mobile"><div class="apercu-mobile__ecran" role="img" aria-label="Aperçu mobile de la page client" data-apercu-ecran="mobile"></div></div>
-            <div class="apercu-bureau" data-vue="desktop" role="img" aria-label="Aperçu desktop de la page client" hidden data-apercu-ecran="desktop"></div>
+            <div class="apercu-bureau" data-vue="desktop" role="img" aria-label="Aperçu de la page client sur ordinateur" hidden data-apercu-ecran="desktop"></div>
           </div>
         </aside>
       </form>

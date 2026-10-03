@@ -131,7 +131,7 @@
     const LEGENDES = [
       "Un nom ou un pseudo suffit. Pas d'adresse à saisir, pas de compte à lui créer.",
       "Glissez vos photos et vidéos, jusqu'à 20 par commande. La première sert de couverture.",
-      "Collez le numéro : le transporteur est reconnu et les étapes se mettent à jour seules.",
+      "Collez le numéro : le transporteur est reconnu et les étapes se mettent à jour seules.",
       "Un clic sur Partager et le lien est copié. Il ne change plus, même quand vous modifiez la commande.",
     ];
     const DUREES = [4200, 3800, 5200, 4400];
@@ -258,7 +258,7 @@
     etiquette.classList.toggle("est-choisi", !parPastille);
     etiquette.style.setProperty("--libre", a.brut);
     etiquette.style.setProperty("--libre-encre", a.surRemplissage);
-    code.innerHTML = `Couleur choisie <code>${a.brut}</code>` + (a.ajuste ? `<span class="ajuste">Texte ajusté : <code>${a.texte}</code></span>` : "");
+    code.innerHTML = `Couleur choisie <code>${a.brut}</code>` + (a.ajuste ? `<span class="ajuste">Texte ajusté : <code>${a.texte}</code></span>` : "");
   };
   pastilles.forEach((b, i) => {
     b.addEventListener("click", () => choisir(b.dataset.teinte, b));

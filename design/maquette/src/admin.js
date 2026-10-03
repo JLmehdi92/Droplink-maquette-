@@ -126,7 +126,7 @@
     </form>`;
     const form = $("form", dlg), err = $(".adm-dialogue__erreur", dlg);
     $$("[data-annuler]", dlg).forEach((b) => b.addEventListener("click", fermer));
-    $$("[data-sans-collage]", dlg).forEach((c) => c.addEventListener("paste", (e) => { e.preventDefault(); err.textContent = "Collage refusé. Recopiez l'adresse à la main : c'est le seul moment où l'on vérifie vraiment quel compte est visé."; }));
+    $$("[data-sans-collage]", dlg).forEach((c) => c.addEventListener("paste", (e) => { e.preventDefault(); err.textContent = "Collage refusé. Recopiez l'adresse à la main : c'est le seul moment où l'on vérifie vraiment quel compte est visé."; }));
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const msg = valider(form);
@@ -146,9 +146,9 @@
       const suspendre = c.statut === "active";
       ouvrir({
         titre: suspendre ? "Suspendre ce compte" : "Réactiver ce compte",
-        aide: suspendre ? "Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique." : "Ses pages redeviendront accessibles sur les mêmes liens que ceux déjà envoyés à ses clients.",
+        aide: suspendre ? "Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique." : "Ses pages redeviendront accessibles sur les mêmes liens que ceux déjà envoyés à ses clients.",
         champs: motif(`Au moins ${MOTIF_MIN} caractères. Il s'affiche en clair dans le journal, et c'est ce qu'on relira si la décision est contestée.`)
-          + `<label class="adm-champ"><span>Recopiez l'adresse du compte pour confirmer</span><input name="recopie" type="email" autocomplete="off" spellcheck="false" placeholder="${c.email}" data-sans-collage><small>Le collage est désactivé : recopier l'adresse est ce qui garantit que vous suspendez le bon compte.</small></label>`,
+          + `<label class="adm-champ"><span>Recopiez l'adresse du compte pour confirmer</span><input name="recopie" type="email" autocomplete="off" spellcheck="false" placeholder="${c.email}" data-sans-collage><small>Le collage est désactivé : recopier l'adresse est ce qui garantit que vous suspendez le bon compte.</small></label>`,
         confirmer: suspendre ? "Suspendre" : "Réactiver", danger: suspendre,
         valider: (f) => motifCourt(f) || (f.recopie.value.trim().toLowerCase() !== c.email ? "L'adresse recopiée ne correspond pas à ce compte." : ""),
         fait: () => {
@@ -157,7 +157,7 @@
           const badge = $(".adm-fiche__etats .adm-badge", f); badge.dataset.statut = c.statut; badge.lastChild.textContent = suspendre ? "Suspendu" : "Actif";
           b.textContent = suspendre ? "Réactiver ce compte" : "Suspendre ce compte"; b.className = suspendre ? "bouton-outil" : "adm-danger";
           const bloc = b.closest(".adm-bloc"); $("h2", bloc).textContent = b.textContent; bloc.classList.toggle("adm-bloc--danger", !suspendre);
-          $(".adm-texte", bloc).textContent = suspendre ? "Ses pages redeviendront accessibles sur les mêmes liens que ceux déjà envoyés à ses clients." : "Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.";
+          $(".adm-texte", bloc).textContent = suspendre ? "Ses pages redeviendront accessibles sur les mêmes liens que ceux déjà envoyés à ses clients." : "Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.";
           annoncer(`Effectué. ${suspendre ? "Compte suspendu" : "Compte réactivé"}, écrit au journal avec le motif.`);
         },
       });
@@ -166,7 +166,7 @@
       const versPro = c.plan === "gratuit";
       ouvrir({
         titre: versPro ? "Passer en Pro" : "Repasser en gratuit",
-        aide: "Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.",
+        aide: "Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.",
         champs: motif(`Au moins ${MOTIF_MIN} caractères. Par exemple : « paiement reçu le 19/09 par virement ». Il s'affiche en clair dans le journal.`),
         confirmer: versPro ? "Passer en Pro" : "Repasser en gratuit",
         valider: motifCourt,
@@ -184,7 +184,7 @@
       const ligne = b.closest("tr"), bloque = !!$(".adm-badge[data-ton=erreur]", ligne);
       ouvrir({
         titre: bloque ? `Débloquer le lien de #${ref}` : `Bloquer le lien de #${ref}`,
-        aide: bloque ? "La page revient sur le même lien, celui que le client a déjà reçu." : "Son client verra « Ce lien n'est plus valable ». Le lien n'est pas détruit : le débloquer le rétablit à l'identique. Vous ne voyez pas le contenu de la commande.",
+        aide: bloque ? "La page revient sur le même lien, celui que le client a déjà reçu." : "Son client verra « Ce lien n'est plus valable ». Le lien n'est pas détruit : le débloquer le rétablit à l'identique. Vous ne voyez pas le contenu de la commande.",
         champs: motif(bloque ? `Au moins ${MOTIF_MIN} caractères. Il s'affiche en clair dans le journal, et c'est ce qu'on relira si la décision est contestée.` : `Au moins ${MOTIF_MIN} caractères. Le vendeur le lit dans sa commande, et il s'écrit au journal.`),
         confirmer: bloque ? "Débloquer le lien" : "Bloquer le lien", danger: !bloque,
         valider: motifCourt,
@@ -208,7 +208,7 @@
           const ligne = b.closest("tr");
           $(".adm-ref", ligne).textContent = `#${ref}`;
           $("[data-dialogue=blocage]", ligne).textContent = "Bloquer le lien";
-          annoncer("Contestation acceptée : lien débloqué, réponse envoyée au vendeur.");
+          annoncer("Contestation acceptée : lien débloqué, réponse envoyée au vendeur.");
         },
       });
       // le second choix du produit : refuser, avec la même réponse écrite
@@ -219,7 +219,7 @@
       refuser.addEventListener("click", () => {
         const f = $("form", dlg), err = $(".adm-dialogue__erreur", dlg);
         if (motifCourt(f)) { err.textContent = "La réponse est trop courte."; return; }
-        fermer(); b.remove(); annoncer("Contestation refusée. Le vendeur lit votre réponse ; le lien reste bloqué.");
+        fermer(); b.remove(); annoncer("Contestation refusée. Le vendeur lit votre réponse ; le lien reste bloqué.");
       });
     }
   });

@@ -99,7 +99,7 @@
       });
       input.addEventListener("blur", () => {
         const e = (email?.value ?? aide.closest("form")?.dataset.adresse ?? "").trim().toLowerCase();
-        if (e && input.value.toLowerCase().includes(e)) erreur(champ, "Votre mot de passe ne doit pas contenir votre adresse email.");
+        if (e && input.value.toLowerCase().includes(e)) erreur(champ, "Votre mot de passe ne doit pas contenir votre adresse e-mail.");
       });
     }
 
@@ -127,7 +127,7 @@
           let msg = "";
           if (type === "inscription" || type === "nouveau") {
             if ([...mdp].length < 12) msg = "Votre mot de passe doit faire au moins 12 caractères.";
-            else if (email && mdp.toLowerCase().includes(email.toLowerCase())) msg = "Votre mot de passe ne doit pas contenir votre adresse email.";
+            else if (email && mdp.toLowerCase().includes(email.toLowerCase())) msg = "Votre mot de passe ne doit pas contenir votre adresse e-mail.";
           } else if (!mdp) msg = "Saisissez votre mot de passe.";
           erreur(champMdp, msg);
           if (msg) invalides.push(champMdp);

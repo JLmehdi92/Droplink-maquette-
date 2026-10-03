@@ -132,7 +132,7 @@
         <p class="fm-horloge__date"><span data-a-date1>29 sept.</span><span data-a-date2>30 sept.</span></p>
       </div>`;
     L1.innerHTML = `
-      <div class="fm-titre" data-b-titre>${ligne("Vos clients,")}${ligne("ont suivi leurs colis.", "fm-attenue")}</div>
+      <div class="fm-titre" data-b-titre>${ligne("Vos clients")}${ligne("ont suivi leurs colis.", "fm-attenue")}</div>
       <div class="fm-3d"><div class="fm-tel" data-b-tel><div class="telephone telephone--film"><div class="telephone__ecran" data-b-ecran></div></div></div></div>
       <div class="fm-notif" data-b-n1><i class="fm-notif__icone">${ic("package")}</i><p><b>Pris en charge par La Poste</b><small>Paris · 29 sept. · 18:19</small></p></div>
       <div class="fm-notif" data-b-n2><i class="fm-notif__icone">${ic("truck")}</i><p><b>Colis en cours d’acheminement</b><small>Wissous · 30 sept. · 07:19</small></p></div>`;
