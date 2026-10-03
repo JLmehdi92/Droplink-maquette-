@@ -67,7 +67,9 @@ export function FormulaireNouveauMotDePasse({
                 : t("erreurIndisponible")
       : null;
 
-  const longueur = [...motDePasse].length;
+  // En unités UTF-16, comme le refus local et le serveur (`motDePasse.length`) : en points
+  // de code, des emoji faisaient dire « trop court » à un mot de passe accepté.
+  const longueur = motDePasse.length;
   const assez = longueur >= longueurMinimale;
 
   return (

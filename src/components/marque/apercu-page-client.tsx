@@ -39,6 +39,7 @@ export function ApercuPageClient({
   bureau = false,
   zoom,
   nomProvisoire,
+  accueil = false,
 }: {
   readonly textes: TextesPageApercu;
   readonly pour: string;
@@ -54,6 +55,13 @@ export function ApercuPageClient({
   /** À l'onboarding seulement (maquette `compte.js`) : tant qu'aucun nom n'est tapé, l'aperçu
    *  montre ce nom-ci, grisé (`est-provisoire`), pour qu'on voie OÙ le nom apparaîtra. */
   readonly nomProvisoire?: string;
+  /**
+   * L'aperçu de `/bienvenue` (maquette `compte.js:72-80`, audit final du 03/10/2026) : la page
+   * « se construit » — suivi et photos y ENTRENT (`data-etats`, `a-suivi`, `a-photos`) — et
+   * elle s'arrête à la validation : livraison et « Propulsé par DropLink » sont masquées
+   * dans la maquette (`page-client.html`, `hidden`).
+   */
+  readonly accueil?: boolean;
 }) {
   const style = {
     "--pc-texte": accent.texte,
@@ -104,7 +112,7 @@ export function ApercuPageClient({
       </small>
       <b>6A4D21</b>
       <span>{textes.sousTitre}</span>
-      <div className="pc__suivi">
+      <div className="pc__suivi" data-pc-suivi="">
         <div className="pc__date">
           <i className="pc__tuile">
             <CalendarDays aria-hidden="true" className="ic" />
@@ -143,7 +151,7 @@ export function ApercuPageClient({
       <h4>
         <span>{textes.galerie}</span> <span>({IMAGES_DEMO.length})</span>
       </h4>
-      <div className="pc__grille">
+      <div className="pc__grille" data-pc-grille="">
         {IMAGES_DEMO.map((img, i) => (
           <figure key={i}>
             <Image src={img} alt="" width={90} height={90} sizes="90px" />
@@ -238,6 +246,16 @@ export function ApercuPageClient({
             {propulse}
           </div>
         </div>
+      </div>
+    );
+  }
+  if (accueil) {
+    return (
+      <div className="pc a-photos a-suivi" data-etats="" lang={langue} style={style}>
+        {boutique}
+        {commande}
+        {photos}
+        {qc}
       </div>
     );
   }

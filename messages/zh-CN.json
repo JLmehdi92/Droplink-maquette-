@@ -1,7 +1,6 @@
 {
   "commun": {
     "chargement": "加载中…",
-    "dureeLecture": "阅读约 {n} 分钟",
     "dureeCourte": "{n} 分钟"
   },
   "navigation": {
@@ -1390,6 +1389,7 @@
     "statutSansMouvement": "无更新 · {jours} 天",
     "sousTitreArchives": "您正在查看归档。客户的链接依然有效。",
     "nouvelleEnCours": "正在创建…",
+    "creationImpossible": "无法创建订单，请重试。",
     "plusMedias": "+{n}",
     "vuesCourt": "{n} 次查看",
     "ouvrirCommande": "打开订单 {reference}",
@@ -1690,6 +1690,11 @@
     },
     "allerAuContenu": "跳到主要内容",
     "logoAccueil": "DropLink，首页",
+    "trajetLu": {
+      "etape": "{etape}：{etat}",
+      "enCoursAvec": "{enCours}，{detail}",
+      "estimation": "预计送达 {dates}"
+    },
     "fourchette": {
       "memeMois": "{du}至{jourAu}日",
       "autreMois": "{du}至{au}"
@@ -2568,10 +2573,10 @@
     "notificationsTexte": "您的客户可以在自己的订单页面上申请邮件通知。确认邮箱后，最多收到三封邮件——发货、运输中、签收——每封都附有退订链接。客户永远不需要创建账户。",
     "parametres": "设置",
     "plans": "免费版与 Pro",
-    "plansTexte": "DropLink 提供免费版和专业版。免费版共可创建 {gratuit} 笔订单——这是终身额度，不会每月重置。专业版将其提高到每月 {pro} 笔，并移除客户页面上的 DropLink 标识。",
-    "plansTexteSansNombre": "DropLink 提供免费版和专业版。免费版可创建的订单总数有限——这是终身额度，不会每月重置。专业版改为每月上限，并移除客户页面上的 DropLink 标识。",
+    "plansTexte": "DropLink 提供免费版和专业版。免费版共可创建 {gratuit} 笔订单，这是终身额度，不会每月重置。专业版将其提高到每月 {pro} 笔，并移除客户页面上的 DropLink 标识。",
+    "plansTexteSansNombre": "DropLink 提供免费版和专业版。免费版可创建的订单总数有限，这是终身额度，不会每月重置。专业版改为每月上限，并移除客户页面上的 DropLink 标识。",
     "planGratuit": "免费版",
-    "planPro": "专业版 — 每月 {prix}",
+    "planPro": "专业版，每月 {prix}",
     "plCommandes": "订单",
     "plCommandesG": "共 {n} 笔",
     "plCommandesP": "每月 {n} 笔",
@@ -2599,10 +2604,10 @@
     "ctaBouton": "创建账号",
     "metaDescription": "DropLink 完整指南：创建订单、上传照片、填写运单号并分享客户链接。",
     "resumeEtiquette": "简而言之：",
-    "param1": "账号：姓名、邮箱与密码——邮箱和密码须输入当前密码才能修改。",
+    "param1": "账号：姓名、邮箱与密码，邮箱和密码须输入当前密码才能修改。",
     "param2": "偏好：界面语言。客户页面的语言在「我的品牌」中设置。",
     "param3": "安全：双重验证、活跃会话、注销账号。",
-    "param4": "数据：导出数据、彻底删除——每项破坏性操作都需确认。",
+    "param4": "数据：导出数据、彻底删除，每项破坏性操作都需确认。",
     "param5": "订阅：当前套餐。验证阶段期间，DropLink 免费。",
     "param6": "支持：帮助中心。",
     "colIndicateur": "指标",

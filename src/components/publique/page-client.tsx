@@ -234,9 +234,15 @@ export async function PageClient({
    * la commande ; elle n'en tient lieu que tant qu'elle ne la contredit pas.
    */
   const premierMouvement = suivi?.premierMouvement ?? null;
-  const preparationContredite =
-    premierMouvement !== null &&
-    new Date(commande.creeeLe).getTime() > new Date(premierMouvement).getTime();
+  // Le plus ancien passage LU contredit aussi la création : sans `premierMouvement` posé, la
+  // frise disait « Préparation 2 oct. » avant « Expédié · 29 sept. » (audit final du 03/10/2026).
+  const plusAncienLu = (suivi?.passages ?? []).reduce<number | null>((min, p) => {
+    const instant = new Date(p.instant).getTime();
+    return Number.isNaN(instant) ? min : min === null ? instant : Math.min(min, instant);
+  }, null);
+  const premierConnu =
+    premierMouvement === null ? plusAncienLu : Math.min(new Date(premierMouvement).getTime(), plusAncienLu ?? Infinity);
+  const preparationContredite = premierConnu !== null && new Date(commande.creeeLe).getTime() > premierConnu;
   const dates = {
     preparation: preparationContredite ? null : dateEtHeure(commande.creeeLe),
     expedie: dateEtHeure(premierMouvement),
@@ -379,6 +385,11 @@ export async function PageClient({
             },
             enCours: t("frise.enCours"),
             enAttente: t("frise.enAttente"),
+            lire: {
+              etape: (etape, etat) => t("trajetLu.etape", { etape, etat }),
+              enCoursAvec: (detail) => t("trajetLu.enCoursAvec", { enCours: t("frise.enCours"), detail }),
+              estimation: (dates) => t("trajetLu.estimation", { dates }),
+            },
           }}
         />
 

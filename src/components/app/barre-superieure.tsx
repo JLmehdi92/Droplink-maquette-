@@ -4,6 +4,7 @@ import { creerBrouillon } from "@/lib/commandes/actions";
 import { BoutonTiroir } from "./coque-tiroir";
 import { BoutonCreerCommande } from "./bouton-creer-commande";
 import { ClocheAlertes } from "./cloche-alertes";
+import { CreationRattrapee } from "./creation-rattrapee";
 import { RechercheGlobale } from "./recherche-globale";
 
 /**
@@ -43,10 +44,12 @@ export async function BarreSuperieure({
         />
       </Suspense>
       <ClocheAlertes langue={langue} jamaisOuvertes={jamaisOuvertes} colisSilencieux={colisSilencieux} />
-      <form action={creerBrouillon} data-sortie-ecran="">
-        <input type="hidden" name="langue" value={langue} />
-        <BoutonCreerCommande libelle={tc("nouvelle")} libelleEnCours={tc("nouvelleEnCours")} />
-      </form>
+      <CreationRattrapee message={tc("creationImpossible")}>
+        <form action={creerBrouillon} data-sortie-ecran="">
+          <input type="hidden" name="langue" value={langue} />
+          <BoutonCreerCommande libelle={tc("nouvelle")} libelleEnCours={tc("nouvelleEnCours")} />
+        </form>
+      </CreationRattrapee>
     </header>
   );
 }

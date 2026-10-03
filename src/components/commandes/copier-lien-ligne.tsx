@@ -1,7 +1,7 @@
 "use client";
 
 import { annoncer } from "@/components/app/annonce";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Copy, TriangleAlert } from "lucide-react";
 
 /**
@@ -22,17 +22,23 @@ export function CopierLienLigne({
   readonly libelles: { readonly copier: string; readonly echec: string; readonly copie?: string };
 }) {
   const [etat, setEtat] = useState<"repos" | "copie" | "echec">("repos");
+  // UNE SEULE MINUTERIE, annulée à chaque nouvel état (audit final du 03/10/2026).
+  const minuterie = useRef(0);
+  useEffect(() => () => window.clearTimeout(minuterie.current), []);
+  const poser = (e: "copie" | "echec"): void => {
+    window.clearTimeout(minuterie.current);
+    setEtat(e);
+    // L'échec aussi revient au repos (1,6 s, comme le succès) : resté posé, il accusait
+    // encore la copie suivante, réussie (contre-audit du 03/10/2026).
+    minuterie.current = window.setTimeout(() => setEtat("repos"), 1600);
+  };
   const copier = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(lien);
-      setEtat("copie");
+      poser("copie");
       if (libelles.copie !== undefined) annoncer(libelles.copie);
-      window.setTimeout(() => setEtat("repos"), 1600);
     } catch {
-      setEtat("echec");
-      // L'échec aussi revient au repos (1,6 s, comme le succès) : resté posé, il accusait
-      // encore la copie suivante, réussie (contre-audit du 03/10/2026).
-      window.setTimeout(() => setEtat("repos"), 1600);
+      poser("echec");
     }
   };
   const libelle = etat === "echec" ? libelles.echec : libelles.copier;

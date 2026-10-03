@@ -218,7 +218,7 @@ export default async function Parametres({
         <div className="barre-liste reglages__onglets">
           <VuesListe
             etiquette={t("onglets.titre")}
-            panneau="panneau-reglages"
+            onglets={{ panneau: "panneau-reglages", toutesTouches: true }}
             vues={onglets.map(({ clef, Icone }) => ({
               clef,
               href: clef === "compte" ? base : `${base}?section=${clef}`,

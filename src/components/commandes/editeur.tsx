@@ -232,17 +232,27 @@ export function Editeur({
    * une ligne, contrairement à la démonstration de la maquette (`commande.js`) : chaque
    * ligne est une écriture réelle en base, et l'historique sert de preuve.
    */
+  // Une série encore en cours quand un nouveau geste arrive : la suivante ira jusqu'au bout.
+  const serieEnCours = useRef(false);
   useEffect(() => {
     if (versionApercu === 0) return;
     let abandonne = false;
+    const jusquAuBout = serieEnCours.current;
+    serieEnCours.current = true;
     relireJusquaNouveau({
       relire: () => relireHistorique(id),
       connu: plusRecentRef.current,
       attendre: (ms) => new Promise((ok) => window.setTimeout(ok, ms)),
       abandonne: () => abandonne,
+      jusquAuBout,
+      surNouvelle: (relue) => {
+        if (!abandonne) setHistoriqueRelu(relue);
+      },
     })
       .then((relue) => {
-        if (!abandonne && relue !== null) setHistoriqueRelu(relue);
+        if (abandonne) return;
+        serieEnCours.current = false;
+        if (relue !== null) setHistoriqueRelu(relue);
       })
       .catch((erreur: unknown) => {
         // L'historique affiché reste celui d'avant : il est vrai, simplement en retard.

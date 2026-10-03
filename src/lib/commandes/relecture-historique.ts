@@ -27,15 +27,30 @@ export async function relireJusquaNouveau<T extends Relue>(options: {
   readonly attendre: (ms: number) => Promise<void>;
   /** Vrai quand l'écran a changé de commande ou qu'un nouveau geste a relancé la série. */
   readonly abandonne: () => boolean;
+  /**
+   * UNE SÉRIE QUI EN REMPLACE UNE AUTRE VA JUSQU'AU BOUT (audit final du 03/10/2026). Deux
+   * gestes à moins de 700 ms : la seconde série part avec l'ANCIENNE ligne de référence, voit
+   * la ligne du premier geste et s'arrêtait — la ligne du second, écrite plus tard, manquait.
+   * Elle relit alors à chaque échéance et rend chaque relecture plus récente à `surNouvelle`.
+   */
+  readonly jusquAuBout?: boolean;
+  readonly surNouvelle?: (relue: T) => void;
 }): Promise<T | null> {
   let ecoule = 0;
+  let derniere: T | null = null;
+  let connu = options.connu;
   for (const echeance of DELAIS_RELECTURE_MS) {
     await options.attendre(echeance - ecoule);
     ecoule = echeance;
     if (options.abandonne()) return null;
     const relue = await options.relire();
     if (options.abandonne()) return null;
-    if (relue !== null && relue.plusRecent !== options.connu) return relue;
+    if (relue !== null && relue.plusRecent !== connu) {
+      if (options.jusquAuBout !== true) return relue;
+      derniere = relue;
+      connu = relue.plusRecent;
+      options.surNouvelle?.(relue);
+    }
   }
-  return null;
+  return derniere;
 }

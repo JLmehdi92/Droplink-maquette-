@@ -33,6 +33,15 @@ const DESCRIPTION =
  * ⚠️ ON NE PRÉREND QUE LA LANGUE DU BLOG. Rendre les trois créerait deux pages
  * dont le seul travail est d'appeler `notFound()`.
  */
+/**
+ * HORS DE LA LISTE, LA ROUTE N'EXISTE PAS (audit final du 03/10/2026) : une autre langue ou
+ * un article inconnu passait par `notFound()` dans une page prérendue, et c'est la page
+ * générique de Next qui répondait — anglais en dur, Times New Roman, `lang` vide. Une route
+ * inexistante, elle, est servie par `global-not-found`, l'écran introuvable de la refonte.
+ * `notFound()` reste plus bas, en filet.
+ */
+export const dynamicParams = false;
+
 export function generateStaticParams(): Array<{ locale: string }> {
   return routing.locales
     .filter((l) => l === LANGUE_DU_BLOG)

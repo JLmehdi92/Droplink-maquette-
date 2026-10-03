@@ -52,6 +52,16 @@ export function HerosClient({
     readonly etapes: Readonly<Record<Etape, string>>;
     readonly enCours: string;
     readonly enAttente: string;
+    /**
+     * LA PONCTUATION DE L'ÉTIQUETTE LUE est une RÈGLE de traduction (audit final du
+     * 03/10/2026) : « Étape : état » en français, « Step: state » en anglais, « 步骤：状态 »
+     * en chinois — écrite en dur, l'anglais lisait « In transit : Ongoing : Lyon ».
+     */
+    readonly lire: {
+      readonly etape: (etape: string, etat: string) => string;
+      readonly enCoursAvec: (detail: string) => string;
+      readonly estimation: (dates: string) => string;
+    };
   };
 }) {
   const courante = ETAPES.indexOf(statut);
@@ -67,10 +77,14 @@ export function HerosClient({
         rang < courante || (rang === courante && etape === "livre")
           ? dates[etape]
           : rang === courante
-            ? libelles.enCours + (dates[etape] === null ? "" : " : " + dates[etape])
+            ? dates[etape] === null
+              ? libelles.enCours
+              : libelles.lire.enCoursAvec(dates[etape])
             : libelles.enAttente;
-      return libelles.etapes[etape] + (etat === null ? "" : " : " + etat);
-    }).join(" · ");
+      return etat === null ? libelles.etapes[etape] : libelles.lire.etape(libelles.etapes[etape], etat);
+    }).join(" · ") +
+    // La date estimée est dite aussi, comme l'étiquette de la maquette (`client.html`).
+    (estimation === null ? "" : " · " + libelles.lire.estimation(estimation));
 
   return (
     <header className="cv-heros">

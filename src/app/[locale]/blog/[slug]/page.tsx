@@ -25,6 +25,15 @@ import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
  * sens de Zod. La seule entrée externe est le `slug`, et il ne sert qu'à
  * chercher dans une liste fermée.
  */
+/**
+ * HORS DE LA LISTE, LA ROUTE N'EXISTE PAS (audit final du 03/10/2026) : une autre langue ou
+ * un article inconnu passait par `notFound()` dans une page prérendue, et c'est la page
+ * générique de Next qui répondait — anglais en dur, Times New Roman, `lang` vide. Une route
+ * inexistante, elle, est servie par `global-not-found`, l'écran introuvable de la refonte.
+ * `notFound()` reste plus bas, en filet.
+ */
+export const dynamicParams = false;
+
 export function generateStaticParams(): Array<{ locale: string; slug: string }> {
   return slugs().map((slug) => ({ locale: LANGUE_DU_BLOG, slug }));
 }
@@ -106,7 +115,7 @@ export default async function ArticleDuBlog({
           </p>
           <h1 className="pub-titre art-titre">{article.titre}</h1>
           <p className="art-meta">
-            <MetaArticle date={article.date} duree={tc("dureeLecture", { n: article.minutes })} />
+            <MetaArticle date={article.date} duree={tc("dureeCourte", { n: article.minutes })} />
           </p>
 
           <CorpsArticle blocs={article.blocs} />

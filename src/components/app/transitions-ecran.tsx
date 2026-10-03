@@ -35,6 +35,14 @@ declare global {
 
 const SORTIE_MS = 110;
 
+/**
+ * Un changement sur place SANS le fondu du panneau : les onglets des Paramètres changés au
+ * clavier, comme la maquette (`parametres.js`, `anime: false`).
+ */
+export function sansFonduDuPanneau(): void {
+  window.__changementSurPlace = false;
+}
+
 export function TransitionsEcran() {
   const router = useRouter();
   const chemin = usePathname();
@@ -260,8 +268,11 @@ export function TransitionsEcran() {
        ses formulaires ne porte cette marque. */
     const urlDuFormulaire = (f: HTMLFormElement): URL => {
       const url = new URL(f.action, location.href);
+      // Les champs VIDES ne voyagent pas : `?statut=preparation&qc=` et un `?q=` resté après
+      // une recherche effacée bruitaient l'adresse partagée (audit final du 03/10/2026). Le
+      // serveur lit un critère absent comme un critère vide.
       url.search = new URLSearchParams(
-        [...new FormData(f)].filter((x): x is [string, string] => typeof x[1] === "string"),
+        [...new FormData(f)].filter((x): x is [string, string] => typeof x[1] === "string" && x[1] !== ""),
       ).toString();
       return url;
     };
@@ -316,8 +327,13 @@ export function TransitionsEcran() {
       if (url.origin !== location.origin) return;
       e.preventDefault();
       window.clearTimeout(frappe);
-      // L'écran ouvert dans un menu déroulant se referme : le choix est fait.
-      f.closest("details")?.removeAttribute("open");
+      // L'écran ouvert dans un menu déroulant se referme : le choix est fait. Le focus, qui
+      // était sur « Appliquer », revient au bouton du menu au lieu de tomber sur `<body>`.
+      const menu = f.closest("details");
+      if (menu !== null) {
+        if (menu.contains(document.activeElement)) menu.querySelector("summary")?.focus({ preventScroll: true });
+        menu.removeAttribute("open");
+      }
       if (url.pathname === location.pathname) {
         surPlace(url, f.hasAttribute("data-frappe-directe"));
         return;

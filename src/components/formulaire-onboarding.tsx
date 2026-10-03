@@ -373,6 +373,7 @@ export function FormulaireOnboarding({
               marqueMasquee={false}
               langue={languePage}
               nomProvisoire={t("nomProvisoire")}
+              accueil
             />
           </div>
         </div>

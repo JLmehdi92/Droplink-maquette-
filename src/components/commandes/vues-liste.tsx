@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef } from "react";
 import { LienEcran } from "@/components/lien-ecran";
+import { sansFonduDuPanneau } from "@/components/app/transitions-ecran";
 
 /**
  * LES VUES DE LA LISTE (maquette, `.vues-liste` : un trait qui glisse sous la vue
@@ -12,7 +13,7 @@ import { LienEcran } from "@/components/lien-ecran";
 export function VuesListe({
   etiquette,
   vues,
-  panneau,
+  onglets,
 }: {
   readonly etiquette: string;
   readonly vues: ReadonlyArray<{ readonly clef: string; readonly href: string; readonly libelle: React.ReactNode; readonly actif: boolean }>;
@@ -22,7 +23,16 @@ export function VuesListe({
    * Ce restent des liens : la section vit dans l'URL (`?section=`), qui reste la source de
    * vérité — la flèche suit le lien, le serveur rend la section, le focus reste sur l'onglet.
    */
-  readonly panneau?: string;
+  readonly onglets?: {
+    /** Le panneau que la rangée commande (Paramètres) ; aucun pour les vues de Commandes. */
+    readonly panneau?: string;
+    /**
+     * Les Paramètres de la maquette (`parametres.js:43-51`) prennent aussi ↑ ↓ Début Fin, et
+     * un changement au clavier n'y joue PAS le fondu du panneau (`anime: false`) ; les vues
+     * de Commandes (`commandes.js:277-280`) ne prennent que ← →.
+     */
+    readonly toutesTouches?: boolean;
+  };
 }) {
   const rangee = useRef<HTMLElement>(null);
   const trait = useRef<HTMLElement>(null);
@@ -83,20 +93,34 @@ export function VuesListe({
     };
   }, [actif]);
 
-  if (panneau !== undefined) {
+  if (onglets !== undefined) {
+    const { panneau, toutesTouches = false } = onglets;
     const aller = (e: React.KeyboardEvent<HTMLAnchorElement>, rang: number): void => {
       // Alt+← et Cmd+← sont le Retour du navigateur : jamais avalés par les onglets.
       if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-      const pas: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+      const pas: Record<string, number> = toutesTouches
+        ? { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }
+        : { ArrowRight: 1, ArrowLeft: -1 };
       const n = vues.length;
-      const cible = e.key in pas ? (rang + (pas[e.key] ?? 0) + n) % n : e.key === "Home" ? 0 : e.key === "End" ? n - 1 : null;
+      const cible =
+        e.key in pas
+          ? (rang + (pas[e.key] ?? 0) + n) % n
+          : toutesTouches && e.key === "Home"
+            ? 0
+            : toutesTouches && e.key === "End"
+              ? n - 1
+              : null;
       if (cible === null) return;
       e.preventDefault();
       const liens = rangee.current?.querySelectorAll<HTMLAnchorElement>('[role="tab"]');
       const lien = liens?.[cible];
       if (lien === undefined) return;
       lien.focus();
-      if (cible !== rang) lien.click();
+      if (cible === rang) return;
+      lien.click();
+      // Le clic vient de marquer un changement sur place (fondu du panneau) : au clavier,
+      // les Paramètres de la maquette changent d'onglet sans lui.
+      if (toutesTouches) sansFonduDuPanneau();
     };
     return (
       <div ref={rangee as React.RefObject<HTMLDivElement | null>} className="vues-liste" role="tablist" aria-label={etiquette}>
@@ -109,7 +133,7 @@ export function VuesListe({
             role="tab"
             aria-selected={v.actif}
             // Le seul panneau rendu est celui de l'onglet choisi.
-            aria-controls={v.actif ? panneau : undefined}
+            aria-controls={v.actif && panneau !== undefined ? panneau : undefined}
             aria-current={v.actif ? "page" : undefined}
             tabIndex={v.actif ? 0 : -1}
             onKeyDown={(e) => aller(e, rang)}

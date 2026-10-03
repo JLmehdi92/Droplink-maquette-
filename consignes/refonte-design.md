@@ -1474,6 +1474,42 @@ commentaires faux. **Gardé** : la rangée « Abandon du suivi après », valeur
 que la maquette ne dessine pas ; le pied du Journal sur toutes les pages (décision : « même
 sur la dernière »). Toujours **non mesuré au navigateur** (double authentification).
 
+### ▶️ 03/10/2026 — audit indépendant final, espace vendeur et pages publiques (session cloud)
+
+Deux agents en lecture seule, mesures au navigateur comprises : **tous les points du
+contre-audit de leur zone sont corrigés** (logo neutre, fourchette, intertitres, étiquette de
+la carte Propulsé, lieux du trajet, Docs, blog, icône maison, refus de l'adresse, menu mobile,
+héros de la landing, en-tête sans flou, note des Tarifs, historique de la fiche, filtres sur
+place, copie de ligne, gestes de navigation, jeton relu, clavier, cloche, fluidité). Nouveaux
+défauts trouvés, et corrigés :
+- **« Créer une commande » qui échoue effaçait toute l'application** (la frontière d'erreur
+  publique remplaçait la coque). Une frontière locale le rattrape : la coque reste, la bulle
+  dit « Création impossible. Réessayez. », le bouton revient. Mesuré, POST coupé.
+- **Un `notFound()` du blog** (autre langue, article inconnu) rendait la page générique de Next,
+  en anglais. `dynamicParams = false` en fait des routes inexistantes, servies par
+  `global-not-found` : mesuré en/zh/fr. Un `not-found` de segment a été ESSAYÉ (sous
+  `[locale]`, sous `blog`, avec et sans layout) : jamais pris, comme le disait déjà
+  `global-not-found` — retiré. Les deux autres `notFound()` (`notification`, `signalement`) ne
+  se déclenchent que sur une langue hors liste ou une configuration absente au déploiement.
+- Vues de Commandes en onglets (← →, un arrêt de tabulation) comme la maquette ; le sélecteur
+  de période n'avale plus Alt/Cmd+← ; la copie de la fiche revient au repos après un échec, une
+  seule minuterie par bouton ; les flèches des Paramètres ne jouent plus le fondu (mesuré :
+  opacité 1 tout du long) ; les champs vides ne voyagent plus dans l'adresse
+  (`?statut=preparation`) ; « Appliquer » rend le focus au bouton du menu ; une série de
+  relecture qui en remplace une autre va jusqu'au bout (la ligne du second geste n'est plus
+  manquée ; test vu rouge).
+- `/p` : l'étiquette lue du trajet suit une règle de traduction (« In transit: Ongoing, Lyon »,
+  plus « In transit : Ongoing : Lyon ») et dit la date estimée ; la préparation se tait aussi
+  quand le plus ancien passage LU la contredit. Le compteur du mot de passe compte comme le
+  serveur. `/bienvenue` : l'aperçu s'arrête à la validation et ses blocs entrent
+  (`data-etats`), comme `compte.js`. La landing dit « 1 au 2 octobre » comme `/p` (le « 1er »
+  noté plus haut est abandonné). Docs : virgules de la maquette au lieu des tirets. L'article
+  affiche « 5 min » comme la maquette.
+- **Gardé** : « Ce bouton prépare le message » du signalement (la maquette dit « ouvre votre
+  messagerie ») — c'est ce que fait le produit.
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1301/1302 (alarme Railway) ;
+  fumée sans violation CSP ni erreur ; `/p` 289,0 Ko hors médias.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

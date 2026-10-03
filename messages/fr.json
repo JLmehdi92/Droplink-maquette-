@@ -1,7 +1,6 @@
 {
   "commun": {
     "chargement": "Chargement…",
-    "dureeLecture": "{n} min de lecture",
     "dureeCourte": "{n} min"
   },
   "navigation": {
@@ -1390,6 +1389,7 @@
     "statutSansMouvement": "Sans mouvement · {jours} j",
     "sousTitreArchives": "Vous consultez vos archives. Les liens continuent de fonctionner.",
     "nouvelleEnCours": "Création…",
+    "creationImpossible": "Création impossible. Réessayez.",
     "plusMedias": "+{n}",
     "vuesCourt": "{n, plural, one {# vue} other {# vues}}",
     "ouvrirCommande": "Ouvrir la commande {reference}",
@@ -1690,6 +1690,11 @@
     },
     "allerAuContenu": "Aller au contenu",
     "logoAccueil": "DropLink, accueil",
+    "trajetLu": {
+      "etape": "{etape} : {etat}",
+      "enCoursAvec": "{enCours}, {detail}",
+      "estimation": "livraison estimée {dates}"
+    },
     "fourchette": {
       "memeMois": "{jourDu} au {au}",
       "autreMois": "{du} au {au}"
@@ -2568,10 +2573,10 @@
     "notificationsTexte": "Votre client peut demander lui-même, depuis sa page de commande, à être prévenu par e-mail. Il confirme son adresse, puis reçoit au plus trois messages — expédition, transit, livraison —, chacun avec un lien de désinscription. Il ne crée jamais de compte.",
     "parametres": "Paramètres",
     "plans": "Gratuit et Pro",
-    "plansTexte": "DropLink a un plan gratuit et un plan Pro. Le gratuit permet de créer {gratuit} commandes au total — c’est un quota à vie, il ne se recharge pas chaque mois. Le Pro le porte à {pro} commandes par mois et retire la mention DropLink de la page que voit votre client.",
-    "plansTexteSansNombre": "DropLink a un plan gratuit et un plan Pro. Le gratuit permet de créer un nombre limité de commandes au total — c’est un quota à vie, il ne se recharge pas chaque mois. Le Pro le remplace par un plafond mensuel et retire la mention DropLink de la page que voit votre client.",
+    "plansTexte": "DropLink a un plan gratuit et un plan Pro. Le gratuit permet de créer {gratuit} commandes au total, c’est un quota à vie, il ne se recharge pas chaque mois. Le Pro le porte à {pro} commandes par mois et retire la mention DropLink de la page que voit votre client.",
+    "plansTexteSansNombre": "DropLink a un plan gratuit et un plan Pro. Le gratuit permet de créer un nombre limité de commandes au total, c’est un quota à vie, il ne se recharge pas chaque mois. Le Pro le remplace par un plafond mensuel et retire la mention DropLink de la page que voit votre client.",
     "planGratuit": "Gratuit",
-    "planPro": "Pro — {prix}/mois",
+    "planPro": "Pro, {prix}/mois",
     "plCommandes": "Commandes",
     "plCommandesG": "{n} au total",
     "plCommandesP": "{n} par mois",
@@ -2599,10 +2604,10 @@
     "ctaBouton": "Créer mon compte",
     "metaDescription": "Le guide complet de DropLink : créer une commande, ajouter ses photos, coller le numéro de suivi et partager un lien client.",
     "resumeEtiquette": "En résumé :",
-    "param1": "Compte : nom, e-mail et mot de passe — l'e-mail et le mot de passe ne changent qu'avec votre mot de passe actuel.",
+    "param1": "Compte : nom, e-mail et mot de passe, l'e-mail et le mot de passe ne changent qu'avec votre mot de passe actuel.",
     "param2": "Préférences : langue de l'interface. La langue des pages client se règle dans Ma marque.",
     "param3": "Sécurité : authentification à deux facteurs, sessions actives, suppression du compte.",
-    "param4": "Données : export de vos données, suppression complète — chaque action destructive demande une confirmation.",
+    "param4": "Données : export de vos données, suppression complète, chaque action destructive demande une confirmation.",
     "param5": "Abonnement : plan en cours. Pendant la phase de validation, DropLink est gratuit.",
     "param6": "Support : centre d'aide.",
     "colIndicateur": "Indicateur",
@@ -3038,7 +3043,7 @@
       "pour": "Une commande pour Léa M.",
       "pourCourt": "pour Léa M.",
       "commande": "Commande",
-      "dates": "1er au 2 octobre",
+      "dates": "1 au 2 octobre",
       "direct": "Mis à jour automatiquement",
       "mouvementHier": "Colissimo · Mouvement hier",
       "mouvementAujourdhui": "Colissimo · Mouvement aujourd’hui",

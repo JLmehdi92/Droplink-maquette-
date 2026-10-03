@@ -170,7 +170,9 @@ export async function BarreListe({
 
   return (
     <div className="barre-liste">
-      <VuesListe etiquette={t("vuesTitre")} vues={vues} />
+      {/* Des onglets au clavier, comme la maquette (`commandes.js:277-280`) : ← → et un seul
+          arrêt de tabulation ; ce restent des liens, la vue vit dans l'URL. */}
+      <VuesListe etiquette={t("vuesTitre")} vues={vues} onglets={{}} />
       {outils ? (
         <div className="barre-liste__outils">
           <DetailsFermable className="deroulant">

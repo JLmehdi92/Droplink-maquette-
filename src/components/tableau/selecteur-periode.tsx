@@ -77,6 +77,8 @@ export function SelecteurPeriode({
             tabIndex={on ? 0 : -1}
             onClick={() => aller(p.cle, p.href)}
             onKeyDown={(e) => {
+              // Alt+← et Cmd+← sont le Retour du navigateur : jamais avalés ici.
+              if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
               const nb = periodes.length;
               const cible =
                 e.key === "ArrowRight" || e.key === "ArrowDown" ? (i + 1) % nb

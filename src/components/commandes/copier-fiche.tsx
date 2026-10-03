@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, Copy, TriangleAlert } from "lucide-react";
 import { annoncer } from "@/components/app/annonce";
@@ -25,15 +25,25 @@ export function BoutonCopierFiche({
 }) {
   const t = useTranslations("editeur");
   const [etat, setEtat] = useState<"repos" | "copie" | "echec">("repos");
+  // UNE SEULE MINUTERIE : un succès suivi d'un échec rapproché effaçait l'échec presque
+  // aussitôt (audit final du 03/10/2026).
+  const minuterie = useRef(0);
+  useEffect(() => () => window.clearTimeout(minuterie.current), []);
+  const poser = (e: "copie" | "echec"): void => {
+    window.clearTimeout(minuterie.current);
+    setEtat(e);
+    // L'échec revient aussi au repos, comme sur la ligne de la liste : resté posé, il
+    // accusait encore la copie suivante.
+    minuterie.current = window.setTimeout(() => setEtat("repos"), 2000);
+  };
 
   const copier = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(lien);
-      setEtat("copie");
+      poser("copie");
       annoncer(t("lienCopie"));
-      window.setTimeout(() => setEtat("repos"), 2000);
     } catch {
-      setEtat("echec");
+      poser("echec");
       annoncer(t("copieEchouee"));
     }
   };

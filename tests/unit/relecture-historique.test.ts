@@ -93,3 +93,35 @@ describe("relireHistorique (l'action)", () => {
     expect(await relireHistorique(ID)).toBeNull();
   });
 });
+
+describe("relireJusquaNouveau — une série qui en remplace une autre", () => {
+  test("va jusqu'au bout : la ligne du SECOND geste, écrite plus tard, n'est pas manquée", async () => {
+    // Le premier geste est visible dès 700 ms ; le second n'arrive qu'à 3 s.
+    const lectures = [{ plusRecent: "geste-1" }, { plusRecent: "geste-1" }, { plusRecent: "geste-2" }];
+    let n = 0;
+    const vues: string[] = [];
+    const r = await relireJusquaNouveau({
+      relire: async () => lectures[n++] ?? null,
+      connu: "avant",
+      attendre: async () => undefined,
+      abandonne: () => false,
+      jusquAuBout: true,
+      surNouvelle: (x) => vues.push(x.plusRecent),
+    });
+    expect(r).toEqual({ plusRecent: "geste-2" });
+    expect(vues).toEqual(["geste-1", "geste-2"]);
+    expect(n).toBe(3);
+  });
+
+  test("CONTRE-TEST : une série ordinaire s'arrête à la première ligne nouvelle", async () => {
+    let n = 0;
+    const r = await relireJusquaNouveau({
+      relire: async () => (n++, { plusRecent: "geste-1" }),
+      connu: "avant",
+      attendre: async () => undefined,
+      abandonne: () => false,
+    });
+    expect(r).toEqual({ plusRecent: "geste-1" });
+    expect(n).toBe(1);
+  });
+});
