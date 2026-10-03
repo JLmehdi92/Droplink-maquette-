@@ -1683,10 +1683,15 @@
       "surtitre": "POWERED BY DROPLINK",
       "titre": "Tracking links, simple and powerful.",
       "texte": "Create one tracking link per order, in under a minute.",
-      "bouton": "Discover DropLink"
+      "bouton": "Discover DropLink",
+      "aria": "Powered by DropLink. Discover DropLink"
     },
     "allerAuContenu": "Skip to content",
-    "logoAccueil": "DropLink, home"
+    "logoAccueil": "DropLink, home",
+    "fourchette": {
+      "memeMois": "{du}–{jourAu}",
+      "autreMois": "{du} – {au}"
+    }
   },
   "admin": {
     "navigation": "Administration",

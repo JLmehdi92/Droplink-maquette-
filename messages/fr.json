@@ -1683,10 +1683,15 @@
       "surtitre": "PROPULSÉ PAR DROPLINK",
       "titre": "Des liens de suivi simples et puissants.",
       "texte": "Créez un lien de suivi par commande, en moins d'une minute.",
-      "bouton": "Découvrir DropLink"
+      "bouton": "Découvrir DropLink",
+      "aria": "Propulsé par DropLink. Découvrir DropLink"
     },
     "allerAuContenu": "Aller au contenu",
-    "logoAccueil": "DropLink, accueil"
+    "logoAccueil": "DropLink, accueil",
+    "fourchette": {
+      "memeMois": "{jourDu} au {au}",
+      "autreMois": "{du} au {au}"
+    }
   },
   "admin": {
     "navigation": "Administration",

@@ -10,10 +10,11 @@ type Etape = (typeof ETAPES)[number];
  * VENDEUR — jamais le dégradé DropLink, jamais de flou (règles 2 et 3) —, l'état du
  * colis en titre, la date estimée, et le trajet en quatre arrêts.
  *
- * ⚠️ LE TRAJET NE NOMME AUCUN LIEU, contrairement à la maquette (« Lyon · 29 sept. ») :
- * ce serait interpréter les passages du transporteur, ce que l'arbitrage du § 5 refuse.
- * Chaque arrêt porte sa DATE quand on la connaît, rien sinon ; le dernier, tant qu'il
- * n'est pas atteint, dit pour qui (« pour Léa M. ») — c'est la seule « destination » que la page
+ * LE TRAJET NOMME SES LIEUX comme la maquette (« Lyon · 29 sept. ») — décision de Mehdi
+ * du 03/10/2026, qui remplace l'arbitrage du § 5 : c'est 17TRACK qui les donne, et ils
+ * sont rendus tels quels (texte React, jamais du HTML), choisis par `lieuxDuTrajet`. Chaque
+ * arrêt porte son lieu et sa DATE quand on les connaît, rien sinon ; le dernier, tant qu'il
+ * n'est pas atteint, dit pour qui (« pour Léa M. ») — la seule « destination » que la page
  * connaisse, et elle n'est pas une adresse.
  *
  * Le trajet est une IMAGE pour un lecteur d'écran (`role="img"`), avec une étiquette qui
@@ -60,7 +61,14 @@ export function HerosClient({
     titre +
     ". " +
     ETAPES.map((etape, rang) => {
-      const etat = rang < courante || (rang === courante && etape === "livre") ? dates[etape] : rang === courante ? libelles.enCours : libelles.enAttente;
+      // L'étape en cours dit aussi où et quand (« En cours : Wissous · 30 sept. ») : le
+      // lieu est dans l'étiquette lue, pas seulement dessiné.
+      const etat =
+        rang < courante || (rang === courante && etape === "livre")
+          ? dates[etape]
+          : rang === courante
+            ? libelles.enCours + (dates[etape] === null ? "" : " : " + dates[etape])
+            : libelles.enAttente;
       return libelles.etapes[etape] + (etat === null ? "" : " : " + etat);
     }).join(" · ");
 

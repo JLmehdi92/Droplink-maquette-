@@ -293,6 +293,15 @@ dialog.cv-feuille.sort::backdrop { animation: cv-voile-sort 220ms ease-out forwa
   .cv-trajet__etapes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; height: auto; }
   .cv-trajet__etapes li { position: static; align-items: center; transform: none !important; text-align: center !important; white-space: normal; overflow-wrap: anywhere; }
 }
+/* LE LIEU DONNÉ PAR 17TRACK EST DE LONGUEUR LIBRE (décision D2 du 03/10/2026) : au bureau les
+   quatre libellés sont posés en absolu, centrés sous leur arrêt, et « GUANGZHOU INTERNATIONAL
+   MAIL PROCESSING CENTER » aurait recouvert l'arrêt voisin. Chacun tient dans 22 % de la ligne
+   (les centres sont à 33 % l'un de l'autre) et s'abrège ; le texte entier reste dans
+   l'étiquette du trajet, la seule lue (`role="img"`). */
+@media (min-width: 640px) {
+  .cv-trajet__etapes li { max-width: 22%; }
+  .cv-trajet__etapes li > * { overflow: hidden; text-overflow: ellipsis; }
+}
 /* ---- Corrections de la relecture (02/10/2026) ---- */
 @media (max-width: 639px) { .cv-carrousel .cv-photo { aspect-ratio: 1; } }
 /* LE TEXTE DU HAUT DE PAGE GARDE SON PLEIN CONTRASTE : `resoudreAccent()` calibre

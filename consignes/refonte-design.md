@@ -175,7 +175,7 @@ leur raison :
 | Sommaire des pages légales qui suit la lecture | **Oui depuis le 02/10/2026** (consigne de Mehdi : « exactement comme l'artefact ») : `AnimationsPubliques` le marque ; sans JavaScript il reste un sommaire, sans entrée active | `page-legale.tsx` |
 | Titres de page « X · DropLink » au lieu de « X — DropLink » | **Non** : on garde les titres des catalogues | changer trois catalogues et la fumée pour une ponctuation n'est pas la refonte |
 | Menu mobile des pages publiques | **`<details>` sans JavaScript**, habillé comme la maquette | même rendu, zéro JS |
-| Lieux par étape du trajet sur la page client (« Lyon · 29 sept. ») | **Non** | ce serait interpréter les passages du transporteur, ce que `historique-suivi.tsx:17-30` refuse |
+| Lieux par étape du trajet sur la page client (« Lyon · 29 sept. ») | **Oui depuis le 03/10/2026** (décision de Mehdi, D2, qui remplace le « Non » d'origine) : le lieu est celui que 17TRACK donne, déjà lu et affiché par l'historique — étape terminée : le plus ancien passage de l'étape parmi les 30 lus ; en cours : lieu et date du plus récent ; passage hors des 30 : la date seule | `lieux-trajet.ts`, `page-client.tsx` |
 | Fragment `page-client.html` imité dans les écrans vendeur | **Non** : l'aperçu reste la vraie page en cadre (`/p/<jeton>/apercu`) | décision du 26/09 |
 
 ### Décisions qui appartiennent à Mehdi
@@ -797,7 +797,8 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   de la fiche (`/p/<jeton>/apercu`) suit sans une ligne : c'est la même page.
 - **Les risques du § 5, tenus un par un** : aucun dégradé DropLink ni flou (le voile de la feuille est
   un aplat) ; aucun `mix-blend-mode` sur une vraie photo (la maquette détoure des produits ; ici
-  `object-fit: cover`) ; le trajet ne nomme AUCUN lieu (arbitrage du § 5) — chaque arrêt porte sa
+  `object-fit: cover`) ; le trajet ne nommait AUCUN lieu (arbitrage du § 5, remplacé le 03/10/2026
+  par la décision D2 de Mehdi : il nomme désormais le lieu donné par 17TRACK) — chaque arrêt porte sa
   date, le dernier le destinataire ; les vignettes de 200 px restent nettes (2,5 tuiles au téléphone,
   pas une, et pas d'image pleine dans le document). **Budget mesuré** (même commande, même machine,
   avant/après) : 289 → 291 Ko hors médias (CSS +5, HTML −2, image −2, JS inchangé) — sous les 300, de
@@ -1331,6 +1332,42 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
   défilait plus) et 4 MEDIUM (estompe figée sur une adresse inchangée, frappe périmée, geste le
   plus récent seulement pour les liens, écran effacé après une action refusée) — tous corrigés.
 - **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1289/1290 (alarme
+  Railway).
+
+### ▶️ 03/10/2026 — lot 14 : les lieux du trajet (D2) et les dates de /p (C1) (session cloud)
+
+- **D2** : le trajet du héros nomme ses lieux, tels que 17TRACK les donne (`lieux-trajet.ts`,
+  `etapeDuJalon` exporté de `normalize.ts`, la table JALONS seule source) — étape terminée : le
+  plus ancien passage de l'étape parmi les 30 lus ; en cours : lieu et date du plus récent ;
+  aucun passage lu : la date seule. Le lieu entre aussi dans l'étiquette lue du trajet. Aucune
+  donnée nouvelle n'est exposée : `lire_passages_publics` rendait déjà le lieu, que
+  l'historique affichait. Mesuré (base de tests) : « Shipped · Paris », « In transit · Lyon ·
+  Oct 2 » en anglais, mêmes arrêts en français et en chinois.
+- **Défaut trouvé à la relecture (M1)** et corrigé avant commit : le lieu d'un arrêt terminé
+  était collé à la date d'un AUTRE passage (« Expédié · Lyon · 27 sept. » quand Lyon datait du
+  28) — contrainte n° 8. `textesDuTrajet` prend désormais le lieu et la date du même passage ;
+  test rouge sur l'ancien assemblage, vert après.
+- **M2** : un lieu long (« GUANGZHOU INTERNATIONAL MAIL PROCESSING CENTER ») recouvrait l'arrêt
+  voisin au bureau. Chaque libellé tient dans 22 % de la ligne et s'abrège ; mesuré à 640, 800,
+  1 024 et 1 440 px : 0 px de chevauchement, rien hors du héros ; à 390 px, la grille passe à
+  la ligne comme avant. Le texte entier reste dans l'étiquette lue.
+- **C1** : la fourchette d'arrivée suit la maquette, le mois non répété, par règle de
+  traduction (`page-publique.fourchette.*`) : « 5 au 6 octobre », « October 5–6 »,
+  « 10月5日至6日 » ; sur deux mois « 30 octobre au 2 novembre » — mesuré dans le héros ET la
+  carte de livraison, dans les trois langues. Bornes inversées remises dans l'ordre, jours en
+  UTC (le trajet aussi, comme la fourchette). Intertitres de l'historique en date courte
+  (« 2 oct. »). La carte « Propulsé par DropLink » porte une étiquette traduite. « Aujourd'hui »
+  reste un écart gardé.
+- **Mesures** : fumée de `/p` et de l'aperçu, 1 440 et 390 px, mouvement réduit compris :
+  aucune violation CSP, aucune erreur console, 0 px de débordement (la sonde relève la feuille
+  d'historique FERMÉE, masquée par `visibility` à dessein — `client.css`, mise en page
+  d'avance). Poids hors médias : 289,0 Ko (< 300). Aucune animation touchée : pas de mesure
+  CPU ×4.
+- **Relecture** (React/TS, échecs silencieux, sécurité /p) : 0 HIGH, 2 MEDIUM corrigés (M1, M2),
+  LOW corrigés : fuseau, bornes inversées, commentaires. Gardés : `jourSeul` ne connaît que les
+  chiffres latins (les trois langues du produit le sont) ; l'étiquette de la carte Propulsé
+  commence par son surtitre visible (WCAG 2.5.3 tenu) sans reprendre son titre.
+- **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1296/1297 (alarme
   Railway).
 
 ## 9. Ce qui attend Mehdi

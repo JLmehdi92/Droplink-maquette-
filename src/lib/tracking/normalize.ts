@@ -84,6 +84,16 @@ const JALONS: Readonly<Record<string, Etape | null>> = {
   returned: null,
 };
 
+/**
+ * L'étape d'un PASSAGE (jalon daté) à partir de son stage brut 17TRACK (`PickedUp`,
+ * `Departure`…) — la même table que la normalisation, une seule source de vérité. `null`
+ * pour un stage inconnu ou sans étape (retour, retourné) : on n'interprète rien.
+ */
+export function etapeDuJalon(stage: string | null | undefined): Etape | null {
+  if (stage === null || stage === undefined || stage.trim() === "") return null;
+  return traduire(JALONS, stage).etape;
+}
+
 export interface EtatFournisseur {
   /** `latest_status.status`, tel quel. */
   readonly statut: string | null;

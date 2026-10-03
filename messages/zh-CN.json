@@ -1683,10 +1683,15 @@
       "surtitre": "由 DROPLINK 提供支持",
       "titre": "简单而强大的物流链接。",
       "texte": "为每笔订单创建物流链接，一分钟内完成。",
-      "bouton": "了解 DropLink"
+      "bouton": "了解 DropLink",
+      "aria": "由 DropLink 提供支持。了解 DropLink"
     },
     "allerAuContenu": "跳到主要内容",
-    "logoAccueil": "DropLink，首页"
+    "logoAccueil": "DropLink，首页",
+    "fourchette": {
+      "memeMois": "{du}至{jourAu}日",
+      "autreMois": "{du}至{au}"
+    }
   },
   "admin": {
     "navigation": "后台管理",

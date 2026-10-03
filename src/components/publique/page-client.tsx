@@ -1,4 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
+import { fourchetteDates } from "@/lib/page-publique/fourchette";
+import { lieuxDuTrajet, textesDuTrajet } from "@/lib/tracking/lieux-trajet";
 import { Image as ImageIcon } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { ArbitrageQc } from "@/components/publique/arbitrage-qc";
@@ -29,8 +31,9 @@ import { lireTransporteur } from "@/lib/tracking/transporteurs";
  * photos en carrousel, la validation ; à droite la livraison, le contact, le suivi par
  * e-mail. Ses risques notés au § 5 sont tenus : aucun `mix-blend-mode` sur une vraie
  * photo, aucun texte à opacité réduite sur l'aplat du vendeur (`surRemplissage` y est à
- * 4,5:1 tout juste, toute transparence passait sous le seuil), aucun lieu interprété dans
- * le trajet, et la feuille est un `<dialog>` natif plutôt qu'un script.
+ * 4,5:1 tout juste, toute transparence passait sous le seuil), le trajet nomme ses lieux tels
+ * que 17TRACK les donne, sans les interpréter (décision de Mehdi du 03/10/2026), et la feuille
+ * est un `<dialog>` natif plutôt qu'un script.
  *
  * L'ORDRE DE LA SOURCE EST CELUI DU TÉLÉPHONE, et c'est lui qui compte pour la
  * grande majorité des visiteurs : où en est la commande, à quoi elle ressemble
@@ -142,6 +145,13 @@ export async function PageClient({
    * absence de date — la règle vit dans `estimationVisible`, qui la compare AU
    * JOUR : le transporteur annonce une date, pas un horaire.
    */
+  const fourchette = (d: Date, a: Date): string =>
+    fourchetteDates(
+      d,
+      a,
+      { memeMois: (v) => t("fourchette.memeMois", v), autreMois: (v) => t("fourchette.autreMois", v) },
+      (x, o) => format.dateTime(x, o),
+    );
   const du = suivi?.estimationDu == null ? null : new Date(suivi.estimationDu);
   const au = suivi?.estimationAu == null ? null : new Date(suivi.estimationAu);
   const estimation = !estimationVisible({
@@ -154,7 +164,7 @@ export async function PageClient({
     ? null
     : du === null || au === null || jour(au) === jour(du)
       ? jour(du as Date)
-      : jour(du) + " — " + jour(au);
+      : fourchette(du, au);
 
   /*
    * `t.raw` ET NON `t` POUR LES CHAÎNES À PARAMÈTRE.
@@ -233,13 +243,21 @@ export async function PageClient({
     en_transit: null,
     livre: statutAffiche === "livre" ? dateEtHeure(suivi?.dernierMouvement ?? null) : null,
   } as const;
-  const jourCourt = (instant: string): string => format.dateTime(new Date(instant), { day: "numeric", month: "short" });
-  const datesTrajet = {
+  // En UTC, comme la fourchette d'arrivée : le jour d'un arrêt ne dépend pas du fuseau du serveur.
+  const jourCourt = (instant: string): string => format.dateTime(new Date(instant), { day: "numeric", month: "short", timeZone: "UTC" });
+  const joursTrajet = {
     preparation: dates.preparation === null ? null : jourCourt(commande.creeeLe),
     expedie: premierMouvement === null ? null : jourCourt(premierMouvement),
     en_transit: null,
     livre: dates.livre === null || suivi?.dernierMouvement == null ? null : jourCourt(suivi.dernierMouvement),
   } as const;
+  /*
+   * LE LIEU DE CHAQUE ARRÊT (décision de Mehdi du 03/10/2026) : tel que 17TRACK le donne,
+   * jamais interprété — le plus ancien passage d'une étape terminée, le plus récent de
+   * l'étape en cours, avec SA date (« Wissous · 30 sept. » ; « aujourd'hui » reste un écart
+   * gardé, faute du fuseau du lecteur). Rien quand le passage n'est pas parmi les 30 lus.
+   */
+  const datesTrajet = textesDuTrajet(lieuxDuTrajet(suivi?.passages ?? [], statutAffiche), joursTrajet, statutAffiche, jourCourt);
 
   /*
    * LES LIGNES DE LIVRAISON, dans l'ordre du kit, puis les deux que le produit
@@ -300,7 +318,9 @@ export async function PageClient({
   // Les passages du transporteur, formatés ICI : la page n'expédie aucun formateur.
   const lignesSuivi: LignePassage[] = (suivi?.passages ?? []).map((p, rang) => ({
     cle: String(rang) + p.instant,
-    jour: format.dateTime(new Date(p.instant), { day: "numeric", month: "long" }),
+    // L'intertitre du jour en date COURTE, comme la maquette (« 29 sept. ») ; « Aujourd'hui »
+    // reste un écart gardé : rendue au serveur, la page ne connaît pas le fuseau du lecteur.
+    jour: format.dateTime(new Date(p.instant), { day: "numeric", month: "short" }),
     heure: format.dateTime(new Date(p.instant), { hour: "2-digit", minute: "2-digit" }),
     quand: format.dateTime(new Date(p.instant), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }),
     description: p.description,
@@ -483,6 +503,7 @@ export async function PageClient({
                 libelles={{
                   surtitre: t("carteDropLink.surtitre"),
                   titre: t("carteDropLink.titre"),
+                  aria: t("carteDropLink.aria"),
                 }}
               />
             )}
