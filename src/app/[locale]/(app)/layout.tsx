@@ -244,7 +244,8 @@ export default async function LayoutApplication({
           colisSilencieux={envois?.silencieux ?? null}
         />
         {children}
-        <footer className="app__pied">{t("piedDePage", { annee: new Date().getFullYear() })}</footer>
+        {/* Aucun pied dans l'espace vendeur : aucune page de la maquette n'en porte
+            (audit final du 03/10/2026). */}
       </CoqueTiroir>
     </div>
   );

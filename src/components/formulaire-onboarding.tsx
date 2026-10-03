@@ -372,7 +372,7 @@ export function FormulaireOnboarding({
               reseaux={[]}
               marqueMasquee={false}
               langue={languePage}
-              nomProvisoire={t("nomProvisoire")}
+              nomProvisoire={libelles.nomProvisoire}
               accueil
             />
           </div>

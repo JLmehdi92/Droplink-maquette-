@@ -35,14 +35,6 @@ declare global {
 
 const SORTIE_MS = 110;
 
-/**
- * Un changement sur place SANS le fondu du panneau : les onglets des Paramètres changés au
- * clavier, comme la maquette (`parametres.js`, `anime: false`).
- */
-export function sansFonduDuPanneau(): void {
-  window.__changementSurPlace = false;
-}
-
 export function TransitionsEcran() {
   const router = useRouter();
   const chemin = usePathname();

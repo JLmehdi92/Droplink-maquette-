@@ -1535,6 +1535,26 @@ par la lecture tracée de la contestation) ; sélecteur 7/30/90 de la courbe du 
 de date de Commandes, adresse du compte visé en texte dans le Journal.
 **Non corrigé, et dit à Mehdi (§ 9)** : le 404 de l'administration a un corps VIDE.
 
+### ▶️ 03/10/2026 — second tour d'audit, vendeur et public (session cloud)
+
+Agent indépendant, mesures au navigateur, POST bloqués : les quinze correctifs du premier tour
+sont vérifiés réels. Restaient, corrigés et remesurés :
+- **Commandes** : un filtre sans résultat faisait disparaître « Filtres » et « Trier » (et le
+  focus rendu au menu tombait sur `<body>`) — les outils restent, comme la maquette.
+- **/p sous mouvement réduit** : la feuille d'historique s'ouvrait sans focus. La règle globale
+  donnait 0,01 ms de transition à `visibility`, héritée par la croix ; la feuille ne transite
+  plus rien sous `reduce`. Mesuré : focus sur la croix à 390 et 1 440, réduit ou non.
+- Après un échec de création, le focus revient au bouton ; les flèches des onglets (Commandes,
+  Paramètres) REMPLACENT l'adresse au lieu d'empiler l'historique (mesuré : +0 entrée pour
+  trois flèches), sans fondu ; l'aperçu de `/bienvenue` est d'une seule langue (« Your
+  shop ») et son compteur de galerie au gris sourdine ; « Passer au Pro » et l'aide du suivi
+  avec la ponctuation de la maquette ; les boutons de 52 px de Tarifs, Docs et fin d'article
+  ne sont plus écrasés à 44 par leur plancher `min-h-11` (gardé, exigé par
+  `cibles-tactiles`) ; « © 2026 DropLink. Tous droits réservés. » sur les pages publiques, la
+  forme courte sur la landing seule, et plus de pied dans l'espace vendeur — comme la maquette.
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1301/1302 (alarme Railway) ;
+  fumée sans violation CSP ni erreur ; `/p` 289,1 Ko hors médias.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

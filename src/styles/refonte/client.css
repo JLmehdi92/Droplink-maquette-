@@ -276,6 +276,10 @@ dialog.cv-feuille.sort::backdrop { animation: cv-voile-sort 220ms ease-out forwa
 @keyframes cv-voile-sort { to { opacity: 0; } }
 @media (min-width: 1024px) { dialog.cv-feuille[open] .cv-feuille__panneau { animation-name: cv-glisse; } }
 @media (prefers-reduced-motion: reduce) { dialog.cv-feuille[open] .cv-feuille__panneau, dialog.cv-feuille[open]::backdrop, dialog.cv-feuille.sort::backdrop { animation: none; } }
+/* SOUS MOUVEMENT RÉDUIT, LA FEUILLE NE TRANSITE RIEN (audit final du 03/10/2026) : la règle
+   globale y donnait 0,01 ms de transition à `visibility`, héritée par chaque enfant — à
+   l'ouverture la croix était encore masquée, et `focus()` n'y faisait rien. */
+@media (prefers-reduced-motion: reduce) { dialog.cv-feuille, dialog.cv-feuille * { transition-property: none; } }
 /* le fond ne défile pas sous la feuille ni sous le visionneur */
 /* LE FOND NE DÉFILE PAS sous une feuille ou un visionneur. Au bureau, `html` SEUL : bloquer
    aussi `body` en faisait un conteneur de défilement immobile, et la colonne collante

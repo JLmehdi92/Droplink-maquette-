@@ -17,8 +17,16 @@ import { signalementDisponible } from "@/lib/contact";
  * Partent, comme dans la maquette : le formulaire « Restez informé » (il n'était
  * relié à aucune liste) et les icônes de réseaux (décoratives).
  */
-export async function PiedPublic({ locale }: { readonly locale: string }) {
+export async function PiedPublic({
+  locale,
+  landing = false,
+}: {
+  readonly locale: string;
+  /** La landing garde la mention courte (`index.html`) ; les autres pages, la longue. */
+  readonly landing?: boolean;
+}) {
   const t = await getTranslations("accueil");
+  const navigation = await getTranslations("navigation");
   const signalable = signalementDisponible();
   return (
     <footer className="pied">
@@ -46,7 +54,13 @@ export async function PiedPublic({ locale }: { readonly locale: string }) {
         </nav>
       </div>
       <div className="conteneur pied__bas">
-        <p>{t("pied.droits", { annee: new Date().getFullYear() })}</p>
+        {/* « © 2026 DropLink. Tous droits réservés. » sur toutes les pages publiques de la
+            maquette, sauf la landing (audit final du 03/10/2026). */}
+        <p>
+          {landing
+            ? t("pied.droits", { annee: new Date().getFullYear() })
+            : navigation("piedDePage", { annee: new Date().getFullYear() })}
+        </p>
         <SelecteurLangue locale={locale} versLeHaut />
       </div>
     </footer>

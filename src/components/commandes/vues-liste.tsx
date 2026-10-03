@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef } from "react";
 import { LienEcran } from "@/components/lien-ecran";
-import { sansFonduDuPanneau } from "@/components/app/transitions-ecran";
+import { useRouter } from "next/navigation";
 
 /**
  * LES VUES DE LA LISTE (maquette, `.vues-liste` : un trait qui glisse sous la vue
@@ -28,12 +28,13 @@ export function VuesListe({
     readonly panneau?: string;
     /**
      * Les Paramètres de la maquette (`parametres.js:43-51`) prennent aussi ↑ ↓ Début Fin, et
-     * un changement au clavier n'y joue PAS le fondu du panneau (`anime: false`) ; les vues
+     * au clavier, l'onglet change sans le fondu du panneau et sans empiler l'historique ; les vues
      * de Commandes (`commandes.js:277-280`) ne prennent que ← →.
      */
     readonly toutesTouches?: boolean;
   };
 }) {
+  const routeur = useRouter();
   const rangee = useRef<HTMLElement>(null);
   const trait = useRef<HTMLElement>(null);
   const actif = vues.find((v) => v.actif)?.clef ?? null;
@@ -117,10 +118,11 @@ export function VuesListe({
       if (lien === undefined) return;
       lien.focus();
       if (cible === rang) return;
-      lien.click();
-      // Le clic vient de marquer un changement sur place (fondu du panneau) : au clavier,
-      // les Paramètres de la maquette changent d'onglet sans lui.
-      if (toutesTouches) sansFonduDuPanneau();
+      // AU CLAVIER, L'ADRESSE EST REMPLACÉE, pas empilée — comme le sélecteur de période :
+      // trois flèches ajoutaient trois entrées d'historique (audit final du 03/10/2026). Et
+      // sans le fondu du panneau, comme les Paramètres de la maquette (`anime: false`).
+      const href = lien.getAttribute("href");
+      if (href !== null) routeur.replace(href, { scroll: false });
     };
     return (
       <div ref={rangee as React.RefObject<HTMLDivElement | null>} className="vues-liste" role="tablist" aria-label={etiquette}>

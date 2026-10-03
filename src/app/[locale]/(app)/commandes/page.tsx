@@ -188,7 +188,9 @@ export default async function Commandes({
      mène ici avec `?q=`. « Créer une commande » est dans la barre du haut
      (décision n° 5) : aucun second bouton ici. */
   const nom = profil?.nomAffiche ?? profil?.nomBoutique ?? null;
-  const outils = !compteVide && page.lignes.length > 0;
+  // Les outils restent quand un filtre ne rend rien, comme la maquette (`commandes.js`) :
+  // c'est là qu'on en a besoin pour revenir en arrière (audit final du 03/10/2026).
+  const outils = !compteVide;
 
   return (
     <main id="contenu" className="tableau commandes-ecran">

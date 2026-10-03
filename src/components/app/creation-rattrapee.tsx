@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, type ReactNode } from "react";
+import { Component, createRef, type ReactNode } from "react";
 import { annoncer } from "@/components/app/annonce";
 
 /**
@@ -18,6 +18,7 @@ export class CreationRattrapee extends Component<
   { readonly essai: number; readonly echec: boolean }
 > {
   override state = { essai: 0, echec: false };
+  private readonly zone = createRef<HTMLDivElement>();
 
   static getDerivedStateFromError(): Partial<{ echec: boolean }> {
     return { echec: true };
@@ -30,8 +31,18 @@ export class CreationRattrapee extends Component<
     this.setState((s) => ({ essai: s.essai + 1, echec: false }));
   }
 
+  // Le bouton qui avait le focus a été remplacé : le nouveau le reprend, sans quoi il
+  // tombait sur `<body>` (audit final du 03/10/2026).
+  override componentDidUpdate(_: unknown, avant: { readonly essai: number }): void {
+    if (avant.essai !== this.state.essai) this.zone.current?.querySelector<HTMLElement>('button[type="submit"]')?.focus();
+  }
+
   override render(): ReactNode {
     if (this.state.echec) return null;
-    return <div key={this.state.essai} className="contents">{this.props.children}</div>;
+    return (
+      <div key={this.state.essai} ref={this.zone} className="contents">
+        {this.props.children}
+      </div>
+    );
   }
 }

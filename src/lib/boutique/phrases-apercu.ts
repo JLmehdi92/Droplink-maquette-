@@ -37,6 +37,8 @@ export interface LibellesApercu {
   readonly pourGabarit: string;
   /** « pour votre client » — l'écran de marque n'a aucune commande réelle. */
   readonly pourGenerique: string;
+  /** « Votre boutique » DANS LA LANGUE DE LA PAGE : l'aperçu de `/bienvenue` est d'une seule langue. */
+  readonly nomProvisoire: string;
   readonly approuver: string;
   readonly statut: string;
   /** Le gabarit « Retrouvez {nom} », substitué avec le nom de la boutique. */

@@ -2720,7 +2720,6 @@ img.compte__avatar { object-fit: cover; }
 /* le pied légal du produit, discret, au bas de la feuille */
 .app__feuille { display: flex; flex-direction: column; }
 .app__feuille > .entree-ecran { flex: 1; min-width: 0; }
-.app__pied { padding: 20px 24px 18px; font-size: 12px; color: var(--sourdine); text-align: center; }
 .compte__lien { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 36px; padding: 0 10px; border-radius: 7px; font-size: 13.5px; color: var(--encre); text-align: left; }
 .compte__lien svg { width: 15px; height: 15px; flex: none; color: var(--corps); }
 @media (hover: hover) and (pointer: fine) { .compte__lien:hover { background: color-mix(in srgb, var(--encre) 5%, transparent); } }

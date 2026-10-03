@@ -847,6 +847,12 @@ body {
  * deux tombent, et c'est voulu.
  */
 @layer utilities {
+  /* LE PLANCHER NE RÉDUIT PAS UN BOUTON DE LA REFONTE (audit final du 03/10/2026) : posé
+     sur un `.bouton` de 52 px (Tarifs, Docs, fin d'article), `min-h-11` l'écrasait à 44.
+     Il reste exigé par `cibles-tactiles` ; la hauteur dessinée, plus grande, l'emporte. */
+  .bouton.min-h-11 {
+    min-height: max(var(--h, 2.75rem), 2.75rem);
+  }
   :lang(zh-CN) * {
     letter-spacing: 0;
   }

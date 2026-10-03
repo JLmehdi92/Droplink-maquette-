@@ -149,7 +149,7 @@ export function ApercuPageClient({
   const photos = (
     <section className="pc__photos">
       <h4>
-        <span>{textes.galerie}</span> <span>({IMAGES_DEMO.length})</span>
+        <span>{textes.galerie}</span> <span data-pc-compte="">({IMAGES_DEMO.length})</span>
       </h4>
       <div className="pc__grille" data-pc-grille="">
         {IMAGES_DEMO.map((img, i) => (

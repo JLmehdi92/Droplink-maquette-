@@ -977,7 +977,7 @@ export default async function Accueil({ params }: { params: Promise<{ locale: st
         </section>
       </main>
 
-      <PiedPublic locale={locale} />
+      <PiedPublic locale={locale} landing />
       <AnimationsLanding />
     </div>
   );
