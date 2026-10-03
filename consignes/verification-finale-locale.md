@@ -16,12 +16,32 @@ l'immuabilité du jeton. Rien ne part sur le vrai dépôt avant qu'elles soient 
 Tu es mon Claude Code local sur le vrai projet DropLink (Windows, PowerShell, pas de WSL).
 Réponds-moi en français. Je suis Mehdi.
 
-CONTEXTE. Toute la refonte du design a été portée dans une session Claude Code cloud, sur un
-dépôt BAC À SABLE privé : https://github.com/JLmehdi92/Droplink-maquette- , branche
-claude/saas-motion-design-video-r3ani3. Ce dépôt n'est relié à aucun service Railway. Le
-cloud ne pouvait pas joindre Postgres : les portes test:rls, couverture et fumee n'ont
-JAMAIS tourné sur ce code. Ta mission : tout vérifier et tout corriger avant que ça parte
-sur le vrai dépôt.
+CONTEXTE — TU N'AS RIEN VU DE CE QUI SUIT, ALORS LIS-LE EN ENTIER.
+Du 01 au 03/10/2026, sans toi, dans des sessions Claude Code web (cloud) :
+1. Une NOUVELLE DIRECTION ARTISTIQUE complète de DropLink a été dessinée : une maquette HTML de
+   toutes les routes du produit et de ses écrans d'état, dans la grammaire des grands SaaS, avec
+   un mouvement mesuré (animations d'entrée, transitions, « films » animés en direct sur les
+   pages d'accès). Des vidéos de motion design de lancement ont aussi été faites à côté : elles
+   ne concernent PAS ce dépôt (seul le « film » des pages d'accès, design/maquette/src/film.js,
+   en vient). La maquette est VERSIONNÉE dans design/maquette/ et c'est la RÉFÉRENCE du design
+   depuis le 01/10/2026 (CLAUDE.md, « Assets design ») : elle remplace le design system pour
+   tout ce qu'elle tranche.
+2. Cette refonte a ensuite été PORTÉE dans le vrai code (Next.js), écran par écran : landing,
+   accès, les huit écrans vendeur et la fiche commande, la page client /p et son aperçu, les
+   pages publiques, l'administration (10 écrans), les états d'erreur et de chargement, puis
+   les animations (« fidélité du mouvement »), le menu mobile, une relecture des trois langues
+   et un audit SEO. Plus de 80 commits, tous journalisés au § 8 de consignes/refonte-design.md,
+   avec leurs mesures.
+3. Pour ne JAMAIS redéployer droplink.fr par accident (Railway redéploie à chaque push sur
+   droplink2), tout ce travail vit sur un dépôt BAC À SABLE privé :
+   https://github.com/JLmehdi92/Droplink-maquette- , branche
+   claude/saas-motion-design-video-r3ani3. Ce dépôt n'est relié à aucun service Railway.
+4. Le cloud ne pouvait pas joindre Postgres : les portes test:rls, couverture et fumee n'ont
+   JAMAIS tourné sur ce code, et rien de ce qui exige la double authentification
+   (l'administration) n'a été mesuré au navigateur.
+TA MISSION n'est donc PAS de refaire la refonte : elle est codée. C'est de la RAPATRIER dans
+ce dépôt, de tout vérifier et de tout corriger ici, puis de me rendre un rapport. Rien ne part
+sur le vrai dépôt avant mon « oui ».
 
 INTERDITS ABSOLUS, sauf si je te dis « oui » explicitement dans ce chat, pour ce geste-là :
 - aucun push vers origin (JLmehdi92/droplink2) : chaque push redéploie droplink.fr ;
@@ -108,7 +128,8 @@ CE QUE LE CLOUD N'A PAS PU MESURER, À FAIRE EN PRIORITÉ :
   est désormais une déconnexion ;
 - les trois frontières d'erreur (espace vendeur, administration, site public, page client)
   en provoquant une erreur de rendu, et les deux squelettes de chargement (réseau ralenti) ;
-- la page de signalement exige NEXT_PUBLIC_CONTACT_ABUS au build (sinon 404) ;
+- la page de signalement exige NEXT_PUBLIC_CONTACT_ABUS au build ; sans elle, le middleware
+  sert la 404 de la charte dans la langue de l'URL (commit b493ba2) ;
 - l'administration au bureau ET dans le tiroir, ses quatre dialogues modaux (Échap et
   annulation bloqués pendant la requête, recopie d'adresse sans collage ni dépôt).
 - ⚠️ TOUTE L'ADMINISTRATION EST « NON MESURÉE » APRÈS LE CONTRE-AUDIT DU 03/10/2026 (C3, D3 ;
@@ -172,10 +193,13 @@ moi, ne les tranche pas seul :
   portée (migration 213) ; le badge « Pro » de la LISTE des comptes reste absent ; la mention
   de facturation de Tarifs reste au gris secondaire ; le menu « ••• » relit le jeton en base
   (corrigé, preuve RLS ci-dessus) ;
-- le menu mobile des pages publiques n'a plus « Créer un compte » (décision de Mehdi), et le
-  bouton de la barre est masqué sous 640 px : au téléphone, une page publique sans appel dans
-  son corps ne mène plus à l'inscription — à confirmer avec moi ;
+- (TRANCHÉ le 03/10/2026) « Créer un compte » est REVENU dans le menu mobile des pages
+  publiques, en bouton plein sous « Se connecter » (décision de Mehdi) : à mesurer, pas à
+  rediscuter ;
 - scripts/ecarts-declares.json est périmé : la référence est désormais la maquette.
+- le message « Export limité à … lignes » du CSV tronqué suit désormais la langue du PROFIL
+  (clé commandes.exportTronque, commit 574398b) ; les en-têtes du fichier restent des
+  identifiants techniques. À vérifier : un export de plus de PLAFOND_LIGNES lignes, en anglais.
 
 ÉTAPE 6 TER — LES LANGUES ET LE SEO (session cloud du 03/10/2026, consignes/audit-langues-seo.md)
 Cinq commits (bdd3c07 à 2fc1aae) ont touché les trois catalogues, le blog, le pied public, la
