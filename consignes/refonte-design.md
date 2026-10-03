@@ -1705,6 +1705,44 @@ ajoutés, refusés comme prévu, appliqués après lecture des appelants).
   après tiret retirée). Plus deux libellés du formulaire de signalement (`legal.signalement.*`).
 - Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1302/1303 (alarme Railway).
 
+### ▶️ 03/10/2026 — relecture des trois langues : le chinois (session cloud)
+
+Même méthode : un relecteur unique sur les 2 329 clés (français pour le sens, anglais relu en aide),
+corrections passées par l'outil de contrôle. **199 corrections** : cohérence 149, ponctuation 21,
+tournure 12, contresens 11, grammaire 4, espacement 2 ; aucun caractère traditionnel, aucune
+ponctuation demi-chasse collée à un idéogramme.
+- **Conventions mesurées et tenues** : 您 (188 contre 13 你 ; 你 gardé dans les répliques de
+  conversation de la landing), 账户 pour le compte DropLink (账号 pour Instagram, Google…), 跟踪,
+  运单号, 笔订单, 免费版 / Pro, 停用 / 恢复 pour un lien bloqué, 双重验证 ; guillemets “ ” (les 「 」
+  de 19 clés remplacés) ; « —— » dans une phrase ; une espace entre idéogramme et lettre latine,
+  chiffre ou variable (331 + 363 cas contre 10 + 11), jamais autour d'une ponctuation pleine chasse.
+- **Contresens corrigés, dont** : « le lien à votre nom » traduit « généré en votre nom »
+  (以你的名义) — quatre clés, dont la description de recherche des tarifs ; « taux d'achèvement »
+  pour le taux d'approbation des photos ; une adresse d'exemple impossible (`droplink.fr/你的店铺/`,
+  un nom de lien n'accepte que des lettres latines) → `your-shop`, comme la landing ; « pris en
+  charge » disparu des analyses ; « téléversements » pour des envois de contestation.
+- `legal.signalement.sujet` retrouve sa variable `{titre}` (le titre était écrit en dur).
+  Quatre exceptions déclarées, avec leur raison, dans `catalogue-chinois.test.ts` (« Logo »,
+  « MB », l'adresse d'exemple, l'objet du signalement).
+- **Au navigateur** (production locale, base de TESTS par l'API HTTPS, compte jetable purgé) :
+  15 pages publiques et d'accès, 9 écrans vendeur, à 390 px (tactile émulé) et au bureau, menus
+  mobiles ouverts : **aucun débordement de page, aucun libellé tronqué** (seules des données longues
+  — adresse e-mail, nom de client — coupées à l'ellipse comme en français). **Un défaut réel** :
+  la référence de la démo de la landing gardait un interlettrage de −1,08 px en chinois — une règle
+  `!important` (`.hx__ref b`) battait `:lang(zh-CN) * { letter-spacing: 0 }`, qui perdait aussi
+  contre tout sélecteur plus spécifique. Les deux sont corrigées (`!important` sur la règle
+  chinoise, exception dédiée sous `.hx__ref b`). L'administration (double authentification) n'a
+  pas été mesurée d'ici. La sonde du dépôt (`verifier-ecran-migre.mjs`) exige Postgres en direct,
+  fermé depuis ce conteneur : une variante HTTPS jetable a servi, hors dépôt.
+- **À reporter dans le design system** (`ui_kits/legal/contenu-legal-zh.js`) : une seule correction
+  — `legal.pages.mentions.sections.0.blocs.0.p` : « DropLink 由个体经营者（entrepreneur individuel,
+  EI）Mahfoud SEDDIKI 发布，地址：… ».
+- **Non corrigés (fond légal ou sens) — à trancher par Mehdi** : les pages légales chinoises disent
+  专业版, 封禁 et 暂停 quand l'interface dit Pro et 停用 ; `conditions.sections.7.blocs.1.p` dit
+  « tout abonnement » (任何订阅) pour « son abonnement éventuel » ; les mentions ajoutent
+  « （即网站发布方本人）» et deux adresses « France », absents du français.
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1302/1303 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

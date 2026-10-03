@@ -853,8 +853,12 @@ body {
   .bouton.min-h-11 {
     min-height: max(var(--h, 2.75rem), 2.75rem);
   }
+  /* `!important` DEPUIS LE 03/10/2026 : sans lui, la règle perdait contre tout sélecteur plus
+     spécifique — mesuré au navigateur, la référence « 6A4D21 » de la démo de la landing gardait
+     −1,08 px (`.pc__commande > b`, 0-1-1 contre 0-1-0). Une règle qui « ne peut pas se périmer »
+     ne doit dépendre d'aucune spécificité. */
   :lang(zh-CN) * {
-    letter-spacing: 0;
+    letter-spacing: 0 !important;
   }
 
   :lang(zh-CN) .font-extrabold {

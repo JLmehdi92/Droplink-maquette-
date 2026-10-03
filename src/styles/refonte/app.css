@@ -1415,6 +1415,9 @@ a.action-ligne { color: var(--corps); }
 .hx__ref { margin-left: auto; text-align: right; }
 .hx__ref small { color: var(--color-ds-texte-sourdine); font-size: 12px; }
 .hx__ref b { font-size: 24px !important; line-height: 1.1; font-weight: 800; letter-spacing: -.045em !important; }
+/* En chinois, aucun interlettrage (CLAUDE.md) : le `!important` ci-dessus battait la règle
+   globale `:lang(zh-CN) *` (mesuré le 03/10/2026, −1,08 px sur la référence). */
+:lang(zh-CN) .hx__ref b { letter-spacing: 0 !important; }
 .hx__ligne { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .hx__direct { display: inline-flex; align-items: center; gap: 7px; font-style: normal; font-size: 12px; font-weight: 600; color: var(--color-ds-texte-corps); white-space: nowrap; }
 .hx__direct i { position: relative; width: 7px; height: 7px; border-radius: 50%; background: var(--color-ds-succes); }

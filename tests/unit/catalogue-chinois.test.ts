@@ -87,6 +87,14 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
      international, et les unités de stockage s'écrivent en lettres latines en
      chinois comme ailleurs. */
   ["docs.regLogo", "« Logo » s'écrit ainsi en chinois."],
+  /* Relecture du chinois, 03/10/2026 : un seul mot pour « logo » (« Logo », le terme
+     dominant, au lieu de 标志 ici), l'unité de stockage en lettres latines comme partout,
+     une adresse d'exemple valable (un nom de lien n'accepte que des lettres latines), et
+     l'objet du signalement rendu à ses deux variables, comme en français. */
+  ["onboarding.logoTitre", "« Logo » s'écrit ainsi en chinois, comme dans la documentation."],
+  ["admin.parametres.unite.megaoctets", "L'unité « MB » s'écrit en lettres latines en chinois."],
+  ["passerPro.tableau.adressePro", "Une adresse d'exemple : un nom de lien ne s'écrit qu'en lettres latines."],
+  ["legal.signalement.sujet", "Deux variables et la ponctuation chinoise « ： », seules : le titre et la catégorie sont déjà traduits."],
   // ⚠️ `docs.plStockageG` et `docs.plStockageP` étaient déclarées ici. Les clés
   // ont été SUPPRIMÉES le 20/09/2026 : le tableau tarifaire promettait « 1 Go »
   // et « 50 Go » alors qu'AUCUN plafond de stockage n'existe dans le produit —

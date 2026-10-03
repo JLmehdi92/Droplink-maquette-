@@ -9,14 +9,14 @@
     "mesCommandes": "订单",
     "maMarque": "我的品牌",
     "espaceVendeur": "卖家中心",
-    "mesEnvois": "物流追踪",
+    "mesEnvois": "物流跟踪",
     "mesAnalyses": "数据分析",
     "seDeconnecter": "退出登录",
     "monCompte": "我的账户",
     "piedDePage": "© {annee} DropLink。版权所有。",
-    "creerCompte": "注册账号",
+    "creerCompte": "创建账户",
     "pro": {
-      "titre": "升级专业版",
+      "titre": "升级至 Pro",
       "texte": "更多功能，更多可能。",
       "bouton": "升级至 Pro"
     },
@@ -89,7 +89,7 @@
       "erreurDescription": "请说明问题所在。",
       "erreurEmail": "这个邮箱地址似乎不正确。",
       "copieSelection": "已选中，请复制",
-      "sujet": "举报内容：{categorie}"
+      "sujet": "{titre}：{categorie}"
     },
     "conditionsMetaTitre": "使用条款 — DropLink",
     "conditionsMetaDescription": "DropLink 的使用条款：服务内容、卖家账户、内容、免费版与专业版、终止与责任。",
@@ -753,7 +753,7 @@
             "titre": "网站发布方",
             "blocs": [
               {
-                "p": "DropLink 由 Mahfoud SEDDIKI 发布，个体经营者（entrepreneur individuel, EI），地址：2 square de l'Avre, 92100 Boulogne-Billancourt, France。"
+                "p": "DropLink 由个体经营者（entrepreneur individuel, EI）Mahfoud SEDDIKI 发布，地址：2 square de l'Avre, 92100 Boulogne-Billancourt, France。"
               },
               {
                 "ul": [
@@ -884,7 +884,7 @@
     "info": {
       "deconnecte": "您已退出登录。期待下次再见。",
       "deconnexion-partielle": "此设备已退出登录，但我们无法向服务器确认。如果这是共用设备，请重新登录后再次退出。",
-      "compte-supprime": "您的账号已注销。订单、照片与客户链接均已删除。"
+      "compte-supprime": "您的账户已删除。订单、照片与客户链接均已删除。"
     },
     "placeholderMotDePasse": "请输入密码",
     "afficherMotDePasse": "显示密码",
@@ -892,8 +892,8 @@
     "erreurMdpVide": "请输入您的密码。"
   },
   "inscription": {
-    "titre": "注册账号",
-    "dejaCompteTexte": "已有账号？",
+    "titre": "创建账户",
+    "dejaCompteTexte": "已有账户？",
     "bouton": "创建我的账户",
     "boutonEnCours": "正在创建…",
     "erreurMdpTropCourt": "密码至少需要 12 个字符。",
@@ -901,7 +901,7 @@
     "erreurMdpContientEmail": "密码不能包含您的邮箱地址。",
     "erreurMdpFuite": "该密码曾出现在公开的数据泄露中，请换一个。",
     "erreurDejaInscrit": "该邮箱已注册。请直接登录。",
-    "titreCarte": "创建您的账号",
+    "titreCarte": "创建您的账户",
     "sousTitreCarte": "免费开始。注册后马上就能发出第一个物流链接。",
     "lienSeConnecter": "登录",
     "placeholderMotDePasse": "用一句话，而不是一个单词",
@@ -914,18 +914,18 @@
     "etape": "第 1 步，共 2 步",
     "nomTitre": "您的店铺名称",
     "nomPlaceholder": "北方工坊",
-    "logoTitre": "标志",
+    "logoTitre": "Logo",
     "logoChoisir": "选择图片",
     "logoRemplacer": "更换",
     "logoFormats": "PNG 或 JPG，最小 512 像素",
-    "logoRetirer": "移除标志",
+    "logoRetirer": "移除 Logo",
     "logoEnvoi": "上传中… {pourcent}%",
     "logoErreur": {
       "type": "不支持这种图片格式。",
       "taille": "这张图片太大了。",
       "envoi": "上传失败。请重试。",
       "confirmation": "服务器未确认上传。请重试。",
-      "retrait": "未能移除标志，请重试。"
+      "retrait": "未能移除 Logo，请重试。"
     },
     "couleurTitre": "您的主色",
     "couleurAide": "对比度会自动调整：任何颜色都能保持清晰易读。",
@@ -961,12 +961,12 @@
   "marque": {
     "titre": "我的品牌",
     "sousTitre": "定制客户页面，强化品牌形象。",
-    "identiteTitre": "品牌标识",
+    "identiteTitre": "品牌信息",
     "nomTitre": "店铺名称",
-    "nomAide": "如果既没有店名也没有标志，客户的页面会直接从内容开始。",
+    "nomAide": "如果既没有店名也没有Logo，客户的页面会直接从内容开始。",
     "nomPlaceholder": "例如：北方工作室",
     "erreurNom": "名称不能超过 60 个字符。",
-    "logoRemplacer": "更换 logo",
+    "logoRemplacer": "更换 Logo",
     "logoRetirer": "移除",
     "logoEnvoi": "正在上传…",
     "depotTitre": "选择图片",
@@ -978,7 +978,7 @@
       "reseau": "上传未完成。请检查网络后重试。",
       "confirmation": "图片已发出，但我们未能保存。请重试。",
       "illisible": "您的浏览器无法读取这张图片。请尝试 PNG、JPG 或 WebP。",
-      "retrait": "无法移除标志，请重试。"
+      "retrait": "无法移除Logo，请重试。"
     },
     "couleurTitre": "个性化",
     "couleurAide": "选择代表您品牌的配色。",
@@ -1024,7 +1024,7 @@
       "whatsapp": "带国家区号的国际格式号码，例如 +86 138 0013 8000。",
       "site": "您的网站地址，例如 yoursite.com。仅接受 https 开头的地址。"
     },
-    "logoTitre": "品牌 logo",
+    "logoTitre": "品牌 Logo",
     "contrasteConforme": "对比度合规",
     "demoTexte": "白底文字",
     "demoTexteSeuil": "最低 4.5:1",
@@ -1032,7 +1032,7 @@
     "demoBoutonSeuil": "最低 3:1",
     "demoBandeau": "横幅",
     "demoBandeauSeuil": "反白文字",
-    "reseauxFacultatif": "选填",
+    "reseauxFacultatif": "可选",
     "reseauxNouvelOnglet": "这些链接会在新标签页中打开，离开客户页面。它们不会创建任何账户，也不会向您的客户索取任何信息。",
     "optionsTitre": "显示选项",
     "apercuDirect": "实时",
@@ -1067,11 +1067,11 @@
     "apercuImageMobile": "客户页面的移动端预览",
     "apercuImageBureau": "客户页面的桌面端预览",
     "voirPageClient": "查看客户页面",
-    "rienEnregistre": "尚未保存任何内容。"
+    "rienEnregistre": "没有保存任何内容。"
   },
   "envois": {
-    "titre": "物流追踪",
-    "sousTitre": "实时追踪所有包裹。信息由承运商自动更新。",
+    "titre": "物流跟踪",
+    "sousTitre": "实时跟踪所有包裹。信息由承运商自动更新。",
     "compteurs": {
       "titre": "总览",
       "total": "全部发货",
@@ -1086,11 +1086,11 @@
       "silencieux": "无更新",
       "tousStatuts": "全部状态",
       "tousTransporteurs": "全部承运商",
-      "rechercher": "搜索发货…"
+      "rechercher": "搜索包裹…"
     },
     "etat": {
       "preparation": "尚未扫描",
-      "expedie": "已发出",
+      "expedie": "已发货",
       "en_transit": "运输中",
       "livre": "已送达"
     },
@@ -1100,7 +1100,7 @@
       "anciens": "很久没有更新"
     },
     "colonnes": {
-      "numero": "物流",
+      "numero": "运单号",
       "commande": "订单",
       "client": "客户",
       "transporteur": "承运商",
@@ -1131,7 +1131,7 @@
     "aide": "刚粘贴的运单号往往还没有被扫描。这不是故障：只是承运商还没有发布任何信息。",
     "actualiser": "刷新",
     "derniereMaj": "最后更新",
-    "compteurPage": "显示第 {de}–{a} 条，共 {total} 条发货",
+    "compteurPage": "显示第 {de}–{a} 个，共 {total} 个包裹",
     "prochaine": {
       "livre": "包裹已送达",
       "aujourdhui": "预计今日送达",
@@ -1151,13 +1151,13 @@
       "selectionPlusieurs": "已选 # 个包裹",
       "toutDeselectionner": "取消全选"
     },
-    "autresCommandes": "另有 {n} 个订单",
+    "autresCommandes": "另有 {n} 笔订单",
     "trier": "排序",
     "finDeListe": "已到列表末尾。"
   },
   "analyses": {
     "titre": "数据分析",
-    "indisponible": "此板块暂时无法读取——这不等于「没有数据」。请稍后重试。",
+    "indisponible": "此板块暂时无法读取——这不等于“没有数据”。请稍后重试。",
     "indisponibleCourt": "暂时无法读取",
     "periode": {
       "titre": "时间范围",
@@ -1170,13 +1170,13 @@
       "commandesCreees": "新建订单",
       "commandesLivrees": "已送达订单",
       "liensOuverts": "客户链接打开数",
-      "tauxValidation": "照片完成率",
+      "tauxValidation": "照片确认率",
       "delaiLivraison": "平均送达时长"
     },
     "carteCourt": {
       "commandesCreees": "新建订单"
     },
-    "ecartPrecedent": "{n}，与上一时段相比",
+    "ecartPrecedent": "较上一周期 {n}",
     "aucuneComparaison": "暂无可比数据",
     "leClientRevient": "客户会反复回来查看",
     "frise": {
@@ -1199,18 +1199,18 @@
     },
     "consultees": {
       "titre": "浏览最多的订单",
-      "aide": "反复回来看自己页面的客户，是一个放心的客户。",
+      "aide": "客户反复查看自己的页面，说明他很放心。",
       "sansNom": "未填写收件人",
-      "vide": "此时段内还没有链接被打开。",
+      "vide": "此周期内还没有链接被打开。",
       "vues": "次查看"
     },
     "qc": {
       "titre": "客户的回复",
-      "aide": "客户看过照片后的回复。如果客户没有回复，订单就一直是待确认。",
+      "aide": "客户看过照片后的回复。如果客户没有回复，订单会一直处于待确认状态。",
       "approuve": "已确认",
       "refuse": "有问题",
       "enAttente": "未回复",
-      "vide": "此时段内没有订单。",
+      "vide": "此周期内没有订单。",
       "tauxTexte": "的回复确认了照片",
       "aucuneReponse": "暂无回复"
     },
@@ -1234,7 +1234,7 @@
       "aide": "按承运商划分的发货分布。",
       "autres": "其他",
       "inconnu": "未识别的承运商",
-      "aucun": "本周期内没有包裹。"
+      "aucun": "本周期内没有承运商揽收的包裹。"
     },
     "activite": {
       "titre": "近期动态",
@@ -1249,7 +1249,7 @@
       "propulse": "技术支持",
       "slogan": "简单而强大的物流链接。"
     },
-    "vuesParCommande": "每个已打开订单 {n, number} 次浏览"
+    "vuesParCommande": "每个已打开订单 {n, number} 次查看"
   },
   "commandes": {
     "titre": "订单",
@@ -1258,7 +1258,7 @@
     "statutExpedition": "发货状态",
     "statutQc": "照片状态",
     "tousStatuts": "全部状态",
-    "tousQc": "全部情况",
+    "tousQc": "全部状态",
     "voirArchivees": "查看已归档订单",
     "appliquer": "应用",
     "toutEffacer": "全部清除",
@@ -1269,10 +1269,10 @@
     "ouvrirPage": "打开 {client} 的页面",
     "copieEchouee": "浏览器拒绝了复制",
     "pageSuivanteDisponible": "下面还有更多订单。",
-    "finDeListe": "已经到底了。",
+    "finDeListe": "已到列表末尾。",
     "statut": {
       "preparation": "备货中",
-      "expedie": "已发出",
+      "expedie": "已发货",
       "en_transit": "运输中",
       "livre": "已送达"
     },
@@ -1366,7 +1366,7 @@
     "sansNom": "未填写",
     "sousTitreChiffre": "{total, plural, other {共 # 笔订单}}，{semaine, plural, other {本周新增 # 笔}}",
     "sousTitreVide": "您的工作台已准备好",
-    "surTotal": "显示 {n} 条，共 {total} 条订单",
+    "surTotal": "显示 {n} 笔，共 {total} 笔订单",
     "chargerLaSuite": "加载更多",
     "plusDActions": "{client} 的更多操作",
     "dupliquer": "复制为模板",
@@ -1380,7 +1380,7 @@
     "filtresActifsLabel": "当前筛选：",
     "retirerFiltre": "移除筛选：{filtre}",
     "puce": {
-      "recherche": "搜索：「{q}」",
+      "recherche": "搜索：“{q}”",
       "statut": "状态：{valeur}",
       "qc": "照片：{valeur}",
       "periodeEntre": "时间：{du} 至 {au}",
@@ -1402,10 +1402,10 @@
     "lienBloque": "链接已停用",
     "quota": {
       "gratuitTitre": "免费版额度已用完",
-      "gratuitTexte": "免费账户共可创建 {n} 个订单：此额度为终身额度，不会重置。升级至 Pro 即可继续创建订单。",
+      "gratuitTexte": "免费账户共可创建 {n} 笔订单：此额度为终身额度，不会重置。升级至 Pro 即可继续创建订单。",
       "gratuitTexteSansNombre": "您已用完免费版额度：此额度为终身额度，不会重置。升级至 Pro 即可继续创建订单。",
-      "mensuelTitre": "本月上限已达到",
-      "mensuelTexte": "您本月已创建 {n} 个订单。上限将于每月 1 日重置。",
+      "mensuelTitre": "已达本月上限",
+      "mensuelTexte": "您本月已创建 {n} 笔订单。上限将于每月 1 日重置。",
       "mensuelTexteSansNombre": "您本月的订单已达上限。上限将于每月 1 日重置。",
       "passerPro": "升级至 Pro"
     },
@@ -1425,7 +1425,7 @@
   "editeur": {
     "historique": {
       "titre": "订单记录",
-      "aucun": "这笔订单还没有发生任何事。",
+      "aucun": "这笔订单暂无任何动态。",
       "aHeure": "{heure}",
       "commentaire": "“{texte}”",
       "types": {
@@ -1472,7 +1472,7 @@
     },
     "statut": {
       "preparation": "备货中",
-      "expedie": "已发出",
+      "expedie": "已发货",
       "en_transit": "运输中",
       "livre": "已送达"
     },
@@ -1495,21 +1495,21 @@
     "apercuCadreMobile": "客户页面移动端预览",
     "apercuCadreDesktop": "客户页面桌面端预览",
     "creeeLe": "创建于 {quand}",
-    "suiviTitre": "订单物流追踪",
+    "suiviTitre": "订单物流跟踪",
     "suiviAttente": "等待中",
     "suiviArrete": "承运商已不再发布该单号的信息。",
     "transporteur": "承运商",
     "transporteurAuto": "自动识别",
     "transporteurAide": "根据运单号自动识别。仅在无法识别时手动选择。",
     "suiviNonReconnu": "未能识别该单号的承运商。请在“承运商”中选择，以重新开始跟踪。",
-    "suiviBloqueGratuit": "单号已保存，但自动追踪未启动：您的免费追踪包裹已全部用完，此额度为终身额度。",
-    "suiviBloqueMensuel": "单号已保存，但自动追踪未启动：本月追踪包裹上限已达到。上限将于每月 1 日重置，届时请重新输入单号。",
+    "suiviBloqueGratuit": "单号已保存，但自动跟踪未启动：您的免费跟踪包裹已全部用完，此额度为终身额度。",
+    "suiviBloqueMensuel": "单号已保存，但自动跟踪未启动：已达到本月跟踪包裹上限。上限将于每月 1 日重置，届时请重新输入单号。",
     "suiviBloquePasserPro": "升级至 Pro",
     "tuileClient": "客户",
-    "tuileReference": "产品编号",
-    "tuileVues": "链接浏览",
+    "tuileReference": "商品编号",
+    "tuileVues": "链接查看次数",
     "tuileVuesAucune": "尚未打开",
-    "tuileVuesNombre": "{n, plural, other {# 次浏览}}",
+    "tuileVuesNombre": "{n, plural, other {# 次查看}}",
     "tuileSuivi": "物流跟踪",
     "tuileVide": "未填写",
     "plusActions": "更多操作",
@@ -1566,7 +1566,7 @@
     "videos": "{n, plural, other {# 个视频}} / {max}",
     "aideOrdre": "拖动缩略图上的手柄即可调整顺序。封面是您客户看到的第一张图。",
     "aideOrdreTelephone": "长按手柄即可移动照片。",
-    "annonceSuppression": "媒体已删除。",
+    "annonceSuppression": "文件已删除。",
     "annonceCouverture": "已设为封面。"
   },
   "actions": {
@@ -1584,7 +1584,7 @@
     "titre": "您的订单",
     "frise": {
       "preparation": "备货中",
-      "expedie": "已发出",
+      "expedie": "已发货",
       "en_transit": "运输中",
       "livre": "已送达",
       "enCours": "进行中",
@@ -1616,7 +1616,7 @@
       "texte": "这些照片和您的订单一致吗？",
       "approuver": "确认无误",
       "refuser": "有问题",
-      "commentaire": "想补充点什么？（选填）",
+      "commentaire": "想补充点什么？（可选）",
       "envoi": "正在提交…",
       "approuve": "此订单已确认。",
       "refuse": "此订单已被反馈存在问题。卖家已收到通知。",
@@ -1652,7 +1652,7 @@
     },
     "bandeau": {
       "preparation": "您的订单正在备货",
-      "expedie": "您的包裹已发出",
+      "expedie": "您的包裹已发货",
       "en_transit": "您的包裹正在运输中",
       "livre": "您的包裹已送达",
       "preparationTexte": "卖家正在为您备货。"
@@ -1684,13 +1684,13 @@
     "lienInvalideCommentCaMarche": "DropLink 如何运作",
     "lienInvalideAccueil": "返回首页",
     "carteDropLink": {
-      "surtitre": "由 DROPLINK 提供支持",
+      "surtitre": "由 DropLink 提供支持",
       "titre": "简单而强大的物流链接。",
       "texte": "为每笔订单创建物流链接，一分钟内完成。",
       "bouton": "了解 DropLink",
       "aria": "由 DropLink 提供支持。了解 DropLink"
     },
-    "allerAuContenu": "跳到主要内容",
+    "allerAuContenu": "跳到正文",
     "logoAccueil": "DropLink，首页",
     "trajetLu": {
       "etape": "{etape}：{etat}",
@@ -1762,7 +1762,7 @@
       "videFiltre": "没有符合此筛选的账户。",
       "sousTitreListe": "管理并跟踪所有 DropLink 账户。",
       "tuileTotalAide": "其中 {sansType} 个未声明类型",
-      "colisInfo": "已登记 {valeur} 个包裹，提醒阈值 {seuil}",
+      "colisInfo": "已登记 {valeur} 个包裹，告警阈值 {seuil}",
       "ouvrirLong": "打开账户 {email}"
     },
     "journal": {
@@ -1913,23 +1913,23 @@
     },
     "plan": {
       "titre": "套餐",
-      "aide": "DropLink 不经手任何付款：收到付款后，请在此将账号切换为 Pro。Pro 卖家可以从客户页面移除 DropLink 品牌标识。",
+      "aide": "DropLink 不经手任何付款：收到付款后，请在此将账户切换为 Pro。Pro 卖家可以从客户页面移除 DropLink 品牌标识。",
       "planActuel": "当前套餐",
       "plans": {
-        "gratuit": "免费",
+        "gratuit": "免费版",
         "pro": "Pro"
       },
       "illisible": "暂时无法读取",
       "passerPro": "切换为 Pro",
-      "passerGratuit": "切回免费",
+      "passerGratuit": "切回免费版",
       "motif": "原因",
       "motifAide": "至少 {n} 个字符。例如：“9 月 19 日已通过银行转账收到付款”。原因会完整显示在日志中。",
       "annuler": "取消",
       "enCours": "处理中…",
       "erreur": {
         "saisie": "原因太短。",
-        "deja": "该账号已是此套餐。请重新加载页面。",
-        "introuvable": "找不到该账号。",
+        "deja": "该账户已是此套餐。请重新加载页面。",
+        "introuvable": "找不到该账户。",
         "ecriture": "无法保存套餐，未作任何更改。"
       },
       "annonce": "已完成。套餐变更已写入审计日志。"
@@ -1937,7 +1937,7 @@
     "panneau": {
       "titre": "总览",
       "aucuneAlerte": "没有告警。没有任何指标超出阈值，后台任务心跳正常。",
-      "alertesIndisponibles": "告警暂时无法读取——这并不等于「没有告警」。请稍后重试。",
+      "alertesIndisponibles": "告警暂时无法读取——这并不等于“没有告警”。请稍后重试。",
       "compteursIndisponibles": "计数暂时无法读取。横线不等于零。",
       "alerte": {
         "colis_au_dessus_du_seuil": "有账户超出包裹上限：{valeur}，阈值为 {seuil}",
@@ -1978,17 +1978,17 @@
         "livre": "已送达"
       },
       "commandesAide": "最近 {jours} 天的订单变化",
-      "statutsUnite": "个订单",
+      "statutsUnite": "笔订单",
       "courbeIndisponible": "曲线不可用。",
       "courbe": "订单",
       "periode": "最近 {jours} 天",
       "periodeEtiquette": "曲线时间窗",
       "alerteDoublons": "{comptes} 个账户，共用 {identifiants} 个标识",
-      "alerteContestation": "{n, plural, =1 {{reference} 的封锁申诉} other {# 项封锁申诉待处理，最早一项为 {reference}}}",
+      "alerteContestation": "{n, plural, =1 {{reference} 的停用申诉} other {# 项停用申诉待处理，最早一项为 {reference}}}",
       "alerteContestationDetail": "卖家于 {date} 提交。",
       "contestationsIndisponibles": "无法读取待处理的申诉。",
       "doublonsIndisponibles": "无法读取重复账户。",
-      "barre": "{jour}：{n} 个订单"
+      "barre": "{jour}：{n} 笔订单"
     },
     "parametres": {
       "titre": "系统参数",
@@ -2001,7 +2001,7 @@
       "unite": {
         "jours": "{n, number} 天",
         "minutes": "{n, number} 分钟",
-        "megaoctets": "{n, number} 兆字节",
+        "megaoctets": "{n, number} MB",
         "parMinute": "{n, number} 次/分钟"
       },
       "secretsTitre": "密钥不在这里。",
@@ -2047,7 +2047,7 @@
           "aide": "已付给服务商但我们没有记录"
         },
         "budget_suivi_total": {
-          "titre": "追踪额度（终身）",
+          "titre": "跟踪额度（终身）",
           "aide": "服务商套餐允许的登记总数"
         },
         "seuil_colis_par_compte": {
@@ -2151,15 +2151,15 @@
       "part": "{part}%",
       "tuileTotal": "店铺总数",
       "tuileTotalAide": "注册时每个账户创建一个",
-      "tuileConfigurees": "已配置店铺",
+      "tuileConfigurees": "已设置店铺",
       "partDuTotal": "占总数 {part}%",
       "tuileCommandes": "新建订单",
       "ceMoisCi": "本月",
-      "tuileStockage": "媒体存储",
-      "stockageAide": "上传时在服务器端重新读取",
+      "tuileStockage": "文件存储用量",
+      "stockageAide": "上传时由服务端重新读取",
       "filtreType": "按账户类型筛选",
       "videFiltre": "没有符合此筛选的店铺。",
-      "legendeConfigurees": "已配置",
+      "legendeConfigurees": "已设置",
       "legendeSansNom": "未命名"
     },
     "unites": {
@@ -2173,7 +2173,7 @@
       "titre": "运行监控",
       "sousTitre": "无人值守时仍在运行的部分。",
       "taches": "后台任务",
-      "tachesIndisponibles": "任务状态暂时无法读取——这并不等于「从未执行」。请稍后重试。",
+      "tachesIndisponibles": "任务状态暂时无法读取——这并不等于“从未执行”。请稍后重试。",
       "indicateursIndisponibles": "用量暂时无法读取。横线不等于零。",
       "friseIndisponible": "包裹历史暂时无法读取。",
       "nonMesure": "未采集",
@@ -2186,11 +2186,11 @@
         "interrogations_ce_mois": "本月向承运商查询次数",
         "colis_pris_en_charge_ce_mois": "本月登记包裹数",
         "abandons_ce_mois": "本月停止跟踪数",
-        "pic_auth-ip": "峰值 — 按 IP 的登录次数",
-        "pic_auth-email": "峰值 — 按邮箱的密码重置次数",
-        "pic_publique-requetes": "峰值 — 客户页面请求",
-        "pic_publique-inconnu": "峰值 — 未知链接",
-        "pic_publique-ecriture": "峰值 — 客户回复"
+        "pic_auth-ip": "峰值：按 IP 的登录次数",
+        "pic_auth-email": "峰值：按邮箱的密码重置次数",
+        "pic_publique-requetes": "峰值：客户页面请求",
+        "pic_publique-inconnu": "峰值：未知链接",
+        "pic_publique-ecriture": "峰值：客户回复"
       },
       "absent": {
         "disponibilite": "可用率",
@@ -2245,13 +2245,13 @@
     },
     "commandes": {
       "titre": "订单",
-      "sousTitreListe": "管理并追踪 DropLink 上创建的所有订单。",
+      "sousTitreListe": "管理并跟踪 DropLink 上创建的所有订单。",
       "trace": "本次访问及其搜索条件都会写入审计日志。列表不显示客户、商品编号或订单链接。",
       "tuileTotal": "订单总数",
       "tuileTotalAide": "含实际内容",
       "tuileEnTransit": "运输中",
       "tuileLivrees": "已送达",
-      "tuilePreparation": "准备中",
+      "tuilePreparation": "备货中",
       "tuileExpediees": "已发货",
       "tuileCeMois": "本月创建",
       "tuileCeMoisAide": "自本月 1 日起",
@@ -2263,7 +2263,7 @@
       "filtreJours": "按日期筛选",
       "statuts": {
         "tous": "全部状态",
-        "preparation": "准备中",
+        "preparation": "备货中",
         "expedie": "已发货",
         "en_transit": "运输中",
         "livre": "已送达"
@@ -2274,7 +2274,7 @@
         "toutes": "全部日期"
       },
       "liste": "订单列表",
-      "listeTotal": "共 {total, number} 个订单",
+      "listeTotal": "共 {total, number} 笔订单",
       "colonnes": {
         "reference": "#",
         "compte": "账户",
@@ -2290,8 +2290,8 @@
       "videTout": "尚未创建任何订单。",
       "videFiltre": "没有订单符合当前筛选条件。",
       "pageSuivante": "查看更多",
-      "surTotal": "{affichees} / {total, number} 个订单",
-      "affichees": "显示 {affichees} 个订单",
+      "surTotal": "{affichees} / {total, number} 笔订单",
+      "affichees": "显示 {affichees} 笔订单",
       "repartition": "状态分布",
       "lienBloque": "链接已停用",
       "aucunTransporteur": "无承运商"
@@ -2330,7 +2330,7 @@
       "serieNouveaux": "新增账户",
       "serieActifs": "活跃账户",
       "typesDeCompte": "账户类型",
-      "typeFournisseurs": "供应商",
+      "typeFournisseurs": "供货商",
       "typeRevendeurs": "分销商",
       "typeSans": "未声明类型",
       "uniteComptes": "个账户",
@@ -2342,7 +2342,7 @@
       "serieDelai": "平均时长（天）",
       "aucuneMesure": "该周期内暂无数据。",
       "statutCommandes": "订单状态",
-      "statutTotal": "已创建 {total} 个订单",
+      "statutTotal": "已创建 {total} 笔订单",
       "transporteurs": "最常用承运商",
       "transporteursTotal": "共跟踪 {total} 个包裹",
       "transporteurInconnu": "尚未识别",
@@ -2377,13 +2377,13 @@
         "ecriture": "没有任何改动。请重试。"
       },
       "motifAideBlocage": "至少 {n} 个字符。卖家会在其订单中看到，并写入日志。",
-      "annonceBloque": "链接已封禁。卖家会在订单中看到原因。",
-      "annonceDebloque": "链接已解封。页面恢复为原链接。"
+      "annonceBloque": "链接已停用。卖家会在订单中看到原因。",
+      "annonceDebloque": "链接已恢复。页面恢复为原链接。"
     },
     "contestation": {
       "pastille": "申诉",
       "voir": "查看 {ref} 的申诉",
-      "titre": "{ref} 停用申诉",
+      "titre": "{ref} 的停用申诉",
       "aide": "卖家于 {date} 提交 · 三次中的第 {rang} 次。本次查看已写入审计日志。",
       "image": "打开卖家附上的图片",
       "reponse": "您的回复",
@@ -2400,8 +2400,8 @@
         "deja": "此申诉已得到回复。",
         "ecriture": "回复未能保存，未作任何更改。"
       },
-      "annonceAcceptee": "申诉已接受：链接已解封，回复已发送给卖家。",
-      "annonceRefusee": "申诉已驳回。卖家会看到您的回复；链接仍处于封禁状态。",
+      "annonceAcceptee": "申诉已接受：链接已恢复，回复已发送给卖家。",
+      "annonceRefusee": "申诉已驳回。卖家会看到您的回复；链接仍处于停用状态。",
       "reponseCourte": "回复太短。"
     },
     "doublons": {
@@ -2420,8 +2420,8 @@
       "colStatut": "状态",
       "colInscription": "注册时间",
       "colCommandes": "订单",
-      "voir": "查看档案",
-      "voirLong": "查看 {email} 的档案",
+      "voir": "查看详情",
+      "voirLong": "查看 {email} 的账户详情",
       "identifiants": "共享标识",
       "concernes": "涉及账户",
       "suspendus": "其中已停用",
@@ -2444,7 +2444,7 @@
     "pastille": "管理",
     "infoValeur": "{libelle}：{valeur}",
     "dialogue": {
-      "motifCourt": "理由太短。",
+      "motifCourt": "原因太短。",
       "recopieDifferente": "您输入的地址与该账户不符。"
     }
   },
@@ -2454,7 +2454,7 @@
     "reessayer": "重试",
     "reference": "事件编号：{ref}",
     "introuvableTitre": "此页面不存在",
-    "introuvableTexte": "您访问的地址没有对应的页面。可能是抄写有误，或该页面已被移除。",
+    "introuvableTexte": "您访问的地址没有对应的页面。可能是地址输入有误，或该页面已被移除。",
     "introuvableRetour": "返回首页",
     "accueilLogo": "DropLink，首页"
   },
@@ -2482,7 +2482,7 @@
       "texte": "客户还没有打开链接，也许从未收到。"
     },
     "silencieux": {
-      "titre": "{n} 件包裹无更新",
+      "titre": "{n} 个包裹无更新",
       "texte": "超过十天没有承运商信息。"
     }
   },
@@ -2493,11 +2493,11 @@
     "source": "依据线上正式版本撰写",
     "duree": "阅读约 7 分钟",
     "misAJour": "更新于",
-    "resume": "DropLink 把一笔订单变成一个发给客户的物流链接。您上传照片并填写运单号，DropLink 会查询承运商并自动更新状态。本指南涵盖每个页面，从注册账号到查看<analyses>数据分析</analyses>。",
+    "resume": "DropLink 把一笔订单变成一个发给客户的物流链接。您上传照片并填写运单号，DropLink 会查询承运商并自动更新状态。本指南涵盖每个页面，从注册账户到查看<analyses>数据分析</analyses>。",
     "grCommencer": "开始使用",
     "grUtiliser": "使用 DropLink",
     "grPiloter": "运营监控",
-    "grCompte": "账号",
+    "grCompte": "账户",
     "grAide": "帮助",
     "presentation": "产品概述",
     "presentationTexte": "DropLink 只解决一个问题：客户反复追问包裹到哪了。原理一句话就能说清。",
@@ -2511,18 +2511,18 @@
     "fait3": "自动获取承运商信息并推进订单状态。",
     "fait4": "为您提供总览：运输中的发货、无更新的包裹、已打开的链接。",
     "ceQueFaitPas": "DropLink 不做什么",
-    "faitPasTexte": "DropLink 不是电商平台，也不管理您的商品目录。这里没有商品、数量、价格、购物车或营业额——这些数据属于您的店铺，而非物流追踪。",
-    "demarrer": "注册账号",
-    "etape1": "开通账号",
+    "faitPasTexte": "DropLink 不是电商平台，也不管理您的商品目录。这里没有商品、数量、价格、购物车或营业额——这些数据属于您的店铺，而非物流跟踪。",
+    "demarrer": "注册账户",
+    "etape1": "开通账户",
     "etape1Texte": "在<lien>注册页</lien>使用邮箱或 Google 账号创建。无需绑定银行卡。",
     "etape2": "设置店铺名称",
-    "etape2Texte": "名称与 logo 会显示在每个客户页面顶部。",
+    "etape2Texte": "名称与 Logo 会显示在每个客户页面顶部。",
     "etape3": "创建第一笔订单",
     "etape3Texte": "立即获得可分享的链接。",
     "combienTitre": "需要多久",
     "combienTexte": "注册不到一分钟，第一个物流链接即可在同一次操作中发出。无需预先配置任何承运商接口。",
     "marque": "配置品牌",
-    "marqueTexte": "<b>「我的品牌」</b>页面是<lien>客户页</lien>的编辑器，而不是普通表单：每次修改都会立即显示在预览中。",
+    "marqueTexte": "<b>“我的品牌”</b>页面是<lien>客户页面</lien>的编辑器，而不是普通表单：每次修改都会立即显示在预览中。",
     "colReglage": "设置项",
     "colEffet": "对客户页面的影响",
     "regLogo": "Logo",
@@ -2536,52 +2536,52 @@
     "regFiligrane": "水印",
     "regFiligraneE": "在您上传的照片上加注店铺名称。",
     "commande": "创建订单",
-    "commandeTexte": "<b>「创建订单」</b>按钮位于订单列表。表单分为三块，旁边同时显示客户页预览。",
+    "commandeTexte": "<b>“创建订单”</b>按钮位于订单列表。表单分为三块，旁边同时显示客户页面预览。",
     "blocClient": "客户信息",
-    "blocClientTexte": "客户的名称或昵称，以及可选邮箱。邮箱仅用于发送链接，不会创建任何账号。",
+    "blocClientTexte": "客户的名称或昵称，以及可选邮箱。邮箱仅用于发送链接，不会创建任何账户。",
     "blocMedias": "照片与视频",
     "blocMediasTexte": "拖入文件：商品、打包过程、封箱包裹。",
     "blocSuivi": "物流与发货",
     "blocSuiviTexte": "粘贴运单号。DropLink 会识别承运商并开始查询。",
-    "sauvegardeTitre": "没有「保存」按钮",
+    "sauvegardeTitre": "没有“保存”按钮",
     "sauvegardeTexte": "填写过程中订单会自动保存。之后补上运单号即可开始跟踪。",
     "medias": "照片与视频",
     "mediasTexte": "媒体文件是 DropLink 的核心：它们取代了来回的消息。可拖放或选择文件添加，并可用鼠标或键盘重新排序。",
     "media1": "支持照片与视频。第一张图片作为封面。",
-    "media2": "每笔订单最多 20 个媒体文件，其中视频最多 3 个。",
+    "media2": "每笔订单最多 20 个文件，其中视频最多 3 个。",
     "media3": "客户可全屏查看每张照片，并在页面内播放视频。",
     "suivi": "承运商与物流",
     "suiviTexte": "您无需手动填写状态。粘贴运单号后，DropLink 会查询承运商并更新页面。",
     "suiviAlerteTitre": "刚粘贴的运单号尚未被扫描",
-    "suiviAlerteTexte": "这不是故障：承运商只是还没有发布信息。页面会如实说明，绝不会显示「运单号不存在」。",
+    "suiviAlerteTexte": "这不是故障：承运商只是还没有发布信息。页面会如实说明，绝不会显示“运单号不存在”。",
     "statuts": "订单状态",
     "statutsTexte": "进度条共四个阶段，且永不回退。更细的信息在物流明细中，而不在进度条上。",
     "stPreparation": "尚未扫描",
     "stPreparationE": "运单号已登记，承运商尚未发布信息。",
-    "stExpedie": "已发出",
+    "stExpedie": "已发货",
     "stExpedieE": "承运商已揽收包裹。",
     "stTransit": "运输中",
     "stTransitE": "包裹正在运输，每次更新都会显示在客户页面。",
     "stLivre": "已送达",
     "stLivreE": "承运商已确认包裹签收。",
     "silenceTitre": "超过十天无更新会被明确标注",
-    "silenceTexte": "超过十天无更新的包裹会在「物流追踪」页面和客户页面被标注。说明了的沉默是信息；未说明的沉默会被当成故障。",
+    "silenceTexte": "超过十天无更新的包裹会在“物流跟踪”页面和客户页面被标注。明确标注的无更新是一条信息；不加说明的无更新会被当成故障。",
     "lien": "客户链接",
-    "lienTexte": "每笔订单都有专属链接。客户无需账号即可在手机或电脑上打开，查看您的照片、包裹状态、物流记录以及您填写的联系方式。",
+    "lienTexte": "每笔订单都有专属链接。客户无需账户即可在手机或电脑上打开，查看您的照片、包裹状态、物流记录以及您填写的联系方式。",
     "lienAlerteTitre": "链接不会自行改变",
-    "lienAlerteTexte": "已发送的订单仍可修改：客户在同一链接上看到更新。只有「吊销并重新生成」会创建新地址，并永久停用旧地址。",
-    "envois": "物流追踪",
-    "envoisTexte": "<b>「物流追踪」</b>页面汇总所有包裹，与订单无关。想找出停滞不前的包裹时就看这里：默认排序会把长期无更新的包裹排在最前。",
+    "lienAlerteTexte": "已发送的订单仍可修改：客户在同一链接上看到更新。只有“撤销并重新生成”会创建新地址，并永久停用旧地址。",
+    "envois": "物流跟踪",
+    "envoisTexte": "<b>“物流跟踪”</b>页面汇总所有包裹，与订单无关。想找出停滞不前的包裹时就看这里：默认排序会把长期无更新的包裹排在最前。",
     "analyses": "数据分析",
-    "analysesTexte": "数据分析衡量的是 DropLink 的使用情况与追踪效果。其中不含任何营业额数据——DropLink 并不知道您的价格。",
+    "analysesTexte": "数据分析衡量的是 DropLink 的使用情况与跟踪效果。其中不含任何营业额数据——DropLink 并不知道您的价格。",
     "notifications": "通知",
     "notificationsTexte": "您的客户可以在自己的订单页面上申请邮件通知。确认邮箱后，最多收到三封邮件——发货、运输中、签收——每封都附有退订链接。客户永远不需要创建账户。",
     "parametres": "设置",
     "plans": "免费版与 Pro",
-    "plansTexte": "DropLink 提供免费版和专业版。免费版共可创建 {gratuit} 笔订单，这是终身额度，不会每月重置。专业版将其提高到每月 {pro} 笔，并移除客户页面上的 DropLink 标识。",
-    "plansTexteSansNombre": "DropLink 提供免费版和专业版。免费版可创建的订单总数有限，这是终身额度，不会每月重置。专业版改为每月上限，并移除客户页面上的 DropLink 标识。",
+    "plansTexte": "DropLink 提供免费版和 Pro。免费版共可创建 {gratuit} 笔订单，这是终身额度，不会每月重置。Pro 将其提高到每月 {pro} 笔，并移除客户页面上的 DropLink 标识。",
+    "plansTexteSansNombre": "DropLink 提供免费版和 Pro。免费版可创建的订单总数有限，这是终身额度，不会每月重置。Pro 改为每月上限，并移除客户页面上的 DropLink 标识。",
     "planGratuit": "免费版",
-    "planPro": "专业版，每月 {prix}",
+    "planPro": "Pro，每月 {prix}",
     "plCommandes": "订单",
     "plCommandesG": "共 {n} 笔",
     "plCommandesP": "每月 {n} 笔",
@@ -2589,30 +2589,30 @@
     "plPageG": "带 DropLink 标识",
     "plPageP": "不带 DropLink 标识",
     "faq": "常见问题",
-    "faqQ1": "客户需要注册账号吗？",
+    "faqQ1": "客户需要注册账户吗？",
     "faqR1": "不需要。打开链接即可立即查看订单，无需注册，也不用安装任何应用。",
     "faqQ2": "需要我手动更新状态吗？",
     "faqR2": "不需要。有运单号就够了：DropLink 会查询承运商并自动推进状态。",
     "faqQ3": "没有运单号能创建订单吗？",
     "faqR3": "可以。先创建并分享链接，发货后再补填运单号：客户会在同一链接看到更新。",
     "faqQ4": "DropLink 会销售我的商品吗？",
-    "faqR4": "不会。DropLink 不涉及商品目录、支付或价格，只负责物流追踪与客户沟通。",
+    "faqR4": "不会。DropLink 不涉及商品目录、支付或价格，只负责物流跟踪与客户沟通。",
     "faqQ5": "链接能保留多久？",
-    "faqR5": "只要您愿意，它就一直有效。链接不会自动失效，只有「吊销并重新生成」才会替换它。",
-    "faqQ6": "如果我吊销了链接，客户会看到什么？",
+    "faqR5": "只要您愿意，它就一直有效。链接不会自动失效，只有“撤销并重新生成”才会替换它。",
+    "faqQ6": "如果我撤销了链接，客户会看到什么？",
     "faqR6": "会看到 DropLink 的提示页面，说明链接已失效并建议联系您。该页面不会透露您店铺的任何信息。",
     "support": "联系客服",
     "supportTexte": "这里没有找到答案？请写信至 <courriel>contact@droplink.fr</courriel>：每条消息都会送达产品团队。",
     "supportSignaler": "举报内容",
     "ctaTitre": "准备创建第一个链接了吗？",
-    "ctaTexte": "免费账号，无需银行卡，一分钟内完成。",
-    "ctaBouton": "创建账号",
+    "ctaTexte": "免费账户，无需银行卡，一分钟内完成。",
+    "ctaBouton": "创建账户",
     "metaDescription": "DropLink 完整指南：创建订单、上传照片、填写运单号并分享客户链接。",
     "resumeEtiquette": "简而言之：",
-    "param1": "账号：姓名、邮箱与密码，邮箱和密码须输入当前密码才能修改。",
-    "param2": "偏好：界面语言。客户页面的语言在「我的品牌」中设置。",
-    "param3": "安全：双重验证、活跃会话、注销账号。",
-    "param4": "数据：导出数据、彻底删除，每项破坏性操作都需确认。",
+    "param1": "账户：姓名、邮箱与密码；修改邮箱和密码须输入当前密码。",
+    "param2": "偏好：界面语言。客户页面的语言在“我的品牌”中设置。",
+    "param3": "安全：双重验证、活跃会话、删除账户。",
+    "param4": "数据：导出数据、彻底删除；每项破坏性操作都需确认。",
     "param5": "订阅：当前套餐（免费版或 Pro），以及升级到 Pro。",
     "param6": "支持：帮助中心。",
     "colIndicateur": "指标",
@@ -2622,18 +2622,18 @@
     "kpiLivrees": "已送达订单",
     "kpiLivreesE": "承运商已确认送达的订单。",
     "kpiLiens": "客户链接打开数",
-    "kpiLiensE": "您的查询页面被打开的次数。",
+    "kpiLiensE": "您的物流页面被打开的次数。",
     "kpiDelai": "平均送达时长",
     "kpiDelaiE": "从承运商揽收到送达的平均耗时。",
     "analysesSuite": "此外还有 7 天、30 天或 90 天的订单趋势、状态分布、承运商使用情况与近期动态。",
-    "clientVoit1": "您的 logo、店铺名称与社交账号。",
+    "clientVoit1": "您的 Logo、店铺名称与社交账号。",
     "clientVoit2": "订单编号与预计送达日期。",
-    "clientVoit3": "物流进度条：尚未扫描、已发出、运输中、已送达。",
+    "clientVoit3": "物流进度条：尚未扫描、已发货、运输中、已送达。",
     "clientVoit4": "您上传的订单照片与视频。",
     "clientVoit5": "承运商与运单号。",
     "clientVoit6": "详细的物流事件记录。",
     "transporteurs": "承运商",
-    "transporteursTexte": "系统会根据运单号识别承运商。<analyses>「数据分析」</analyses>页面会显示您的发货在各承运商之间的分布。"
+    "transporteursTexte": "系统会根据运单号识别承运商。<analyses>“数据分析”</analyses>页面会显示您的发货在各承运商之间的分布。"
   },
   "tableau": {
     "titre": "仪表盘",
@@ -2664,7 +2664,7 @@
       "creees": "创建的订单",
       "jour": "日期",
       "ouvertures": "打开次数",
-      "zoneSemaines": "{n} 周的订单走势。用左右方向键逐周查看。",
+      "zoneSemaines": "{n} 周的订单趋势。用左右方向键逐周查看。",
       "zoneLiens": "客户链接：共 {n} 次打开。用左右方向键逐日查看。"
     },
     "colisTotal": "{n} 个包裹",
@@ -2672,14 +2672,14 @@
   },
   "parametres": {
     "titre": "设置",
-    "sousTitre": "管理账号、偏好设置与 DropLink 配置。",
+    "sousTitre": "管理账户、偏好设置与 DropLink 配置。",
     "compte": {
       "nom": "姓名",
       "enregistrer": "保存",
       "enregistrement": "正在保存…",
       "enregistre": "已保存。",
       "adresse": "邮箱地址",
-      "nouvelleAdresse": "新的电子邮箱",
+      "nouvelleAdresse": "新邮箱地址",
       "motDePasse": "密码",
       "actuel": "当前密码",
       "nouveau": "新密码",
@@ -2691,7 +2691,7 @@
       "changerMotDePasse": "修改密码",
       "changement": "正在修改…",
       "motDePasseChange": "密码已修改，您的其他设备已退出登录。",
-      "sansMotDePasse": "使用 Google 登录？请先通过「忘记密码」设置密码。",
+      "sansMotDePasse": "使用 Google 登录？请先通过“忘记密码”设置密码。",
       "annuler": "取消",
       "nomAide": "显示在您工作区中的名称及其缩写。",
       "nomMax": "最多 80 个字符。",
@@ -2703,12 +2703,12 @@
       "aide": "定制您的 DropLink 使用体验。",
       "langue": "语言",
       "appliquer": "应用",
-      "languePubliqueAide": "客户所见页面的语言在「我的品牌」中设置。"
+      "languePubliqueAide": "客户所见页面的语言在“我的品牌”中设置。"
     },
     "securite": {
       "sessions": "活跃会话",
       "sessionsAide": "管理已登录设备。",
-      "fermer": "退出其他设备",
+      "fermer": "让其他设备退出登录",
       "fermeture": "正在退出…",
       "ferme": "您的其他设备已退出登录。",
       "cetAppareil": "本设备",
@@ -2726,7 +2726,7 @@
       },
       "deuxEtapes": {
         "titre": "双重验证（2FA）",
-        "aide": "使用验证码保护账号。",
+        "aide": "使用验证码保护账户。",
         "activer": "启用",
         "annuler": "取消",
         "activee": "已启用",
@@ -2748,7 +2748,7 @@
         "desactiveeOk": "双重验证已停用。",
         "fermer": "关闭",
         "desactivee": "未启用",
-        "lectureImpossible": "暂时无法读取两步验证状态。"
+        "lectureImpossible": "暂时无法读取双重验证状态。"
       }
     },
     "abonnement": {
@@ -2758,16 +2758,16 @@
       "gratuit": "免费版",
       "gratuitAide": "了解 DropLink 的核心功能。",
       "pro": "Pro",
-      "proAide": "你的 Pro 订阅已生效。",
+      "proAide": "您的 Pro 订阅已生效。",
       "inclusPhotos": "照片、视频和自动物流跟踪",
-      "inclusCouleurs": "使用你品牌配色的客户页面",
+      "inclusCouleurs": "使用您品牌配色的客户页面",
       "inclusTotal": "共 {n} 笔订单",
-      "proLien": "以你的名义生成链接",
-      "proMarque": "不显示「由 DropLink 提供支持」卡片",
+      "proLien": "以您命名的链接",
+      "proMarque": "不显示“由 DropLink 提供支持”卡片",
       "proPlafond": "按月重置的上限，而非终身额度",
       "bouton": "升级至 Pro",
       "nonInclus": "不包含：",
-      "detail": "专业版带来的变化"
+      "detail": "Pro 套餐带来的变化"
     },
     "support": {
       "aide": "需要帮助？",
@@ -2776,36 +2776,36 @@
       "ouvrir": "打开"
     },
     "erreurs": {
-      "session": "您的会话已过期，请重新登录。",
+      "session": "您的登录状态已过期，请重新登录。",
       "invalide": "请检查您填写的信息。",
       "motDePasseActuel": "当前密码不正确。",
       "trop": "尝试次数过多，请几分钟后再试。",
       "mdpTropCourt": "至少 12 个字符。",
       "mdpTropLong": "密码过长。",
-      "mdpContientEmail": "密码不能包含您的电子邮箱。",
+      "mdpContientEmail": "密码不能包含您的邮箱地址。",
       "mdpFuite": "该密码出现在公开的数据泄露中，请换一个。",
       "mdpIdentique": "新密码必须与当前密码不同。",
       "adresseIdentique": "这已经是您账户的邮箱。",
       "indisponible": "服务暂时不可用，请重试。",
       "code": "验证码错误或已过期，请输入当前显示的验证码。",
-      "dejaActive": "此账号已启用双重验证。",
-      "confirmation": "输入的邮箱与账号邮箱不一致。",
-      "abonnementEnCours": "您的专业版订阅仍然有效：在这里删除账户不会停止 Lemon Squeezy 的扣款。请先在 Lemon Squeezy 客户中心取消订阅，然后再回来删除账户。"
+      "dejaActive": "此账户已启用双重验证。",
+      "confirmation": "输入的邮箱与账户邮箱不一致。",
+      "abonnementEnCours": "您的 Pro 订阅仍然有效：在这里删除账户不会停止 Lemon Squeezy 的扣款。请先在 Lemon Squeezy 客户中心取消订阅，然后再回来删除账户。"
     },
     "donnees": {
       "aide": "管理数据并导出信息。",
       "exporter": "导出我的数据",
-      "exporterAide": "订单、包裹、媒体与浏览记录，JSON 格式，不含内部备注。",
+      "exporterAide": "订单、包裹、文件与查看记录，JSON 格式，不含内部备注。",
       "bouton": "导出",
       "avertissement": "文件包含订单的公开链接：任何获得链接的人都能看到您客户的页面，请妥善保管。"
     },
     "suppression": {
       "compte": {
-        "titre": "注销账号",
+        "titre": "删除账户",
         "bouton": "删除",
-        "avertissement": "此操作不可撤销。您的账号、订单、发货记录与客户链接将被删除且无法恢复。",
-        "conservation": "仅保留您的电子邮箱及注册、注销日期一年（依法对托管服务商的要求），随后删除。",
-        "soumettre": "注销账号",
+        "avertissement": "此操作不可撤销。您的账户、订单、发货记录与客户链接将被删除且无法恢复。",
+        "conservation": "仅保留您的邮箱地址及注册、注销日期一年（依法对托管服务商的要求），随后删除。",
+        "soumettre": "删除账户",
         "enCours": "正在删除…",
         "portail": "在 Lemon Squeezy 取消我的订阅",
         "portailAbsent": "您的 Lemon Squeezy 客户中心链接附在每一封订阅收据邮件中。如找不到，请写信至 contact@droplink.fr。"
@@ -2814,12 +2814,12 @@
         "titre": "删除全部数据",
         "aide": "永久删除您的全部数据。",
         "bouton": "删除",
-        "avertissement": "您的全部订单、照片、视频与客户链接将被永久删除。账号仍然有效，但内容为空。",
+        "avertissement": "您的全部订单、照片、视频与客户链接将被永久删除。账户仍然有效，但内容为空。",
         "soumettre": "全部删除",
         "enCours": "正在删除…",
         "ok": "您的全部数据已删除。"
       },
-      "recopier": "请输入您的电子邮箱以确认：{adresse}",
+      "recopier": "请输入您的邮箱地址以确认：{adresse}",
       "annuler": "取消"
     },
     "onglets": {
@@ -2833,14 +2833,14 @@
     }
   },
   "verification": {
-    "titre": "两步验证",
+    "titre": "双重验证",
     "souvenirAppareil": "在此设备上记住 30 天",
     "sousTitre": "请输入身份验证应用中的 6 位数验证码。",
     "libelle": "验证码",
     "bouton": "验证",
     "enCours": "正在验证…",
     "perdu": "设备丢失？请将启用时记下的备用密钥添加到新的身份验证应用中。",
-    "pasVous": "不是您的账号？",
+    "pasVous": "不是您的账户？",
     "erreurs": {
       "code": "验证码错误或已过期，请输入当前显示的验证码。",
       "invalide": "请输入应用显示的 6 位数字。",
@@ -2876,38 +2876,38 @@
       "image": "无法附上图片。请重试，或不附图片直接提交。",
       "type": "不支持此图片格式：请使用 JPEG、PNG 或 WebP。",
       "taille": "该图片超出允许的大小。",
-      "cadence": "短时间内上传过多。请一分钟后重试。",
+      "cadence": "短时间内提交过多。请一分钟后重试。",
       "deja": "已有一项申诉在等待回复。",
       "plafond": "此次停用的三次申诉机会已用完。",
       "non-bloque": "此链接已不再停用。请刷新页面。",
       "introuvable": "找不到该订单。请刷新页面。",
-      "session": "您的会话已过期。请重新登录。",
+      "session": "您的登录状态已过期。请重新登录。",
       "ecriture": "申诉未能保存，未提交任何内容。"
     },
     "motif": "原因："
   },
   "passerPro": {
-    "comparaisonCourt": "免费版与专业版",
+    "comparaisonCourt": "免费版与 Pro",
     "titre": "升级至 Pro",
     "sousTitre": "Pro 套餐会改变什么，又不会改变什么。",
     "eyebrow": "Pro 套餐",
-    "accroche": "以你的名义生成链接",
-    "intro": "只有四项会改变。其余的一切，照片、视频、自动物流跟踪和你的品牌色，免费套餐已经包含。",
-    "gratuit": "免费",
+    "accroche": "以您命名的链接",
+    "intro": "只有四项会改变。其余的一切——照片、视频、自动物流跟踪和您的品牌色——免费版已经包含。",
+    "gratuit": "免费版",
     "pro": "Pro",
     "parMois": "{prix} / 月",
     "passer": "升级至 Pro",
-    "dejaPro": "你的 Pro 套餐已生效",
-    "pasEncoreOuvert": "订阅尚未开放。请联系我们为你的账户开通。",
+    "dejaPro": "您的 Pro 套餐已生效",
+    "pasEncoreOuvert": "订阅尚未开放。请联系我们为您的账户开通。",
     "facture": "付款由 Lemon Squeezy 处理并开具发票。可随时取消：已付费周期内套餐继续有效。",
     "features": {
       "lien": {
-        "titre": "以你的名义生成链接",
-        "texte": "使用 droplink.fr/你的店铺/… 而非 droplink.fr/p/…。即使你更改店铺名称，已发出的旧链接仍然有效。"
+        "titre": "以您命名的链接",
+        "texte": "使用 droplink.fr/your-shop/… 而非 droplink.fr/p/…。即使您更改店铺名称，已发出的旧链接仍然有效。"
       },
       "marque": {
-        "titre": "只展示你的品牌",
-        "texte": "客户页面上的「由 DropLink 提供支持」卡片将不再显示。"
+        "titre": "只展示您的品牌",
+        "texte": "客户页面上的“由 DropLink 提供支持”卡片将不再显示。"
       },
       "commandes": {
         "titre": "按月重置的上限",
@@ -2916,27 +2916,27 @@
       },
       "colis": {
         "titre": "跟上节奏的物流跟踪",
-        "texte": "已跟踪包裹同理：免费套餐为终身总量，Pro 套餐为每月上限。"
+        "texte": "已跟踪包裹同理：免费版为终身总量，Pro 套餐为每月上限。"
       }
     },
     "tableau": {
       "commandes": "订单",
       "colis": "已跟踪包裹",
       "adresse": "客户页面地址",
-      "carte": "「由 DropLink 提供支持」卡片",
+      "carte": "“由 DropLink 提供支持”卡片",
       "medias": "照片、视频与自动物流跟踪",
       "couleurs": "品牌配色页面",
       "aVie": "共 <b>{n}</b> 个，终身",
       "parMois": "每月 <b>{n}</b> 个",
       "mensuel": "每月上限",
       "adresseGratuit": "droplink.fr/p/xK9…",
-      "adressePro": "droplink.fr/你的店铺/xK9…",
+      "adressePro": "droplink.fr/your-shop/xK9…",
       "carteGratuit": "显示",
       "cartePro": "移除",
       "inclus": "包含"
     },
     "filParametres": "设置",
-    "comparaison": "免费版与专业版对比"
+    "comparaison": "免费版与 Pro 对比"
   },
   "notifications": {
     "carte": {
@@ -2952,7 +2952,7 @@
     "boutiqueSansNom": "您的卖家",
     "confirmation": {
       "sujet": "确认订单邮件通知 — {boutique}",
-      "corps": "您好，\n\n您申请通过邮件接收在{boutique}购买的订单进度通知。\n\n如需确认，请打开以下链接并点击“确认”：\n{lien}\n\n该链接24小时内有效。如果这不是您本人的操作，请忽略此邮件，您不会收到任何邮件。\n\n—\nDropLink，代表{boutique}"
+      "corps": "您好，\n\n您申请通过邮件接收在 {boutique} 购买的订单进度通知。\n\n如需确认，请打开以下链接并点击“确认”：\n{lien}\n\n该链接 24 小时内有效。如果这不是您本人的操作，请忽略此邮件，您不会收到任何邮件。\n\n—\nDropLink，代表 {boutique}"
     },
     "etape": {
       "sujet": {
@@ -2965,7 +2965,7 @@
         "en_transit": "您的订单正在运输中，承运商已揽收。",
         "livre": "您的订单已显示签收。"
       },
-      "corps": "您好，\n\n{phrase}\n\n查看订单、照片和包裹跟踪：\n{lien}\n\n—\n您收到此邮件是因为您申请了该订单的通知。如不想再收到：\n{desinscription}\n\nDropLink，代表{boutique}"
+      "corps": "您好，\n\n{phrase}\n\n查看订单、照片和包裹跟踪：\n{lien}\n\n—\n您收到此邮件是因为您申请了该订单的通知。如不想再收到：\n{desinscription}\n\nDropLink，代表 {boutique}"
     },
     "page": {
       "titre": "邮件通知",
@@ -3002,18 +3002,18 @@
     "metaDescription": "免费开始，无需银行卡。Pro 套餐每月 {prix}，无需长期绑定：以你的名义生成链接、客户页面不显示 DropLink 标识、上限每月重置。",
     "eyebrow": "价格",
     "titre": "免费起步，业务增长后升级 Pro",
-    "intro": "照片、视频、自动物流跟踪和品牌配色页面：DropLink 的核心功能，免费套餐已经全部包含。Pro 只增加四项。",
+    "intro": "照片、视频、自动物流跟踪和品牌配色页面：DropLink 的核心功能，免费版已经全部包含。Pro 只增加四项。",
     "gratuitSous": "无需银行卡",
     "gratuitQuota": "终身共 {n} 笔订单",
     "gratuitQuotaSansNombre": "终身订单总量",
-    "proSous": "按月付费，无需长期绑定",
+    "proSous": "按月付费，无需长期合约",
     "proQuota": "每月 {n} 笔订单",
     "proQuotaSansNombre": "每月重置的上限",
-    "toutLeGratuit": "包含免费套餐的全部功能",
-    "ctaGratuit": "免费注册账号",
+    "toutLeGratuit": "包含免费版的全部功能",
+    "ctaGratuit": "免费创建账户",
     "ctaPro": "从 Pro 开始",
-    "noteCompte": "创建账号后，可在你的账户中开通 Pro。",
-    "dejaInscrit": "已有账号？",
+    "noteCompte": "创建账户后，可在您的账户中开通 Pro。",
+    "dejaInscrit": "已有账户？",
     "comparer": "对比两种套餐",
     "question": "对套餐有疑问？",
     "voirDocs": "使用文档中有详细说明"
@@ -3033,7 +3033,7 @@
       "pastilleUrl": "，droplink.fr/your-shop",
       "titre1": "一个链接。",
       "titre2": "整笔订单。",
-      "chapo": "照片、物流单号和送达日期，都在一个使用您品牌颜色的页面上。客户自己就能查看，无需注册账号，也不用再来问您。",
+      "chapo": "照片、运单号和送达日期，都在一个使用您品牌颜色的页面上。客户自己就能查看，无需注册账户，也不用再来问您。",
       "cta": "免费开始",
       "cta2": "查看客户页面"
     },
@@ -3041,7 +3041,7 @@
       "offertes": "赠送 {n} 笔订单",
       "offertesSansNombre": "免费订单，轻松起步",
       "carte": "无需银行卡",
-      "compte": "客户无需注册账号"
+      "compte": "客户无需注册账户"
     },
     "scene": {
       "description": "在聊天中发出的链接展开成客户页面：Atelier Nord 的订单 6A4D21，正在运输中，预计 10月1日至2日送达，Léa M. 已确认四张照片。",
@@ -3068,7 +3068,7 @@
       "medias": "张照片或视频（每笔订单）",
       "etapes": "个带日期的物流阶段",
       "langues": "种客户页面语言",
-      "compte": "个需要客户注册的账号"
+      "compte": "个需要客户注册的账户"
     },
     "probleme": {
       "titre1": "每笔订单十条消息。",
@@ -3091,7 +3091,7 @@
       "chapo": "四步即可分享一笔订单。每次修改都会同步到客户页面，而链接永远不变。",
       "gestes": "四个步骤",
       "g1": "客户",
-      "g1t": "一个名字或昵称就够了。无需填写地址，也无需为客户注册账号。",
+      "g1t": "一个名字或昵称就够了。无需填写地址，也无需为客户注册账户。",
       "g2": "照片",
       "g2t": "拖入照片和视频，每笔订单最多 {n} 个。第一张作为封面。",
       "g3": "物流",
@@ -3105,10 +3105,10 @@
       "laCommande": "订单信息",
       "champClient": "客户姓名或昵称",
       "exClient": "例如：Léa M.",
-      "aideClient": "自由填写。客户没有账号。",
-      "champRef": "商品信息",
+      "aideClient": "自由填写。客户没有账户。",
+      "champRef": "商品编号",
       "valeurRef": "39 码球鞋、卫衣、运动裤和帽子",
-      "champSuivi": "物流单号",
+      "champSuivi": "运单号",
       "collez": "粘贴单号",
       "champTransporteur": "承运商",
       "detection": "自动识别",
@@ -3122,7 +3122,7 @@
     "client": {
       "etiquette": "客户页面",
       "titre": "客户打开的页面。",
-      "chapo": "每笔订单一个页面，无需应用，无需账号。所有信息一目了然，您不必再重复发送。",
+      "chapo": "每笔订单一个页面，无需应用，无需账户。所有信息一目了然，您不必再重复发送。",
       "couleursTitre": "使用您的颜色，始终清晰易读",
       "couleursTexte": "任选一种颜色。如果颜色太浅不适合文字，页面会自动调整以保持清晰。",
       "nuancier": "店铺颜色",
@@ -3174,7 +3174,7 @@
       "titre1": "免费开始。",
       "titre2": "成长后升级 Pro。",
       "legende": "免费版与 Pro 版对比",
-      "coin": "两个方案都会自动追踪包裹，并且从头到尾使用同一个链接。",
+      "coin": "两种套餐都会自动跟踪包裹，并且从头到尾使用同一个链接。",
       "gratuit": "免费版",
       "sansCarte": "无需银行卡",
       "pro": "Pro",
@@ -3183,12 +3183,12 @@
       "ctaGratuit": "免费开始",
       "ctaPro": "从 Pro 开始",
       "commandes": "订单",
-      "colis": "追踪包裹",
+      "colis": "已跟踪包裹",
       "auTotal": "共 <b>{n}</b>",
       "parMoisN": "每月 <b>{n}</b>",
       "medias": "照片和视频",
       "parCommande": "每笔订单 {n} 个",
-      "suiviAuto": "自动追踪承运商",
+      "suiviAuto": "承运商物流自动跟踪",
       "couleurs": "品牌颜色页面",
       "lien": "以您命名的链接",
       "lienUrl": "droplink.fr/your-shop/…",
@@ -3199,10 +3199,10 @@
     "questions": {
       "etiquette": "问题",
       "titre": "常见问题",
-      "q1": "客户需要注册账号吗？",
+      "q1": "客户需要注册账户吗？",
       "r1": "不需要。客户打开链接就能看到订单，手机和电脑都可以。无需应用，无需密码。",
       "q2": "支持哪些承运商？",
-      "r2": "粘贴物流单号即可自动识别承运商；如果没有识别出来，您可以手动选择。物流阶段会自动更新，无需您再回到订单。",
+      "r2": "粘贴运单号即可自动识别承运商；如果没有识别出来，您可以手动选择。物流阶段会自动更新，无需您再回到订单。",
       "q3": "发送链接后还能修改订单吗？",
       "r3": "可以，随时修改。照片、单号、状态：客户在同一个链接上看到最新版本，链接永远不变。",
       "q4": "用完 {n} 笔免费订单后会怎样？",
@@ -3215,7 +3215,7 @@
       "slugs": "atelier-nord|your-shop|studio-kaia|maison-lou"
     },
     "pied": {
-      "devise": "一个链接，追踪整笔订单。",
+      "devise": "一个链接，跟踪整笔订单。",
       "produit": "产品",
       "legal": "法律信息",
       "documentation": "使用文档",
@@ -3242,7 +3242,7 @@
         "consultations": "次查看",
         "derniere": "最近一次：{quand}",
         "valide1": "照片已确认",
-        "valide2": "由您的客户。",
+        "valide2": "确认人：您的客户。",
         "mouvementHier": "昨天有更新",
         "mouvementAujourdhui": "今天有更新"
       },
@@ -3252,7 +3252,7 @@
         "b1": "您来填写。",
         "b2": "其余交给 DropLink。",
         "c1": "您的客户",
-        "c2": "自己就能追踪包裹。",
+        "c2": "自己就能跟踪包裹。",
         "pourLea": "致 Léa M.",
         "photos": "4 张照片",
         "transit": "Colissimo · 运输中",
