@@ -327,11 +327,13 @@ export default async function AdminCommandes({
           {/* « X SUR N » COMME LA MAQUETTE, mais N seulement SANS FILTRE : le total est
               celui de la répartition (toute la plateforme). Filtré, le nombre de lignes
               qui correspondent n'est compté par aucune fonction — l'écrire ferait lire
-              le total de la plateforme comme celui du filtre (contrainte n° 8). */}
+              le total de la plateforme comme celui du filtre (contrainte n° 8). Et
+              seulement en PREMIÈRE page : plus loin, « 12 sur 1 248 » se lirait comme
+              « on n'en voit que 12 ». */}
           {page.lignes.length === 0 ? null : (
             <footer className="adm-pied">
               <span>
-                {!filtre && total !== null
+                {!filtre && total !== null && parametres.curseur === null
                   ? t("commandes.surTotal", { affichees: page.lignes.length, total })
                   : t("commandes.affichees", { affichees: page.lignes.length })}
               </span>

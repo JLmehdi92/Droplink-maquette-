@@ -266,7 +266,6 @@ export default async function AdminBoutiques({
                           prefetch={false}
                           className="adm-qui adm-qui--lien"
                           href={`/${langue}/admin/comptes/${b.proprietaireId}`}
-                          aria-label={t("commandes.voirLong", { email: b.email })}
                         >
                           <AvatarCompte email={b.email} nom={b.nom} />
                           <span>

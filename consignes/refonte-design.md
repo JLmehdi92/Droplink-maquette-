@@ -1450,6 +1450,13 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
 - **NON MESURÉ** : aucun écran d'administration ne se voit d'ici (double authentification) —
   vérifié seulement qu'ils rendent 404 à un anonyme. Tous listés dans
   `verification-finale-locale.md`.
+- **Relecture** (base de données, sécurité, React/TS, échecs silencieux) : 0 HIGH, 0 MEDIUM.
+  Vérifié par elle : droits et `search_path` de la 213, référence identique à la 160, index
+  partiel utilisé, aucun contournement d'audit (« Examiner » passe par la liste, qui trace),
+  N du même périmètre que la liste non filtrée. LOW corrigés : le lien boutique garde son
+  texte visible comme nom accessible ; le chemin « illisible » incohérent laisse une trace
+  serveur (test cas par cas, vu rouge) ; « X sur N » seulement en première page sur Commandes
+  et Comptes ; nombres formatés en chinois.
 
 ## 9. Ce qui attend Mehdi
 

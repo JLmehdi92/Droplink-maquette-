@@ -33,9 +33,11 @@ describe("lireAlerteContestations", () => {
       // Un nombre sans sa plus ancienne contredit la base : rien n'est inventé.
       { data: [{ en_attente: 2, plus_ancienne_ref: null, plus_ancienne_le: null }], error: null },
     ]) {
+      bruit.mockClear();
       expect(await lireAlerteContestations(client(reponse))).toEqual({ statut: "illisible" });
+      // Chaque chemin « illisible » laisse sa trace au serveur, pas seulement l'un d'eux.
+      expect(bruit).toHaveBeenCalledTimes(1);
     }
-    expect(bruit).toHaveBeenCalled();
     bruit.mockRestore();
   });
 });

@@ -109,7 +109,10 @@ export async function lireAlerteContestations(supabase: ClientAdmin): Promise<Al
   if (nombre === 0) return { statut: "aucune" };
   // Un nombre sans sa plus ancienne contredirait la base : on le dit illisible plutôt que
   // d'inventer une référence.
-  if (reference === null || envoyeeLe === null) return { statut: "illisible" };
+  if (reference === null || envoyeeLe === null) {
+    console.error("[admin] alerte des contestations incohérente : " + String(nombre) + " en attente sans plus ancienne");
+    return { statut: "illisible" };
+  }
   return { statut: "ok", nombre, reference, envoyeeLe };
 }
 

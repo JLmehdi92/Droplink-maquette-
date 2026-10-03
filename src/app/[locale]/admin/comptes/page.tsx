@@ -270,11 +270,12 @@ export default async function AdminComptes({
 
           {/* « X SUR N » COMME LA MAQUETTE, N seulement SANS FILTRE (`compteurs_admin`,
               tous les comptes) : filtré, aucune fonction ne compte les comptes qui
-              correspondent, et le total de la plateforme se lirait comme le leur. */}
+              correspondent, et le total de la plateforme se lirait comme le leur. Et
+              seulement en première page, comme sur Commandes. */}
           {page.lignes.length === 0 ? null : (
             <footer className="adm-pied">
               <span>
-                {parametres.q === "" && parametres.statut === "tous"
+                {parametres.q === "" && parametres.statut === "tous" && parametres.curseur === null
                   ? t("comptes.surTotal", { affichees: page.lignes.length, total: compteurs.comptes })
                   : t("comptes.affichees", { affichees: page.lignes.length })}
               </span>
