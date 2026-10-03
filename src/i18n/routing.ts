@@ -13,9 +13,17 @@ import { LANGUES, LANGUE_DEFAUT } from "./config";
  * langue est celle du VENDEUR, pas de l'URL. Un client à qui on envoie un lien
  * ne la choisit pas, et un préfixe de langue produirait deux adresses pour un
  * jeton censé être unique — dont une que le vendeur n'a jamais envoyée.
+ *
+ * ⚠️ `alternateLinks: false` (audit du 03/10/2026). Le middleware de next-intl posait
+ * d'office un en-tête HTTP `Link` d'alternates qui CONTREDISAIT le HTML : un
+ * x-default vers `/` ou `/docs` (des redirections 307 selon `Accept-Language`, pas
+ * des pages), des versions `en` et `zh-CN` du blog qui répondent 404, des alternates
+ * sur les pages 404. Les alternates justes vivent dans les métadonnées de chaque page
+ * (`lib/seo/alternates.ts`) et dans le plan du site : une seule source.
  */
 export const routing = defineRouting({
   locales: LANGUES,
   defaultLocale: LANGUE_DEFAUT,
   localePrefix: "always",
+  alternateLinks: false,
 });
