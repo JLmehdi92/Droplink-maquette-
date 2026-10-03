@@ -7,8 +7,8 @@ import { useEffect, useRef } from "react";
  * `[data-info]` (barre, part d'anneau), son texte suit le pointeur.
  *
  * ELLE NE PORTE AUCUNE INFORMATION EXCLUSIVE : chaque graphique dit ses
- * chiffres ailleurs (légende, axe, total), et chaque barre porte aussi un
- * `<title>`. C'est un confort de souris, absent au toucher.
+ * chiffres ailleurs (légende, axe, total). C'est un confort de souris, absent
+ * au toucher.
  */
 export function InfoBulles() {
   const bulle = useRef<HTMLDivElement>(null);

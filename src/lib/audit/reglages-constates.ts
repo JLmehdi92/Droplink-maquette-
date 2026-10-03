@@ -53,7 +53,7 @@ export interface ReglageConstate {
   readonly id: string;
   /** Déjà mise en forme : l'unité fait partie de la valeur pour qui décide. */
   readonly valeur: number;
-  readonly unite: "nombre" | "jours" | "minutes" | "megaoctets";
+  readonly unite: "nombre" | "jours" | "minutes" | "megaoctets" | "parMinute";
 }
 
 export function reglagesConstates(): readonly ReglageConstate[] {
@@ -64,9 +64,10 @@ export function reglagesConstates(): readonly ReglageConstate[] {
     { id: "silence_jours", valeur: SEUIL_SILENCE_JOURS, unite: "jours" },
     { id: "abandon_jours", valeur: FENETRE_VIDE_JOURS, unite: "jours" },
     { id: "purge_jours", valeur: PURGE_JOURS, unite: "jours" },
-    { id: "debit_inconnu", valeur: seuil("publique-inconnu").plafond, unite: "nombre" },
-    { id: "debit_valide", valeur: seuil("publique-requetes").plafond, unite: "nombre" },
-    { id: "debit_depot", valeur: seuil("depot").plafond, unite: "nombre" },
+    // Des plafonds PAR FENÊTRE D'UNE MINUTE : la maquette les écrit « 20 / min ».
+    { id: "debit_inconnu", valeur: seuil("publique-inconnu").plafond, unite: "parMinute" },
+    { id: "debit_valide", valeur: seuil("publique-requetes").plafond, unite: "parMinute" },
+    { id: "debit_depot", valeur: seuil("depot").plafond, unite: "parMinute" },
   ];
 }
 

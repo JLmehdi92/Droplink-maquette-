@@ -1458,6 +1458,22 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
   serveur (test cas par cas, vu rouge) ; « X sur N » seulement en première page sur Commandes
   et Comptes ; nombres formatés en chinois.
 
+### ▶️ 03/10/2026 — audit indépendant final, administration (session cloud)
+
+Un agent en lecture seule, consigne « ne crois pas la session qui a corrigé », a repris les six
+points de l'administration du contre-audit : tous corrigés (preuves fichier:ligne). Il a trouvé,
+et c'est corrigé : les valeurs constatées des Paramètres sans leur unité (« 20 » au lieu de
+« 20 / min », « 20 Mo », « 10 jours ») ; les bornes et les totaux chinois non formatés
+(« 100000 ») ; la rangée « Notifications par email — rien n'est envoyé », absente de la
+maquette et FAUSSE depuis les e-mails de suivi (188-189), retirée ; le point manquant de
+« Les secrets ne sont pas ici. » ; le suffixe « · ni modifiables ni effaçables » du pied du
+Journal ; la date d'origine en format court (« 20 sept. 2026 ») et la phrase des bornes sans
+« Valeur par défaut », comme la maquette ; l'aide du stockage raccourcie ; un comptage des
+doublons illisible qui laissait la section des décisions vide, désormais dit ; deux
+commentaires faux. **Gardé** : la rangée « Abandon du suivi après », valeur réelle du produit
+que la maquette ne dessine pas ; le pied du Journal sur toutes les pages (décision : « même
+sur la dernière »). Toujours **non mesuré au navigateur** (double authentification).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

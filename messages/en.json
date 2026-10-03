@@ -1775,7 +1775,7 @@
       },
       "vide": "No entries yet.",
       "surTotalAuDela": "{affichees} of more than {total, number} entries",
-      "surTotal": "{affichees} of {total, plural, one {# entry} other {# entries}}",
+      "surTotal": "{affichees} of {total, plural, one {# entry} other {# entries}} · neither editable nor erasable",
       "pageSuivante": "Show more",
       "decompteAuDela": "More than {total, number} entries · neither editable nor erasable",
       "decompte": "{total, plural, one {# entry} other {# entries}} · neither editable nor erasable",
@@ -1937,7 +1937,7 @@
       "comptesActifs": "Active accounts",
       "stockage": "Media storage",
       "stockageIndisponible": "Unavailable",
-      "stockageAide": "Sum of the sizes re-read server-side at upload, across all accounts.",
+      "stockageAide": "Sum of the sizes re-read server-side at upload",
       "stockageValeur": "{valeur} {unite}",
       "sousTitre": "A global overview of activity on DropLink.",
       "decision": "Needs a decision",
@@ -1977,6 +1977,7 @@
       "alerteContestation": "{n, plural, one {Appeal against the block of {reference}} other {# block appeals waiting, the oldest for {reference}}}",
       "alerteContestationDetail": "Sent by the seller on {date}.",
       "contestationsIndisponibles": "Pending appeals could not be read.",
+      "doublonsIndisponibles": "Duplicate accounts could not be read.",
       "barre": "{jour}: {n, plural, one {# order} other {# orders}}"
     },
     "parametres": {
@@ -1985,9 +1986,15 @@
       "enregistrer": "Save",
       "enCours": "Saving…",
       "fait": "Saved.",
-      "bornes": "Between {min} and {max}. Default: {defaut}.",
+      "bornes": "Between {min, number} and {max, number}.",
       "aucunPlafond": "None",
-      "secretsTitre": "Secrets are not here",
+      "unite": {
+        "jours": "{n, plural, one {# day} other {# days}}",
+        "minutes": "{n, plural, one {# minute} other {# minutes}}",
+        "megaoctets": "{n, number} MB",
+        "parMinute": "{n, number} / min"
+      },
+      "secretsTitre": "Secrets are not here.",
       "secretsAide": "API keys, storage token and service key never go through this screen or the database. They live only in the server's environment variables.",
       "origine": {
         "jamaisDecide": "Default value: nobody has ever changed it.",
@@ -2083,10 +2090,6 @@
         },
         "debit_depot": {
           "titre": "Media uploads"
-        },
-        "notifications_email": {
-          "titre": "Email notifications",
-          "aide": "Not deployed: nothing is sent"
         }
       },
       "erreur": {

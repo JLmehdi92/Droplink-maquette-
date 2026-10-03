@@ -83,8 +83,10 @@ type Rangee =
   // qu'un titre. Une glose sous « Jeton inconnu » n'apprendrait rien et ferait
   // de la carte un mur de texte.
   | { readonly genre: "constate"; readonly id: string; readonly sansAide?: true }
-  | { readonly genre: "absent"; readonly id: string }
-  | { readonly genre: "eteint"; readonly id: string };
+  | { readonly genre: "absent"; readonly id: string };
+
+/** « 20 sept. 2026 », comme l'origine d'un réglage dans la maquette. */
+const DATE_ORIGINE = { day: "numeric", month: "short", year: "numeric" } as const;
 
 /*
  * L ICÔNE DE CHAQUE CARTE, comme le kit en pose une. Elle ne porte AUCUNE
@@ -145,7 +147,6 @@ const CARTES: readonly {
     rangees: [
       { genre: "reglage", cle: "inscriptions_ouvertes" },
       { genre: "reglage", cle: "suivi_actif" },
-      { genre: "eteint", id: "notifications_email" },
     ],
   },
   {
@@ -158,7 +159,7 @@ const CARTES: readonly {
     ],
   },
   {
-    // La purge des médias (`purge_jours`) n'est pas dessinée par la maquette : c'est une
+    // L'abandon du suivi (`abandon_jours`) n'est pas dessiné par la maquette : c'est une
     // valeur réelle du produit, constatée comme les autres, et elle reste dite.
     id: "constate",
     rangee: 3,
@@ -203,9 +204,9 @@ export default async function ParametresAdmin({
     !p.ecrit
       ? t("origine.jamaisDecide")
       : p.modifiePar === null
-        ? t("origine.auteurParti", { date: format.dateTime(new Date(p.modifieLe ?? 0), "long") })
+        ? t("origine.auteurParti", { date: format.dateTime(new Date(p.modifieLe ?? 0), DATE_ORIGINE) })
         : t("origine.decide", {
-            date: format.dateTime(new Date(p.modifieLe ?? 0), "long"),
+            date: format.dateTime(new Date(p.modifieLe ?? 0), DATE_ORIGINE),
             email: p.modifiePar,
           });
 
@@ -258,13 +259,14 @@ export default async function ParametresAdmin({
                   interrogations: details.interrogationsVides ?? 0,
                 }),
               })}
-          etat={{ forme: "valeur", valeur: format.number(c.valeur) }}
+          // L'UNITÉ FAIT PARTIE DE LA VALEUR (« 20 / min », « 20 Mo », « 10 jours »), comme la
+          // maquette — un nombre nu ne dit pas ce qu'il borne (audit final du 03/10/2026).
+          etat={{ forme: "valeur", valeur: c.unite === "nombre" ? format.number(c.valeur) : t("unite." + c.unite, { n: c.valeur }) }}
         />
       );
     }
 
-    const etat: FormeConstatee =
-      r.genre === "absent" ? { forme: "absent", mention: t("aucunPlafond") } : { forme: "eteint" };
+    const etat: FormeConstatee = { forme: "absent", mention: t("aucunPlafond") };
     return (
       <RangeeConstatee
         key={r.id}

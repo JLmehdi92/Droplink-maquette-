@@ -77,6 +77,7 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
     "composé depuis la même étape, pour la phrase du corps de l'e-mail",
   ],
   ["admin.surveillance.degradation.", "composé depuis la décision de `surPanne`"],
+  ["admin.parametres.unite.", "composé depuis l'unité d'une valeur constatée (`reglagesConstates`) — paramètres de l'administration"],
   /* Le texte des trois pages légales, recopié du kit (29/09/2026) et lu d'un
      bloc par `t.raw(\`pages.${sorte}\`)` puis validé par `documentLegal` : ses
      centaines de feuilles sont des sections et des blocs, jamais des appels. */

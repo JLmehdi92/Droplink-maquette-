@@ -95,7 +95,7 @@ export default async function PanneauAdmin({
 
   const supabase = await creerClientServeur();
   const seuils = await lireSeuils(supabase);
-  // Les trois lectures sont indépendantes : les enchaîner triplerait l'attente
+  // Les six lectures sont indépendantes : les enchaîner multiplierait l'attente
   // du premier écran que voit un administrateur.
   // UN SEUL INSTANT DE REFERENCE POUR TOUT L'ECRAN. Rappele a chaque ligne, il
   // avancerait pendant le rendu et deux lignes du meme evenement pourraient
@@ -165,6 +165,9 @@ export default async function PanneauAdmin({
         </header>
         {panneau.alertes === null ? <p className="adm-texte pb-4">{t("panneau.alertesIndisponibles")}</p> : null}
         {contestations.statut === "illisible" ? <p className="adm-texte pb-4">{t("panneau.contestationsIndisponibles")}</p> : null}
+        {/* Un comptage des doublons illisible se DIT, comme celui des contestations : sinon la
+            section restait réduite à son titre (audit final du 03/10/2026). */}
+        {doublons === null ? <p className="adm-texte pb-4">{t("panneau.doublonsIndisponibles")}</p> : null}
         {/* « Aucune alerte » exige les TROIS lectures : un comptage des doublons ou des
             contestations illisible ne vaut pas « aucun ». */}
         {panneau.alertes !== null &&

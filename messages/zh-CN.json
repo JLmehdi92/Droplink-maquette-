@@ -1742,7 +1742,7 @@
       "surJours": "近 {jours} 天",
       "partDuTotal": "占总数 {part}%",
       "liste": "账户列表",
-      "listeTotal": "共 {total} 个账户",
+      "listeTotal": "共 {total, number} 个账户",
       "filtreStatut": "按状态筛选",
       "statutTous": "全部状态",
       "repartition": "账户状态",
@@ -1775,7 +1775,7 @@
       },
       "vide": "目前没有任何记录。",
       "surTotalAuDela": "显示 {affichees} 条，总数超过 {total, number} 条",
-      "surTotal": "显示 {affichees} 条，{total, plural, other {共 # 条}}",
+      "surTotal": "显示 {affichees} 条，{total, plural, other {共 # 条}} · 不可修改，也不可删除",
       "pageSuivante": "查看更多",
       "decompteAuDela": "超过 {total, number} 条记录 · 不可修改，也不可删除",
       "decompte": "{total, plural, other {# 条记录}} · 不可修改，也不可删除",
@@ -1806,7 +1806,7 @@
       "partDuTotal": "占总数 {part}%",
       "surLaFenetre": "所选时间窗内",
       "liste": "条目列表",
-      "listeTotal": "共 {total} 条",
+      "listeTotal": "共 {total, number} 条",
       "listeTotalAuDela": "超过 {total} 条",
       "repartition": "日志分布",
       "unite": "条",
@@ -1937,7 +1937,7 @@
       "comptesActifs": "活跃账户",
       "stockage": "文件存储用量",
       "stockageIndisponible": "无法获取",
-      "stockageAide": "全部账户在上传时由服务端重新读取的文件大小之和。",
+      "stockageAide": "上传时由服务端重新读取的文件大小之和",
       "stockageValeur": "{valeur} {unite}",
       "sousTitre": "DropLink 平台活动的整体概览。",
       "decision": "需要决策的事项",
@@ -1977,6 +1977,7 @@
       "alerteContestation": "{n, plural, =1 {{reference} 的封锁申诉} other {# 项封锁申诉待处理，最早一项为 {reference}}}",
       "alerteContestationDetail": "卖家于 {date} 提交。",
       "contestationsIndisponibles": "无法读取待处理的申诉。",
+      "doublonsIndisponibles": "无法读取重复账户。",
       "barre": "{jour}：{n} 个订单"
     },
     "parametres": {
@@ -1985,9 +1986,15 @@
       "enregistrer": "保存",
       "enCours": "处理中…",
       "fait": "已保存。",
-      "bornes": "取值范围 {min} 至 {max}。默认值：{defaut}。",
+      "bornes": "取值范围 {min, number} 至 {max, number}。",
       "aucunPlafond": "无",
-      "secretsTitre": "密钥不在这里",
+      "unite": {
+        "jours": "{n, number} 天",
+        "minutes": "{n, number} 分钟",
+        "megaoctets": "{n, number} 兆字节",
+        "parMinute": "{n, number} 次/分钟"
+      },
+      "secretsTitre": "密钥不在这里。",
       "secretsAide": "API 密钥、存储令牌和服务密钥从不经过本页面，也不进入数据库。它们只存在于服务器的环境变量中。",
       "origine": {
         "jamaisDecide": "默认值：从未有人修改过。",
@@ -2083,10 +2090,6 @@
         },
         "debit_depot": {
           "titre": "文件上传"
-        },
-        "notifications_email": {
-          "titre": "邮件通知",
-          "aide": "尚未上线：不会发送任何邮件"
         }
       },
       "erreur": {
@@ -2132,7 +2135,7 @@
       "activeEtat": "正常",
       "sousTitreListe": "管理并跟踪所有使用 DropLink 的店铺。",
       "liste": "店铺列表",
-      "listeTotal": "共 {total} 个店铺",
+      "listeTotal": "共 {total, number} 个店铺",
       "repartition": "店铺状态",
       "unite": "个店铺",
       "part": "{part}%",
@@ -2261,7 +2264,7 @@
         "toutes": "全部日期"
       },
       "liste": "订单列表",
-      "listeTotal": "共 {total} 个订单",
+      "listeTotal": "共 {total, number} 个订单",
       "colonnes": {
         "reference": "#",
         "compte": "账户",

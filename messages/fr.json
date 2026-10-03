@@ -1775,7 +1775,7 @@
       },
       "vide": "Aucune entrée pour l'instant.",
       "surTotalAuDela": "{affichees} sur plus de {total, number} entrées",
-      "surTotal": "{affichees} sur {total, plural, one {# entrée} other {# entrées}}",
+      "surTotal": "{affichees} sur {total, plural, one {# entrée} other {# entrées}} · ni modifiables ni effaçables",
       "pageSuivante": "Voir la suite",
       "decompteAuDela": "Plus de {total, number} entrées · ni modifiables ni effaçables",
       "decompte": "{total, plural, one {# entrée} other {# entrées}} · ni modifiables ni effaçables",
@@ -1937,7 +1937,7 @@
       "comptesActifs": "Comptes actifs",
       "stockage": "Stockage des médias",
       "stockageIndisponible": "Indisponible",
-      "stockageAide": "Somme des tailles relues côté serveur au dépôt, tous comptes confondus.",
+      "stockageAide": "Somme des tailles relues côté serveur au dépôt",
       "stockageValeur": "{valeur} {unite}",
       "sousTitre": "Voici un aperçu global de l'activité sur DropLink.",
       "decision": "Ce qui demande une décision",
@@ -1977,6 +1977,7 @@
       "alerteContestation": "{n, plural, one {Contestation du blocage de {reference}} other {# contestations de blocage en attente, la plus ancienne pour {reference}}}",
       "alerteContestationDetail": "Envoyée par le vendeur le {date}.",
       "contestationsIndisponibles": "Les contestations en attente n’ont pas pu être lues.",
+      "doublonsIndisponibles": "Les comptes en doublon n’ont pas pu être lus.",
       "barre": "{jour} : {n, plural, one {# commande} other {# commandes}}"
     },
     "parametres": {
@@ -1985,9 +1986,15 @@
       "enregistrer": "Enregistrer",
       "enCours": "En cours…",
       "fait": "Enregistré.",
-      "bornes": "Entre {min} et {max}. Valeur par défaut : {defaut}.",
+      "bornes": "Entre {min, number} et {max, number}.",
       "aucunPlafond": "Aucun",
-      "secretsTitre": "Les secrets ne sont pas ici",
+      "unite": {
+        "jours": "{n, plural, one {# jour} other {# jours}}",
+        "minutes": "{n, plural, one {# minute} other {# minutes}}",
+        "megaoctets": "{n, number} Mo",
+        "parMinute": "{n, number} / min"
+      },
+      "secretsTitre": "Les secrets ne sont pas ici.",
       "secretsAide": "Clés d'API, jeton de stockage et clé de service ne passent jamais par cet écran ni par la base. Ils vivent uniquement dans les variables d'environnement du serveur.",
       "origine": {
         "jamaisDecide": "Valeur par défaut : personne ne l'a jamais modifiée.",
@@ -2083,10 +2090,6 @@
         },
         "debit_depot": {
           "titre": "Dépôts de médias"
-        },
-        "notifications_email": {
-          "titre": "Notifications par email",
-          "aide": "Non déployées : rien n'est envoyé"
         }
       },
       "erreur": {
