@@ -62,8 +62,8 @@
       "etape2Titre": "We review it",
       "etape2Texte": "The account concerned may be suspended as a precaution while we review.",
       "etape3Titre": "The pages stop being served",
-      "etape3Texte": "If the report is founded, the cut is immediate and covers every page of the account.",
-      "avertissement": "A clearly abusive report may engage your liability. Your details are never passed on to the person concerned.",
+      "etape3Texte": "If the report is well-founded, the takedown is immediate and covers every page of the account.",
+      "avertissement": "A clearly abusive report may expose you to liability. Your details are never passed on to the person concerned.",
       "lien": "Address of the page concerned",
       "lienExemple": "https://…",
       "categorie": "Nature of the report",
@@ -163,7 +163,7 @@
             "titre": "Your content",
             "blocs": [
               {
-                "p": "The photos, videos and information the seller uploads remain their property. The seller grants DropLink the licence strictly necessary to provide the service: storing these files and displaying them on the order page reachable through the link. This licence ends when the content or the account is deleted."
+                "p": "The photos, videos and information the seller uploads remain their property. The seller grants DropLink the license strictly necessary to provide the service: storing these files and displaying them on the order page reachable through the link. This license ends when the content or the account is deleted."
               },
               {
                 "p": "The seller guarantees that they hold the rights to the published content, and undertakes not to include sensitive data or identifying details that are not needed to track the order. DropLink acts as a host: it does not review uploaded content in advance."
@@ -246,7 +246,7 @@
               {
                 "ul": [
                   "The Pro subscription is collected by Lemon Squeezy, reseller and issuer of the invoice, under its own terms of purchase. DropLink neither sees nor stores any card data.",
-                  "It renews every month until cancelled.",
+                  "It renews every month until canceled.",
                   "A failed payment returns the account to the free plan; a successful payment restores the Pro plan.",
                   "No refund is made for a period that has started."
                 ]
@@ -264,7 +264,7 @@
                 "p": "The seller can cancel their Pro subscription at any time from their Lemon Squeezy customer portal: the Pro plan stays active until the end of the period already paid."
               },
               {
-                "p": "The seller can delete their account at any time from the settings, once any subscription has been cancelled: DropLink refuses deletion while a charge can still occur. Deletion is immediate and removes orders, media and tracking; links already sent stop working. Only the following remain, as the privacy policy describes: the email address and the sign-up and deletion dates, for one year under the host's obligations, then erased automatically; the archives of subscription events, without name, email or card, for three years; the log of administration access. A suspended account cannot be deleted from the settings: the request is then made to contact@droplink.fr."
+                "p": "The seller can delete their account at any time from the settings, once any subscription has been canceled: DropLink refuses deletion while a charge can still occur. Deletion is immediate and removes orders, media and tracking; links already sent stop working. Only the following remain, as the privacy policy describes: the email address and the sign-up and deletion dates, for one year under the host's obligations, then erased automatically; the archives of subscription events, without name, email or card, for three years; the log of administration access. A suspended account cannot be deleted from the settings: the request is then made to contact@droplink.fr."
               },
               {
                 "p": "DropLink may terminate an account in the event of a breach of these terms, or with reasonable notice if the service is discontinued."
@@ -276,7 +276,7 @@
             "titre": "Availability",
             "blocs": [
               {
-                "p": "DropLink strives to keep the service continuously available, without guaranteeing that it will never be interrupted. The service may be interrupted for maintenance, change or be discontinued."
+                "p": "DropLink strives to keep the service continuously available, without guaranteeing that it will never be interrupted. The service may be interrupted for maintenance, may change, or may be discontinued."
               },
               {
                 "p": "Automatic status updates depend on the information sent by carriers. Data that is unavailable, late or wrong on the carrier's side cannot be attributed to DropLink."
@@ -300,7 +300,7 @@
                 "ul": [
                   "DropLink is responsible for providing the service: hosting content, generating links, showing the statuses sent by carriers.",
                   "DropLink is not responsible for the reality of the sale, the conformity of the products, delivery times, or disputes between a seller and their customer.",
-                  "The seller alone is responsible, towards their customers, for the information they publish on their order pages.",
+                  "The seller alone is responsible, toward their customers, for the information they publish on their order pages.",
                   "Subject to the mandatory provisions protecting consumers, DropLink's liability is limited to direct and foreseeable damage, up to the amounts paid over the last twelve months."
                 ]
               }
@@ -317,7 +317,7 @@
                 "h3": "Data of the seller's customers (Article 28 GDPR)"
               },
               {
-                "p": "For the information the seller enters or uploads about their customers — name, photos, tracking number —, the seller is the controller and DropLink acts as processor, on the seller's instructions only: providing order pages and parcel tracking. As such, DropLink:"
+                "p": "For the information the seller enters or uploads about their customers — name, photos, tracking number — the seller is the controller and DropLink acts as processor, on the seller's instructions only: providing order pages and parcel tracking. As such, DropLink:"
               },
               {
                 "ul": [
@@ -401,7 +401,7 @@
                       "Google"
                     ],
                     [
-                      "Display name, name, description, logo, colour and social links of the shop",
+                      "Display name, name, description, logo, color and social links of the shop",
                       "Entered by the seller"
                     ],
                     [
@@ -504,7 +504,7 @@
                       "Legal obligation of the host"
                     ],
                     [
-                      "Secure the service: limit abuse, check that a password has not leaked, recognise trusted devices, log administration access",
+                      "Secure the service: limit abuse, check that a password has not leaked, recognize trusted devices, log administration access",
                       "Legitimate interest: protecting the service and its users"
                     ],
                     [
@@ -629,7 +629,7 @@
                     ],
                     [
                       "Confirmed tracking email address",
-                      "Until unsubscribe, or deletion of the order"
+                      "Until the customer unsubscribes or the order is deleted"
                     ],
                     [
                       "Order page views (fingerprints, country)",
@@ -641,7 +641,7 @@
                     ],
                     [
                       "Log of administration access",
-                      "Kept for the security of the service and the defence of our rights; it cannot be modified and survives the deletion of the account concerned"
+                      "Kept for the security of the service and the defense of our rights; it cannot be modified and survives the deletion of the account concerned"
                     ]
                   ]
                 }
@@ -684,7 +684,7 @@
                     ],
                     [
                       "dl_appareil",
-                      "Recognise a trusted device for two-factor authentication",
+                      "Recognize a trusted device for two-factor authentication",
                       "Thirty days"
                     ]
                   ]
@@ -720,7 +720,7 @@
                   "Encrypted HTTPS connections across the whole service.",
                   "Passwords stored as hashes, never in plain text, and checked against known leaks without ever being sent.",
                   "Each seller's data is isolated in the database: an account can read only its own orders.",
-                  "Photos and videos stored in a private space, served through signed links with limited lifetime.",
+                  "Photos and videos stored in a private space, served through signed links with a limited lifetime.",
                   "Two-factor authentication available to sellers and mandatory for administration, where every view of an account is logged."
                 ]
               },
@@ -868,9 +868,9 @@
       "expire": "This link has expired or has already been used. Request a new one below.",
       "profil": "Your account could not be opened. Try again, and write to us if it happens again.",
       "service": "The service is momentarily unreachable. Your session is intact: try again in a moment.",
-      "session": "Your session has expired. Sign in again to continue.",
+      "session": "Your session has expired. Log in again to continue.",
       "suspendu": "This account is suspended. Write to us to find out why.",
-      "indisponible": "Google sign-in is temporarily unavailable. Sign in with your email address and password below.",
+      "indisponible": "Google sign-in is temporarily unavailable. Log in with your email address and password below.",
       "trop": "Too many attempts from this device. Please wait a few minutes.",
       "fermees": "Sign-ups are closed for now. Existing accounts are unaffected.",
       "confirmez": "Open your inbox: if a confirmation link is waiting there, it completes your account. If you already had an account, log in below."
@@ -880,7 +880,7 @@
     "bouton": "Log in",
     "boutonEnCours": "Logging in…",
     "erreurIdentifiants": "Incorrect address or password.",
-    "erreurIndisponible": "Log-in failed. Try again in a moment.",
+    "erreurIndisponible": "Login failed. Try again in a moment.",
     "info": {
       "deconnecte": "You are logged out. See you soon.",
       "deconnexion-partielle": "You are logged out on this device, but we could not confirm it with the server. On a shared device, log in again and log out once more.",
@@ -909,7 +909,7 @@
   },
   "onboarding": {
     "apercuEtiquette": "Preview of your customer page",
-    "titre": "Let’s put your name on the page",
+    "titre": "Let's put your name on the page",
     "sousTitre": "This is what your customer will see. You can change everything later.",
     "etape": "Step 1 of 2",
     "nomTitre": "Your shop name",
@@ -925,10 +925,10 @@
       "taille": "This image is too heavy.",
       "envoi": "The upload failed. Try again.",
       "confirmation": "The server did not confirm the upload. Try again.",
-      "retrait": "The logo couldn’t be removed. Try again."
+      "retrait": "The logo couldn't be removed. Try again."
     },
-    "couleurTitre": "Your colour",
-    "couleurAide": "Contrast is adjusted automatically: any colour stays readable.",
+    "couleurTitre": "Your color",
+    "couleurAide": "Contrast is adjusted automatically: any color stays readable.",
     "typeTitre": "You mostly sell…",
     "type": {
       "supplier": {
@@ -943,11 +943,11 @@
     "erreurType": "Choose who you sell to.",
     "valider": "Continue",
     "validationEnCours": "Saving…",
-    "erreurSession": "Your session expired. Sign in again.",
+    "erreurSession": "Your session expired. Log in again.",
     "erreurEcriture": "Saving failed. Try again.",
     "apercuTitre": "WHAT YOUR CUSTOMER WILL SEE",
-    "couleurChoisir": "Pick a colour",
-    "couleursRapides": "Quick colours",
+    "couleurChoisir": "Pick a color",
+    "couleursRapides": "Quick colors",
     "couleurs": {
       "violet": "Violet",
       "sapin": "Forest green",
@@ -955,7 +955,7 @@
       "encre": "Ink",
       "ambre": "Amber"
     },
-    "erreurCouleur": "Enter a six-digit hex colour, for example #5B4BF5.",
+    "erreurCouleur": "Enter a six-digit hex color, for example #5B4BF5.",
     "nomProvisoire": "Your shop"
   },
   "marque": {
@@ -963,7 +963,7 @@
     "sousTitre": "Brand your customer page and strengthen your image.",
     "identiteTitre": "Brand identity",
     "nomTitre": "Shop name",
-    "nomAide": "With no name and no logo, your customer’s page starts straight with its content.",
+    "nomAide": "With no name and no logo, your customer's page starts directly with its content.",
     "nomPlaceholder": "For example: Studio Nord",
     "erreurNom": "The name cannot be longer than 60 characters.",
     "logoRemplacer": "Change logo",
@@ -974,16 +974,16 @@
     "logoErreur": {
       "type": "That format is not accepted. Choose a PNG, a JPG or a WebP.",
       "taille": "This image is too heavy.",
-      "session": "Your session has expired. Sign in again, then retry.",
+      "session": "Your session has expired. Log in again, then retry.",
       "reseau": "The upload did not go through. Check your connection and retry.",
       "confirmation": "The image was sent but we could not save it. Please retry.",
       "illisible": "Your browser could not read this image. Try a PNG, a JPG or a WebP.",
       "retrait": "The logo could not be removed. Try again."
     },
-    "couleurTitre": "Customisation",
-    "couleurAide": "Pick the colours that represent your brand.",
-    "couleurHex": "Colour code",
-    "couleurAjustee": "On your customers' page, text sitting on this colour is darkened or lightened slightly so it stays readable. Your colour itself is not changed.",
+    "couleurTitre": "Customization",
+    "couleurAide": "Pick the colors that represent your brand.",
+    "couleurHex": "Color code",
+    "couleurAjustee": "On your customers' page, text sitting on this color is darkened or lightened slightly so it stays readable. Your color itself is not changed.",
     "erreurCouleur": "Enter six digits or letters preceded by a hash, for example #0058be.",
     "langueTitre": "Customer page language",
     "langueAide": "Your customers always see this language, wherever they are.",
@@ -1001,7 +1001,7 @@
     "enregistrement": "Saving…",
     "enregistre": "Saved.",
     "erreur": {
-      "session": "Your session has expired. Sign in again, then retry.",
+      "session": "Your session has expired. Log in again, then retry.",
       "ecriture": "Nothing was saved. Please retry in a moment."
     },
     "reseauxTitre": "Social links",
@@ -1033,7 +1033,7 @@
     "demoBandeau": "Banner",
     "demoBandeauSeuil": "Inverted text",
     "reseauxFacultatif": "optional",
-    "reseauxNouvelOnglet": "These links open outside your customer’s page, in a new tab. They create no account and ask your customer for nothing.",
+    "reseauxNouvelOnglet": "These links open outside your customer's page, in a new tab. They create no account and ask your customer for nothing.",
     "optionsTitre": "Display options",
     "apercuDirect": "live",
     "apercuPour": "for your customer",
@@ -1041,17 +1041,17 @@
     "identiteAide": "Add your shop's main details.",
     "optionsAide": "Choose what appears on your customer page.",
     "apercuAide": "Here is what your customers will see.",
-    "couleurPrincipale": "Primary colour",
+    "couleurPrincipale": "Primary color",
     "descriptionTitre": "Description (optional)",
     "descriptionPlaceholder": "Clothing · Sneakers · Accessories",
     "descriptionCompteur": "{n} / {max}",
     "descriptionAide": "One line under your name, on your customer's page.",
     "erreurDescription": "Description too long: {max} characters maximum.",
     "lienTitre": "Custom link",
-    "lienAide": "Customise your link for a more professional look.",
+    "lienAide": "Customize your link for a more professional look.",
     "lienProBadge": "Pro",
     "lienProTitre": "Pro feature",
-    "lienProAide": "With a link customised to your brand.",
+    "lienProAide": "With a link customized to your brand.",
     "marqueTitre": "DropLink branding",
     "marqueAide": "Remove the “Powered by DropLink” card from your customer pages.",
     "marqueOption": "Hide DropLink branding",
@@ -1066,7 +1066,7 @@
     "apercuMobile": "Mobile",
     "apercuImageMobile": "Mobile preview of the customer page",
     "apercuImageBureau": "Desktop preview of the customer page",
-    "voirPageClient": "View the client page",
+    "voirPageClient": "View the customer page",
     "rienEnregistre": "Nothing has been saved."
   },
   "envois": {
@@ -1086,7 +1086,7 @@
       "silencieux": "No movement",
       "tousStatuts": "All statuses",
       "tousTransporteurs": "All carriers",
-      "rechercher": "Search a shipment…"
+      "rechercher": "Search for a shipment…"
     },
     "etat": {
       "preparation": "Not scanned yet",
@@ -1170,7 +1170,7 @@
       "commandesCreees": "Orders created",
       "commandesLivrees": "Orders delivered",
       "liensOuverts": "Customer links opened",
-      "tauxValidation": "Photo completion rate",
+      "tauxValidation": "Photo approval rate",
       "delaiLivraison": "Average delivery time"
     },
     "carteCourt": {
@@ -1178,11 +1178,11 @@
     },
     "ecartPrecedent": "{n} vs previous period",
     "aucuneComparaison": "nothing to compare",
-    "leClientRevient": "the customer comes back",
+    "leClientRevient": "the customer comes back several times",
     "frise": {
       "titre": "Order trend",
       "fenetre": "Last {n} weeks",
-      "vide": "No order created over these twelve weeks.",
+      "vide": "No orders created in these twelve weeks.",
       "aide": "Orders created each week."
     },
     "colis": {
@@ -1192,7 +1192,7 @@
       "livre": "Delivered",
       "preparation": "Not scanned yet",
       "silencieux": "No movement",
-      "vide": "No tracked parcel yet.",
+      "vide": "No tracked parcels yet.",
       "aide": "Current status of your shipments.",
       "dontSilencieux": "{n, plural, one {Including # parcel with no movement for over 10 days} other {Including # parcels with no movement for over 10 days}}",
       "suivis": "{n, plural, one {parcel tracked} other {parcels tracked}}"
@@ -1208,17 +1208,17 @@
       "titre": "What your customers replied",
       "aide": "What your customers replied after seeing the photos. Without a reply from them, the order stays pending.",
       "approuve": "Approved",
-      "refuse": "Declined",
+      "refuse": "Rejected",
       "enAttente": "No reply",
-      "vide": "No order over this period.",
-      "tauxTexte": "of responses approve the photos",
+      "vide": "No orders in this period.",
+      "tauxTexte": "of replies approve the photos",
       "aucuneReponse": "no replies yet"
     },
     "sousTitreEcran": "Track your performance and the effectiveness of your shipments.",
     "livreesSur": "{n} of {total} created",
     "reponsesSur": "{n, plural, one {# reply} other {# replies}} of {total}",
     "surColisLivres": "across {n, plural, one {# delivered parcel} other {# delivered parcels}}",
-    "jours": "{n} days",
+    "jours": "{n, plural, one {# day} other {# days}}",
     "evolution": {
       "titre": "Order trend",
       "aide": "Orders created over the selected period."
@@ -1234,7 +1234,7 @@
       "aide": "Breakdown of your shipments by carrier.",
       "autres": "Other",
       "inconnu": "Carrier not identified",
-      "aucun": "No parcel registered over this period."
+      "aucun": "No parcels registered in this period."
     },
     "activite": {
       "titre": "Recent activity",
@@ -1249,7 +1249,7 @@
       "propulse": "Powered by",
       "slogan": "Tracking links, simple and powerful."
     },
-    "vuesParCommande": "{n} views per opened order"
+    "vuesParCommande": "{n, plural, one {# view per opened order} other {# views per opened order}}"
   },
   "commandes": {
     "titre": "Orders",
@@ -1305,7 +1305,7 @@
       "filtreTitre": "No order matches",
       "filtreTexte": "This account has orders, but none of them pass the current filters.",
       "archiveTitre": "Everything is archived",
-      "archiveTexte": "This account has no active order: they are all filed in the archive. Their links keep working for your customers.",
+      "archiveTexte": "This account has no active orders: they are all filed in the archive. Their links keep working for your customers.",
       "voirArchives": "View the archive",
       "etapes": {
         "photos": {
@@ -1318,11 +1318,11 @@
         },
         "lien": {
           "titre": "Send the link",
-          "texte": "And you never come back to it."
+          "texte": "And you never have to come back to it."
         }
       },
-      "marqueQuestion": "Haven’t set up your brand yet?",
-      "marqueLien": "Add your name and your colour",
+      "marqueQuestion": "Haven't set up your brand yet?",
+      "marqueLien": "Add your name and your color",
       "filtreTexteChiffre": "{total, plural, one {Your order is still there} other {Your # orders are still there}}. It is these criteria, together, that return nothing.",
       "accents": "Search ignores accents: “creme” also finds “Crème”."
     },
@@ -1334,15 +1334,15 @@
     "selectionner": "Select {client}",
     "lot": {
       "titre": "Bulk actions",
-      "aide": "Tick some orders, then choose. Each bulk action is all or nothing.",
+      "aide": "Select orders, then choose an action. Each bulk action is all or nothing.",
       "archiver": "Archive the selection",
       "desarchiver": "Move the selection out of the archive",
       "ok": "{n, plural, one {# order processed} other {# orders processed}}.",
-      "vide": "No order selected.",
+      "vide": "No orders selected.",
       "partiel": "Action refused: nothing was changed. Reload the list.",
       "ecriture": "The action could not be processed. Nothing was changed.",
       "exporter": "Export",
-      "exportAvertissement": "The file contains your orders’ public links: anyone who opens it can open your customers’ pages.",
+      "exportAvertissement": "The file contains your orders' public links: anyone who opens it can open your customers' pages.",
       "exportTelecharger": "Download the CSV",
       "enCours": "Working…",
       "selectionUn": "# selected",
@@ -1402,8 +1402,8 @@
     "lienBloque": "Link blocked",
     "quota": {
       "gratuitTitre": "Free plan limit reached",
-      "gratuitTexte": "The free account includes {n} orders in total: this limit is for life and never resets. Upgrade to Pro to keep creating orders.",
-      "gratuitTexteSansNombre": "You have reached your free plan limit: it is for life and never resets. Upgrade to Pro to keep creating orders.",
+      "gratuitTexte": "The free plan includes {n} orders in total: this is a lifetime limit that never resets. Upgrade to Pro to keep creating orders.",
+      "gratuitTexteSansNombre": "You have reached your free plan limit: it is a lifetime limit that never resets. Upgrade to Pro to keep creating orders.",
       "mensuelTitre": "Monthly limit reached",
       "mensuelTexte": "You have created your {n} orders for this month. The limit resets on the 1st of the month.",
       "mensuelTexteSansNombre": "You have reached your order limit for this month. It resets on the 1st of the month.",
@@ -1420,7 +1420,7 @@
     },
     "resume": "Summary",
     "nbPhotos": "{n, plural, one {# photo} other {# photos}}",
-    "lienCopie": "{client}’s link copied"
+    "lienCopie": "{client}'s link copied"
   },
   "editeur": {
     "historique": {
@@ -1450,8 +1450,8 @@
     "reference": "Product reference",
     "referenceExemple": "e.g. blue jacket size M",
     "suivi": "Tracking number",
-    "suiviExemple": "Paste the carrier number",
-    "suiviAide": "A tracking number you just pasted often hasn’t been scanned yet — that’s normal, the carrier has published nothing. If the parcel ships from abroad, tracking may only start on arrival; an origin shipping number follows the whole journey.",
+    "suiviExemple": "Paste the carrier's tracking number",
+    "suiviAide": "A tracking number you just pasted often hasn't been scanned yet — that's normal, the carrier has published nothing. If the parcel ships from abroad, tracking may only start on arrival; an origin shipping number follows the whole journey.",
     "notes": "Internal notes",
     "notesExemple": "Purchase price, remarks, anything that must not leave this page.",
     "notesPrivees": "Never visible to the customer, and absent from the export.",
@@ -1500,10 +1500,10 @@
     "suiviArrete": "The carrier no longer publishes anything for this number.",
     "transporteur": "Carrier",
     "transporteurAuto": "Automatic detection",
-    "transporteurAide": "Detected from the number. Only choose it if it isn’t.",
-    "suiviNonReconnu": "The carrier for this number wasn’t recognized. Choose it under “Carrier” to restart tracking.",
-    "suiviBloqueGratuit": "Number saved, but automatic tracking has not started: all your free tracked parcels are used, and this limit is for life.",
-    "suiviBloqueMensuel": "Number saved, but automatic tracking has not started: this month’s tracked parcel limit is reached. It resets on the 1st; enter the number again then.",
+    "transporteurAide": "Detected from the number. Only choose it if it isn't.",
+    "suiviNonReconnu": "The carrier for this number wasn't recognized. Choose it under “Carrier” to restart tracking.",
+    "suiviBloqueGratuit": "Number saved, but automatic tracking has not started: all your free tracked parcels are used up, and this is a lifetime limit.",
+    "suiviBloqueMensuel": "Number saved, but automatic tracking has not started: this month's tracked parcel limit has been reached. It resets on the 1st; re-enter the number then.",
     "suiviBloquePasserPro": "Upgrade to Pro",
     "tuileClient": "Customer",
     "tuileReference": "Product reference",
@@ -1516,10 +1516,10 @@
     "dupliquer": "Duplicate as template",
     "archiver": "Archive",
     "desarchiver": "Restore from archive",
-    "tuileDerniereVue": "Last on {quand}",
+    "tuileDerniereVue": "Last viewed {quand}",
     "resume": "Order summary",
     "apercuDirect": "live",
-    "lienClient": "Client link",
+    "lienClient": "Customer link",
     "lienClientAide": "It exists from the moment the order is created and never changes: every edit lands on the same page.",
     "filCommandes": "Orders"
   },
@@ -1542,7 +1542,7 @@
       "survol": "Media {position} over position {cible}.",
       "depose": "Media dropped at position {cible}.",
       "horsZone": "Outside the grid.",
-      "annule": "Move cancelled, the media returns to its place."
+      "annule": "Move canceled, the media returns to its place."
     },
     "refus": {
       "type_non_accepte": "Format not accepted.",
@@ -1556,7 +1556,7 @@
       "ecriture": "Could not save.",
       "stockage": "Storage unavailable.",
       "cadence": "Too many uploads in a short time. Wait a minute.",
-      "session": "Session expired. Please sign in again.",
+      "session": "Session expired. Please log in again.",
       "reseau": "Upload interrupted. Try again.",
       "inconnu": "Upload rejected."
     },
@@ -1587,7 +1587,7 @@
       "expedie": "Shipped",
       "en_transit": "In transit",
       "livre": "Delivered",
-      "enCours": "Ongoing",
+      "enCours": "In progress",
       "enAttente": "Pending"
     },
     "galerie": {
@@ -1687,8 +1687,8 @@
       "surtitre": "POWERED BY DROPLINK",
       "titre": "Tracking links, simple and powerful.",
       "texte": "Create one tracking link per order, in under a minute.",
-      "bouton": "Discover DropLink",
-      "aria": "Powered by DropLink. Discover DropLink"
+      "bouton": "Learn more about DropLink",
+      "aria": "Powered by DropLink. Learn more about DropLink"
     },
     "allerAuContenu": "Skip to content",
     "logoAccueil": "DropLink, home",
@@ -1761,7 +1761,7 @@
       "part": "{part}%",
       "videFiltre": "No account matches this filter.",
       "sousTitreListe": "Manage and monitor every DropLink account.",
-      "tuileTotalAide": "of which {sansType} with no declared type",
+      "tuileTotalAide": "including {sansType} with no declared type",
       "colisInfo": "{valeur} parcels registered, alert threshold {seuil}",
       "ouvrirLong": "Open account {email}"
     },
@@ -1772,7 +1772,7 @@
         "commandes_liste": "Viewed the order list",
         "compte_blocage_lien": "Blocked an order link",
         "compte_deblocage_lien": "Unblocked an order link",
-        "compte_plan": "Changed an account’s plan",
+        "compte_plan": "Changed an account's plan",
         "contestations_detail": "Read a dispute",
         "compte_contestation_refusee": "Rejected a dispute",
         "compte_reactivation": "Reactivated an account",
@@ -1836,23 +1836,23 @@
       "colis": "Parcels",
       "retour": "Back to the account list",
       "typeInscrit": "{type} · joined on {date}",
-      "trace": "Opening this record was written to the audit log, with your identity. This vendor's order content is not reachable from anywhere here.",
+      "trace": "Opening this record was written to the audit log, with your identity. This seller's order content is not reachable from anywhere here.",
       "medias": "Media",
       "stockage": "Storage",
       "langue": "Language",
-      "plafonds": "Ceilings",
+      "plafonds": "Limits",
       "plafondColis": "Parcels registered",
       "quotaAVie": "Lifetime orders",
       "quotaMoisPro": "Orders this month (Pro)",
       "surPlafond": "{valeur} of {plafond}",
       "depassementColis": "Over by {ecart}. Every parcel registered is billed to us by the tracking provider.",
       "activite": "What this account has done",
-      "activiteAide": "The vendor's events, not yours, and only their counts. No order content appears here.",
+      "activiteAide": "The seller's events, not yours, and only their counts. No order content appears here.",
       "activiteVide": "This account has done nothing yet.",
       "filigrane": "Watermark",
       "active": "On",
       "inactive": "Off",
-      "reseaux": "Configured networks",
+      "reseaux": "Configured social links",
       "reseauxAucun": "None",
       "interdits": "What this page does not allow",
       "evenement": {
@@ -1860,8 +1860,8 @@
         "commande_modifiee": "{n, plural, one {# order edit} other {# order edits}}",
         "commande_archivee": "{n, plural, one {# order archived} other {# orders archived}}",
         "commande_dupliquee": "{n, plural, one {# order duplicated} other {# orders duplicated}}",
-        "media_ajoute": "{n, plural, one {# media file added} other {# media added}}",
-        "media_supprime": "{n, plural, one {# media file removed} other {# media removed}}",
+        "media_ajoute": "{n, plural, one {# media file added} other {# media files added}}",
+        "media_supprime": "{n, plural, one {# media file removed} other {# media files removed}}",
         "medias_reordonnes": "{n, plural, one {# media reordering} other {# media reorderings}}",
         "lien_revoque": "{n, plural, one {# link revoked} other {# links revoked}}",
         "qc_approuve": "{n, plural, one {# customer approval} other {# customer approvals}}",
@@ -1873,8 +1873,8 @@
           "pourquoi": "Suspending is reversible, deleting is not."
         },
         "usurpation": {
-          "quoi": "Sign in as them.",
-          "pourquoi": "Audited reading is enough to diagnose."
+          "quoi": "Log in as them.",
+          "pourquoi": "Audited read access is enough for diagnosis."
         },
         "commandes": {
           "quoi": "Open their orders.",
@@ -1883,7 +1883,7 @@
       },
       "email": "Email",
       "titre": "Account record",
-      "couleur": "Colour"
+      "couleur": "Color"
     },
     "suspension": {
       "ouvrir": "Suspend this account",
@@ -1923,7 +1923,7 @@
       "passerPro": "Switch to Pro",
       "passerGratuit": "Switch back to Free",
       "motif": "Reason",
-      "motifAide": "At least {n} characters. For example: “payment received on 19/09 by bank transfer”. It is shown in full in the log.",
+      "motifAide": "At least {n} characters. For example: “payment received on 9/19 by bank transfer”. It is shown in full in the log.",
       "annuler": "Cancel",
       "enCours": "Working…",
       "erreur": {
@@ -1936,12 +1936,12 @@
     },
     "panneau": {
       "titre": "Overview",
-      "aucuneAlerte": "No alerts. Nothing is over the thresholds, and background tasks are beating normally.",
+      "aucuneAlerte": "No alerts. Nothing is over the thresholds, and background tasks are sending heartbeats normally.",
       "alertesIndisponibles": "Alerts unreadable right now — this is NOT “no alerts”. Try again in a moment.",
       "compteursIndisponibles": "Counters unreadable right now. The dashes do not mean zero.",
       "alerte": {
-        "colis_au_dessus_du_seuil": "One account is over the parcel ceiling: {valeur} against a threshold of {seuil}",
-        "veilleur_en_retard": "A background job has not beaten for {valeur} minutes"
+        "colis_au_dessus_du_seuil": "One account is over the parcel limit: {valeur} against a threshold of {seuil}",
+        "veilleur_en_retard": "A background job has not sent a heartbeat for {valeur} minutes"
       },
       "colisFactures": "Parcels registered",
       "comptesActifs": "Active accounts",
@@ -1956,7 +1956,7 @@
       "facture": "BILLED",
       "ceMoisCi": "this month",
       "commandes": "Orders created",
-      "comptesDont": "of which {sansType} with no type · {suspendus} suspended, outside this total",
+      "comptesDont": "including {sansType} with no type · {suspendus} suspended, outside this total",
       "dernieresActions": "Latest administration actions",
       "dernieresActionsIndisponibles": "Preview unavailable right now. The full log is still readable.",
       "toutLeJournal": "Full log",
@@ -1965,12 +1965,12 @@
         "veilleur_en_retard": "Alert threshold: {seuil} minutes. Job concerned: {sujet}."
       },
       "boutiques": "Shops",
-      "boutiquesDont": "of which {nommees} have a shop name",
+      "boutiquesDont": "including {nommees} with a shop name",
       "statuts": "Order status",
       "statutsAide": "Orders broken down by status",
       "statutsIndisponible": "Breakdown unavailable.",
       "statutPart": "{part}%",
-      "aucuneCommande": "No order created on the platform yet.",
+      "aucuneCommande": "No orders created on the platform yet.",
       "statut": {
         "preparation": "Preparing",
         "expedie": "Shipped",
@@ -1984,15 +1984,15 @@
       "periode": "Last {jours} days",
       "periodeEtiquette": "Chart window",
       "alerteDoublons": "{comptes, plural, one {# account} other {# accounts}}, across {identifiants, plural, one {# shared identifier} other {# shared identifiers}}",
-      "alerteContestation": "{n, plural, one {Appeal against the block of {reference}} other {# block appeals waiting, the oldest for {reference}}}",
+      "alerteContestation": "{n, plural, one {Dispute of the block on {reference}} other {# block disputes waiting, the oldest for {reference}}}",
       "alerteContestationDetail": "Sent by the seller on {date}.",
-      "contestationsIndisponibles": "Pending appeals could not be read.",
+      "contestationsIndisponibles": "Pending disputes could not be read.",
       "doublonsIndisponibles": "Duplicate accounts could not be read.",
       "barre": "{jour}: {n, plural, one {# order} other {# orders}}"
     },
     "parametres": {
       "titre": "System settings",
-      "sousTitre": "Every change is written to the audit log, with the old and the new value. Greyed values can only be changed at deploy time.",
+      "sousTitre": "Every change is written to the audit log, with the old and the new value. Grayed-out values can only be changed at deploy time.",
       "enregistrer": "Save",
       "enCours": "Saving…",
       "fait": "Saved.",
@@ -2030,7 +2030,7 @@
         },
         "constate": {
           "titre": "Observed, changed at deployment",
-          "sousTitre": "Greyed-out values are changed at deployment."
+          "sousTitre": "Grayed-out values are changed at deployment."
         }
       },
       "cles": {
@@ -2048,7 +2048,7 @@
         },
         "budget_suivi_total": {
           "titre": "Tracking budget (lifetime)",
-          "aide": "Total pickups the provider plan allows"
+          "aide": "Total registrations the provider's tier allows"
         },
         "seuil_colis_par_compte": {
           "titre": "Parcel alert threshold",
@@ -2081,7 +2081,7 @@
           "aide": "In megabytes · provisional, to calibrate"
         },
         "silence_jours": {
-          "titre": "Silence named after",
+          "titre": "Flagged as silent after",
           "aide": "In days without movement"
         },
         "abandon_jours": {
@@ -2141,7 +2141,7 @@
         "sans": "Not set up"
       },
       "suspendue": "Suspended",
-      "plafondDepasse": "Over ceiling",
+      "plafondDepasse": "Over limit",
       "activeEtat": "Active",
       "sousTitreListe": "Manage and monitor every shop using DropLink.",
       "liste": "Shop list",
@@ -2186,7 +2186,7 @@
         "interrogations_ce_mois": "Carrier lookups this month",
         "colis_pris_en_charge_ce_mois": "Parcels registered this month",
         "abandons_ce_mois": "Tracking given up this month",
-        "pic_auth-ip": "Peak — sign-ins per address",
+        "pic_auth-ip": "Peak — logins per address",
         "pic_auth-email": "Peak — password resets per email address",
         "pic_publique-requetes": "Peak — public page requests",
         "pic_publique-inconnu": "Peak — unknown links",
@@ -2223,13 +2223,13 @@
         "admin": "Administration"
       },
       "degradation": {
-        "autorise": "If the counter fails, access stays allowed: the incident does not concern a vendor's customers.",
-        "refuse": "Here, a counter failure denies access. That only penalises us."
+        "autorise": "If the counter fails, access stays allowed: the incident does not concern a seller's customers.",
+        "refuse": "Here, a counter failure denies access. That only penalizes us."
       },
       "barre": "{jour}: {n, plural, one {# parcel} other {# parcels}}"
     },
     "traceTitre": "Everything is logged",
-    "traceTexte": "Every read of a seller’s data is written to the audit log.",
+    "traceTexte": "Every read of a seller's data is written to the audit log.",
     "allerAuContenu": "Skip to content",
     "roleAdministrateur": "Administrator",
     "onglets": {
@@ -2256,7 +2256,7 @@
       "tuileCeMois": "Created this month",
       "tuileCeMoisAide": "since the 1st of the month",
       "partDuTotal": "{part}% of total",
-      "recherche": "Search an order",
+      "recherche": "Search for an order",
       "recherchePlaceholder": "Reference, shop or email…",
       "chercher": "Search",
       "filtreStatut": "Filter by status",
@@ -2299,7 +2299,7 @@
     "statistiques": {
       "surFenetre": "over {jours} days",
       "titre": "Statistics",
-      "sousTitre": "Analyse DropLink's growth and usage.",
+      "sousTitre": "Analyze DropLink's growth and usage.",
       "vsAvant": "vs previous period",
       "sansAvant": "nothing in the previous period",
       "tuileCommandes": "Orders created",
@@ -2310,7 +2310,7 @@
       "surComptes": "{total, plural, one {out of # account} other {out of # accounts}}",
       "tuileNouveaux": "New accounts",
       "tuileColis": "Parcels registered",
-      "tuileColisAide": "billed by tracking",
+      "tuileColisAide": "billed by the tracking provider",
       "vues": {
         "globale": "Global view",
         "utilisation": "Usage",
@@ -2345,8 +2345,8 @@
       "statutTotal": "{total, plural, one {# order created} other {# orders created}}",
       "transporteurs": "Most used carriers",
       "transporteursTotal": "{total, plural, one {Out of # tracked parcel} other {Out of # tracked parcels}}",
-      "transporteurInconnu": "Not recognised yet",
-      "aucunColis": "No parcel over the period.",
+      "transporteurInconnu": "Not recognized yet",
+      "aucunColis": "No parcels in this period.",
       "part": "{part}%",
       "croissance": "Overall growth",
       "croissanceAide": "Last three months against the three before",
@@ -2362,8 +2362,8 @@
     "blocage": {
       "bloquer": "Block the link",
       "debloquer": "Unblock the link",
-      "bloquerLong": "Block the link of {reference}",
-      "debloquerLong": "Unblock the link of {reference}",
+      "bloquerLong": "Block the link for {reference}",
+      "debloquerLong": "Unblock the link for {reference}",
       "aideBlocage": "Their customer will see “This link is no longer valid”. The link is not destroyed: unblocking restores it as it was. You do not see the order's content.",
       "aideDeblocage": "The page comes back on the same link, the one the customer already received.",
       "motif": "Reason",
@@ -2381,7 +2381,7 @@
       "annonceDebloque": "Link unblocked. The page is back on the same link."
     },
     "contestation": {
-      "pastille": "Appeal",
+      "pastille": "Dispute",
       "voir": "View the dispute for {ref}",
       "titre": "Dispute of the block on {ref}",
       "aide": "Sent by the seller on {date} · {rang, selectordinal, one {first} two {second} few {third} other {#th}} of three. This reading is written to the audit log.",
@@ -2400,8 +2400,8 @@
         "deja": "This dispute has already been answered.",
         "ecriture": "The reply could not be saved. Nothing has changed."
       },
-      "annonceAcceptee": "Appeal accepted: link unblocked, reply sent to the seller.",
-      "annonceRefusee": "Appeal rejected. The seller reads your reply; the link stays blocked.",
+      "annonceAcceptee": "Dispute accepted: link unblocked, reply sent to the seller.",
+      "annonceRefusee": "Dispute rejected. The seller reads your reply; the link stays blocked.",
       "reponseCourte": "The reply is too short."
     },
     "doublons": {
@@ -2420,12 +2420,12 @@
       "colStatut": "Status",
       "colInscription": "Signed up",
       "colCommandes": "Orders",
-      "voir": "View profile",
-      "voirLong": "View the profile of {email}",
+      "voir": "View record",
+      "voirLong": "View the record for {email}",
       "identifiants": "Shared identifiers",
       "concernes": "Accounts involved",
-      "suspendus": "Of which suspended",
-      "reglesTitre": "How a duplicate is recognised",
+      "suspendus": "Suspended among them",
+      "reglesTitre": "How a duplicate is recognized",
       "regles": {
         "reseauxQ": "Instagram and TikTok.",
         "reseauxR": "The same account name, however the link is written: capital letters, www, sharing parameters.",
@@ -2459,13 +2459,13 @@
     "accueilLogo": "DropLink, home"
   },
   "motDePasse": {
-    "oublieTitre": "Forgotten password",
-    "oublieSousTitre": "Enter your address. If an account exists, you receive a link to choose a new one.",
+    "oublieTitre": "Forgot password",
+    "oublieSousTitre": "Enter your address. If an account exists, you will receive a link to choose a new one.",
     "bouton": "Send the link",
     "boutonEnCours": "Sending…",
     "envoyeTitre": "Check your inbox",
-    "envoyeTexte": "If an account exists for this address, a reset link will reach you there. Remember to check your spam folder.",
-    "retourConnexion": "Back to log in",
+    "envoyeTexte": "If an account exists for this address, you will receive a reset link. Remember to check your spam folder.",
+    "retourConnexion": "Back to login",
     "nouveauTitre": "New password",
     "nouveauSousTitre": "Choose a new one for <adresse>{email}</adresse>.",
     "avertissement": "This link only works once, and your other devices will have to log in again.",
@@ -2507,20 +2507,20 @@
     "fluxLien": "Customer link",
     "ceQueFait": "What DropLink does",
     "fait1": "Create an order from the customer name, your photos and a tracking number.",
-    "fait2": "Generate a unique tracking page, in your colours, that the customer opens without an account.",
+    "fait2": "Generate a unique tracking page, in your colors, that the customer opens without an account.",
     "fait3": "Pull carrier information and move the status forward automatically.",
     "fait4": "Give you an overview: shipments in progress, parcels with no movement, links opened.",
     "ceQueFaitPas": "What DropLink does not do",
-    "faitPasTexte": "DropLink is not a marketplace and does not manage your catalogue. You will find no products, quantities, prices, cart or revenue: that data belongs to your shop, not to your tracking.",
+    "faitPasTexte": "DropLink is not a marketplace and does not manage your catalog. You will find no products, quantities, prices, cart or revenue: that data belongs to your shop, not to your tracking.",
     "demarrer": "Creating your account",
     "etape1": "Open an account",
-    "etape1Texte": "By email or with Google, from the <lien>sign-up page</lien>. No bank card is required.",
+    "etape1Texte": "By email or with Google, from the <lien>sign-up page</lien>. No credit card is required.",
     "etape2": "Name your shop",
     "etape2Texte": "The name and logo appear at the top of every customer page.",
     "etape3": "Create your first order",
     "etape3Texte": "You get a link to share straight away.",
     "combienTitre": "How long it takes",
-    "combienTexte": "An account takes under a minute, and the first tracking link goes out in the same session. There is no carrier integration to configure beforehand.",
+    "combienTexte": "Creating an account takes under a minute, and the first tracking link goes out in the same session. There is no carrier integration to configure beforehand.",
     "marque": "Setting up your brand",
     "marqueTexte": "The <b>My brand</b> screen is an editor for your <lien>customer page</lien>, not a plain form: every change shows immediately in the preview.",
     "colReglage": "Setting",
@@ -2529,7 +2529,7 @@
     "regLogoE": "Shown in the header, next to the shop name.",
     "regNom": "Name and description",
     "regNomE": "Identify your shop to the customer.",
-    "regCouleur": "Accent colour",
+    "regCouleur": "Accent color",
     "regCouleurE": "Applied to the page accents. Default: #5B4BF5. Contrast is adjusted automatically so the text stays readable.",
     "regSociaux": "Social links",
     "regSociauxE": "Instagram, TikTok, WhatsApp and website, shown when filled in.",
@@ -2542,64 +2542,64 @@
     "blocMedias": "Photos and videos",
     "blocMediasTexte": "Drop your files: the order, the packing, the sealed parcel.",
     "blocSuivi": "Tracking and shipping",
-    "blocSuiviTexte": "Paste the tracking number. DropLink recognises the carrier and starts querying it.",
+    "blocSuiviTexte": "Paste the tracking number. DropLink recognizes the carrier and starts querying it.",
     "sauvegardeTitre": "There is no save button",
     "sauvegardeTexte": "The order saves itself as you fill it in. Adding a tracking number later is enough to start tracking.",
     "medias": "Photos and videos",
     "mediasTexte": "Media are the heart of DropLink: they replace the back-and-forth messages. Add them by drag and drop or by picking files, and reorder them with the mouse or the keyboard.",
     "media1": "Photos and videos are accepted. The first image is used as the cover.",
-    "media2": "Twenty media per order, including three videos.",
+    "media2": "Twenty media per order, up to three of them videos.",
     "media3": "The customer opens each photo full screen, and plays videos without leaving the page.",
     "suivi": "Carrier and tracking",
     "suiviTexte": "You have no status to enter. Paste the tracking number: DropLink queries the carrier and updates the page.",
     "suiviAlerteTitre": "A freshly pasted number has not been scanned yet",
-    "suiviAlerteTexte": "It is not an error: the carrier simply has not published anything. The page says so, and never « number not found ».",
+    "suiviAlerteTexte": "It is not an error: the carrier simply has not published anything. The page says so, and never “number not found”.",
     "statuts": "Order statuses",
     "statutsTexte": "The tracker has four steps, and it never goes backwards. Finer detail lives in the tracking history, not in the tracker.",
     "stPreparation": "Not scanned yet",
-    "stPreparationE": "The number is saved, the carrier has published nothing yet.",
+    "stPreparationE": "The number is saved; the carrier has published nothing yet.",
     "stExpedie": "Shipped",
     "stExpedieE": "The carrier has picked up the parcel.",
     "stTransit": "In transit",
     "stTransitE": "The parcel is moving; every movement shows on the customer page.",
     "stLivre": "Delivered",
     "stLivreE": "The carrier has confirmed the parcel was handed over.",
-    "silenceTitre": "Silence is named after ten days",
-    "silenceTexte": "A parcel with no movement for more than ten days is flagged, on the Shipments screen and on the customer page. Named silence is information; unexplained silence reads as a failure.",
+    "silenceTitre": "Silence is flagged after ten days",
+    "silenceTexte": "A parcel with no movement for more than ten days is flagged, on the Shipments screen and on the customer page. Flagged silence is information; unexplained silence reads as a failure.",
     "lien": "The customer link",
     "lienTexte": "Every order has its own link. Your customer opens it without an account, on mobile or desktop, and finds your photos, the parcel status, the movement history and your contact details if you filled them in.",
     "lienAlerteTitre": "The link never changes on its own",
-    "lienAlerteTexte": "You can edit an order you already sent: the customer sees the update on the same link. Only « revoke and regenerate » creates a new address, and it cuts off the old one for good.",
+    "lienAlerteTexte": "You can edit an order you already sent: the customer sees the update on the same link. Only “revoke and regenerate” creates a new address, and it cuts off the old one for good.",
     "envois": "Shipments",
     "envoisTexte": "The <b>Shipments</b> screen groups all your parcels, regardless of orders. It is the view to open when you look for what has stopped moving: the default sort brings immobile parcels to the top.",
     "analyses": "Analytics",
     "analysesTexte": "Analytics measure your use of DropLink and the effectiveness of your tracking. No revenue data appears: DropLink does not know your prices.",
     "notifications": "Notifications",
-    "notificationsTexte": "Your customer can ask, from their order page, to be notified by email. They confirm their address, then receive at most three messages — shipped, in transit, delivered —, each with an unsubscribe link. They never create an account.",
+    "notificationsTexte": "Your customer can ask, from their order page, to be notified by email. They confirm their address, then receive at most three messages — shipped, in transit, delivered — each with an unsubscribe link. They never create an account.",
     "parametres": "Settings",
     "plans": "Free and Pro",
-    "plansTexte": "DropLink has a free plan and a Pro plan. The free plan allows {gratuit} orders in total, a lifetime quota, it does not reset each month. Pro raises it to {pro} orders per month and removes the DropLink mention from the page your customer sees.",
-    "plansTexteSansNombre": "DropLink has a free plan and a Pro plan. The free plan allows a limited number of orders in total, a lifetime quota, it does not reset each month. Pro replaces it with a monthly limit and removes the DropLink mention from the page your customer sees.",
+    "plansTexte": "DropLink has a free plan and a Pro plan. The free plan allows {gratuit} orders in total: it is a lifetime quota that does not reset each month. Pro raises it to {pro} orders per month and removes DropLink branding from the page your customer sees.",
+    "plansTexteSansNombre": "DropLink has a free plan and a Pro plan. The free plan allows a limited number of orders in total: it is a lifetime quota that does not reset each month. Pro replaces it with a monthly limit and removes DropLink branding from the page your customer sees.",
     "planGratuit": "Free",
     "planPro": "Pro, {prix}/month",
     "plCommandes": "Orders",
     "plCommandesG": "{n} in total",
     "plCommandesP": "{n} per month",
     "plPage": "Customer page",
-    "plPageG": "With the DropLink mention",
-    "plPageP": "Without the DropLink mention",
+    "plPageG": "With DropLink branding",
+    "plPageP": "Without DropLink branding",
     "faq": "Frequently asked questions",
     "faqQ1": "Does my customer need an account?",
-    "faqR1": "No. They open the link and see their order immediately, with no signup and nothing to install.",
+    "faqR1": "No. They open the link and see their order immediately, with no sign-up and nothing to install.",
     "faqQ2": "Do I have to update the status myself?",
     "faqR2": "No. The tracking number is enough: DropLink queries the carrier and moves the status on its own.",
     "faqQ3": "Can I create an order without a tracking number?",
     "faqR3": "Yes. Create it, share the link, and add the number once the parcel ships: the customer sees the update on the same link.",
     "faqQ4": "Does DropLink sell my products?",
-    "faqR4": "No. DropLink handles no catalogue, no payment and no prices: only tracking and customer communication.",
+    "faqR4": "No. DropLink handles no catalog, no payment and no prices: only tracking and customer communication.",
     "faqQ5": "How long does my link stay active?",
-    "faqR5": "As long as you want. A link does not expire on its own: only « revoke and regenerate » replaces it.",
-    "faqQ6": "What does my customer see if I revoked the link?",
+    "faqR5": "As long as you want. A link does not expire on its own: only “revoke and regenerate” replaces it.",
+    "faqQ6": "What does my customer see if I have revoked the link?",
     "faqR6": "A DropLink page explaining the link is no longer valid and inviting them to contact you. It reveals nothing about your shop.",
     "support": "Contacting support",
     "supportTexte": "A question not answered here? Write to us at <courriel>contact@droplink.fr</courriel>: every message reaches the product team.",
@@ -2609,12 +2609,12 @@
     "ctaBouton": "Create my account",
     "metaDescription": "The complete DropLink guide: create an order, add your photos, paste the tracking number and share a customer link.",
     "resumeEtiquette": "In short:",
-    "param1": "Account: name, email and password, the email and password only change with your current password.",
+    "param1": "Account: name, email and password; the email and password only change with your current password.",
     "param2": "Preferences: interface language. The language of customer pages is set in My brand.",
     "param3": "Security: two-factor authentication, active sessions, account deletion.",
-    "param4": "Data: export your data, delete everything, every destructive action asks for confirmation.",
+    "param4": "Data: export your data, delete everything; every destructive action asks for confirmation.",
     "param5": "Subscription: your current plan, Free or Pro, and the upgrade to Pro.",
-    "param6": "Support: help centre.",
+    "param6": "Support: help center.",
     "colIndicateur": "Metric",
     "colMesure": "What it measures",
     "kpiCrees": "Orders created",
@@ -2628,12 +2628,12 @@
     "analysesSuite": "On top of that: order trends over 7, 30 or 90 days, status breakdown, carrier usage and recent activity.",
     "clientVoit1": "Your logo, the shop name and your social links.",
     "clientVoit2": "The order reference and the estimated delivery date.",
-    "clientVoit3": "A tracking rail: Not scanned yet, Shipped, In transit, Delivered.",
+    "clientVoit3": "A progress tracker: Not scanned yet, Shipped, In transit, Delivered.",
     "clientVoit4": "Your photos and videos of the order.",
     "clientVoit5": "The carrier and the tracking number.",
     "clientVoit6": "The detailed history of tracking events.",
     "transporteurs": "Carriers",
-    "transporteursTexte": "The carrier is recognised from the tracking number. The <analyses>Analytics</analyses> screen shows how your shipments split between carriers."
+    "transporteursTexte": "The carrier is recognized from the tracking number. The <analyses>Analytics</analyses> screen shows how your shipments split between carriers."
   },
   "tableau": {
     "titre": "Dashboard",
@@ -2648,7 +2648,7 @@
     },
     "actions": {
       "titre": "Quick actions",
-      "marque": "Customise my customer page",
+      "marque": "Customize my customer page",
       "envois": "View my shipments",
       "analyses": "Open analytics"
     },
@@ -2665,7 +2665,7 @@
       "jour": "Day",
       "ouvertures": "Opens",
       "zoneSemaines": "Orders over {n} weeks. Use the left and right arrows to read each week.",
-      "zoneLiens": "Customer links: {n} opens. Use the left and right arrows to read each day."
+      "zoneLiens": "Customer links: {n, plural, one {# open} other {# opens}}. Use the left and right arrows to read each day."
     },
     "colisTotal": "{n, plural, one {# parcel} other {# parcels}}",
     "silenceJours": "No movement · {n} d"
@@ -2690,14 +2690,14 @@
       "adresseSuivie": "Link followed. If a second confirmation is requested on your old address, follow it too: the address shown here is the one your account really has.",
       "changerMotDePasse": "Change password",
       "changement": "Changing…",
-      "motDePasseChange": "Password changed. Your other devices have been signed out.",
-      "sansMotDePasse": "Signing in with Google? Set a password first with Forgot password.",
+      "motDePasseChange": "Password changed. Your other devices have been logged out.",
+      "sansMotDePasse": "Signing in with Google? Set a password first with “Forgot your password?”",
       "annuler": "Cancel",
       "nomAide": "The name shown in your workspace, and its initials.",
       "nomMax": "80 characters maximum.",
-      "adresseAide": "The sign-in address of your account. A confirmation link is sent to the new address.",
+      "adresseAide": "The email address you use to log in. A confirmation link is sent to the new address.",
       "adresseNote": "Your address only changes once that link is followed.",
-      "motDePasseAide": "Changing your password signs out your other devices."
+      "motDePasseAide": "Changing your password logs out your other devices."
     },
     "preferences": {
       "aide": "Tailor your DropLink experience.",
@@ -2707,15 +2707,15 @@
     },
     "securite": {
       "sessions": "Active sessions",
-      "sessionsAide": "Manage your signed-in devices.",
-      "fermer": "Sign out other devices",
-      "fermeture": "Signing out…",
-      "ferme": "Your other devices have been signed out.",
+      "sessionsAide": "Manage your logged-in devices.",
+      "fermer": "Log out other devices",
+      "fermeture": "Logging out…",
+      "ferme": "Your other devices have been logged out.",
       "cetAppareil": "This device",
       "activeLe": "Last active: {date}",
-      "appareilInconnu": "Unrecognised device",
+      "appareilInconnu": "Unrecognized device",
       "lectureImpossible": "Your sessions can't be read right now. Please try again.",
-      "fermerAide": "Sign out all your other devices. This one stays signed in.",
+      "fermerAide": "Log out all your other devices. This one stays logged in.",
       "appareilsFiables": {
         "titre": "Trusted devices",
         "aide": "Devices that skip your code.",
@@ -2748,7 +2748,7 @@
         "desactiveeOk": "Two-factor authentication disabled.",
         "fermer": "Close",
         "desactivee": "Off",
-        "lectureImpossible": "Two-step verification status can't be read right now."
+        "lectureImpossible": "Two-factor authentication status can't be read right now."
       }
     },
     "abonnement": {
@@ -2756,11 +2756,11 @@
       "aide": "Manage your subscription and unlock more features.",
       "planActuel": "Current plan",
       "gratuit": "Free",
-      "gratuitAide": "Discover DropLink and its core features.",
+      "gratuitAide": "Get started with DropLink and its core features.",
       "pro": "Pro",
       "proAide": "Your Pro subscription is active.",
       "inclusPhotos": "Photos, videos and automatic tracking",
-      "inclusCouleurs": "Customer page in your colours",
+      "inclusCouleurs": "Customer page in your colors",
       "inclusTotal": "{n, plural, one {# order in total} other {# orders in total}}",
       "proLien": "The link under your name",
       "proMarque": "Without the “Powered by DropLink” card",
@@ -2771,12 +2771,12 @@
     },
     "support": {
       "aide": "Need help?",
-      "centre": "Help centre",
+      "centre": "Help center",
       "centreAide": "Browse our guides and tutorials.",
       "ouvrir": "Open"
     },
     "erreurs": {
-      "session": "Your session has expired. Please sign in again.",
+      "session": "Your session has expired. Please log in again.",
       "invalide": "Please check what you entered.",
       "motDePasseActuel": "Current password is incorrect.",
       "trop": "Too many attempts. Try again in a few minutes.",
@@ -2839,7 +2839,7 @@
     "libelle": "Verification code",
     "bouton": "Verify",
     "enCours": "Verifying…",
-    "perdu": "Lost your device? Add the backup key you noted when enabling it to a new authenticator app.",
+    "perdu": "Lost your device? Add the backup key you wrote down when you enabled two-factor authentication to a new authenticator app.",
     "pasVous": "Not your account?",
     "erreurs": {
       "code": "Incorrect or expired code. Enter the code shown now.",
@@ -2867,7 +2867,7 @@
     "enAttente": "Awaiting reply",
     "refusee": "Dispute rejected on {date}",
     "refuseeBadge": "Rejected",
-    "reponse": "DropLink’s reply",
+    "reponse": "DropLink's reply",
     "restantes": "{n, plural, one {# more dispute} other {# more disputes}} possible for this block.",
     "aucuneRestante": "All three disputes for this block have been used.",
     "recontester": "Dispute again",
@@ -2881,7 +2881,7 @@
       "plafond": "All three disputes for this block have been used.",
       "non-bloque": "This link is no longer blocked. Reload the page.",
       "introuvable": "This order cannot be found. Reload the page.",
-      "session": "Your session has expired. Sign in again.",
+      "session": "Your session has expired. Log in again.",
       "ecriture": "The dispute could not be saved. Nothing was sent."
     },
     "motif": "Reason:"
@@ -2892,14 +2892,14 @@
     "sousTitre": "What the Pro plan changes — and what it doesn't.",
     "eyebrow": "Pro plan",
     "accroche": "Your links, under your name",
-    "intro": "Four things change, and they are the only ones. Everything else, photos, videos, automatic tracking and your colours, is already in the free plan.",
+    "intro": "Four things change, and they are the only ones. Everything else, photos, videos, automatic tracking and your colors, is already in the free plan.",
     "gratuit": "Free",
     "pro": "Pro",
     "parMois": "{prix} / month",
     "passer": "Upgrade to Pro",
     "dejaPro": "Your Pro plan is active",
     "pasEncoreOuvert": "Subscriptions aren't open yet. Get in touch and we'll activate your account.",
-    "facture": "Payment is handled by Lemon Squeezy, who issues the invoice. Cancel any time: your plan stays active until the end of the period you already paid for.",
+    "facture": "Payment is handled by Lemon Squeezy, which issues the invoice. Cancel any time: your plan stays active until the end of the period you already paid for.",
     "features": {
       "lien": {
         "titre": "The link under your name",
@@ -2911,7 +2911,7 @@
       },
       "commandes": {
         "titre": "A cap that resets",
-        "texte": "A free account is capped on a lifetime total of orders. On Pro, the cap becomes monthly again.",
+        "texte": "A free account is capped at a lifetime total of orders. On Pro, the cap becomes monthly again.",
         "texteNombre": "A free account is capped at {n} orders FOR LIFE. On Pro, the cap becomes monthly again."
       },
       "colis": {
@@ -2925,7 +2925,7 @@
       "adresse": "Customer page address",
       "carte": "“Powered by DropLink” card",
       "medias": "Photos, videos and automatic tracking",
-      "couleurs": "Page branded in your colours",
+      "couleurs": "Page branded in your colors",
       "aVie": "<b>{n}</b> in total, for life",
       "parMois": "<b>{n}</b> per month",
       "mensuel": "Monthly cap",
@@ -2999,10 +2999,10 @@
   },
   "tarifs": {
     "metaTitre": "Pricing — DropLink",
-    "metaDescription": "Start free, no credit card needed. The Pro plan is {prix} a month, no commitment: links under your name, a page without the DropLink mention and a cap that resets every month.",
+    "metaDescription": "Start free, no credit card needed. The Pro plan is {prix} a month, no commitment: links under your name, a page without DropLink branding and a cap that resets every month.",
     "eyebrow": "Pricing",
     "titre": "Free to start, Pro when you grow",
-    "intro": "Photos, videos, automatic tracking and a page in your colours: everything DropLink does is already in the free plan. Pro adds four things, and only four.",
+    "intro": "Photos, videos, automatic tracking and a page in your colors: everything DropLink does is already in the free plan. Pro adds four things, and only four.",
     "gratuitSous": "No credit card needed",
     "gratuitQuota": "{n} orders in total, for life",
     "gratuitQuotaSansNombre": "A lifetime total of orders",
@@ -3033,7 +3033,7 @@
       "pastilleUrl": ", droplink.fr/your-shop",
       "titre1": "One link.",
       "titre2": "The whole order.",
-      "chapo": "Photos, tracking number and delivery date on a page in your colours. Your customer follows along on their own, with no account and no messages to you.",
+      "chapo": "Photos, tracking number and delivery date on a page in your colors. Your customer follows along on their own, with no account and no messages to you.",
       "cta": "Start for free",
       "cta2": "See a customer page"
     },
@@ -3044,7 +3044,7 @@
       "compte": "No account for your customer"
     },
     "scene": {
-      "description": "A link sent in a chat unfolds into a customer page: Atelier Nord’s order 6A4D21, its tracking in transit with an estimated delivery of October 1–2, and four photos approved by Léa M.",
+      "description": "A link sent in a chat unfolds into a customer page: Atelier Nord's order 6A4D21, its tracking in transit with an estimated delivery of October 1–2, and four photos approved by Léa M.",
       "boutique": "Atelier Nord",
       "pour": "An order for Léa M.",
       "pourCourt": "for Léa M.",
@@ -3058,7 +3058,7 @@
       "approuvees": "Approved",
       "parLea": "by Léa M.",
       "aLea": "to Léa M.",
-      "message": "Your order is ready, it’s all on this link:",
+      "message": "Your order is ready, it's all on this link:",
       "commandeRef": "Order {ref}",
       "vu": "Seen",
       "description2": "Sneakers and streetwear, shipped with care."
@@ -3073,9 +3073,9 @@
     "probleme": {
       "titre1": "Ten messages per order.",
       "titre2": "Always the same ones.",
-      "q1": "Where’s my parcel?",
+      "q1": "Where's my parcel?",
       "q2": "Can you send me the photos again?",
-      "q3": "What’s the tracking number?",
+      "q3": "What's the tracking number?",
       "q4": "When will it arrive?",
       "q5": "Did you actually ship it?",
       "q6": "Has it moved since yesterday?",
@@ -3091,11 +3091,11 @@
       "chapo": "An order ready to share in four steps. Every change reaches the customer page, and the link never changes.",
       "gestes": "The four steps",
       "g1": "The customer",
-      "g1t": "A name or a nickname is enough. No address to enter, no account to create for them.",
+      "g1t": "A name or a handle is enough. No address to enter, no account to create for them.",
       "g2": "The photos",
       "g2t": "Drop in your photos and videos, up to {n} per order. The first one is the cover.",
       "g3": "The tracking",
-      "g3t": "Paste the number: the carrier is recognised and the steps update on their own.",
+      "g3t": "Paste the number: the carrier is recognized and the steps update on their own.",
       "g4": "The link",
       "g4t": "One click on Share and the link is copied. It never changes, even when you edit the order.",
       "commandes": "Orders",
@@ -3103,7 +3103,7 @@
       "partager": "Share",
       "copie": "Link copied",
       "laCommande": "The order",
-      "champClient": "Customer name or nickname",
+      "champClient": "Customer name or handle",
       "exClient": "E.g. Léa M.",
       "aideClient": "Free text. Your customer has no account.",
       "champRef": "Product reference",
@@ -3123,24 +3123,24 @@
       "etiquette": "The customer page",
       "titre": "What your customer opens.",
       "chapo": "One page per order, no app and no account. Everything is there, so you have nothing left to resend.",
-      "couleursTitre": "In your colours, readable whatever happens",
+      "couleursTitre": "In your colors, readable no matter what",
       "couleursTexte": "Pick any shade. If it is too light for text, the page adjusts it on its own to stay readable.",
-      "nuancier": "Shop colour",
+      "nuancier": "Shop color",
       "violet": "Violet",
       "corail": "Coral",
       "vert": "Green",
       "jaune": "Yellow",
-      "libre": "Choose your colour",
-      "choisie": "Chosen colour",
+      "libre": "Choose your color",
+      "choisie": "Chosen color",
       "ajuste": "Text adjusted:",
       "livraisonTitre": "A date, not a “soon”",
-      "livraisonTexte": "The estimated delivery window and the parcel’s four steps, each dated.",
+      "livraisonTexte": "The estimated delivery window and the parcel's four steps, each dated.",
       "validationTitre": "They approve the photos before shipping",
-      "validationTexte": "One button, and you know it’s the right item, the right size. Try it.",
+      "validationTexte": "One button, and you know it's the right item, the right size. Try it.",
       "languesTitre": "In the language you choose",
       "languesTexte": "French, English or Simplified Chinese.",
       "historiqueTitre": "Every step of the parcel",
-      "historiqueTexte": "The carrier’s history, collected automatically. You no longer have to look it up for them.",
+      "historiqueTexte": "The carrier's history, collected automatically. You no longer have to look it up for them.",
       "historiqueEtiquette": "Sample tracking history",
       "h1": "Parcel in transit",
       "h1lieu": "Wissous",
@@ -3152,13 +3152,13 @@
       "etiquette": "For sellers",
       "titre1": "Nothing gets past you.",
       "titre2": "Not even a stuck parcel.",
-      "chapo": "Your space spots what’s wrong before your customer does, and tells you who opened their link.",
+      "chapo": "Your space spots what's wrong before your customer does, and tells you who opened their link.",
       "alertesTitre": "Alerts, not surprises",
       "alertesTexte": "A link never opened, a parcel with no news for ten days: the bell tells you.",
       "vuesTitre": "Who looked, and how many times",
       "vuesTexte": "Every link opening is counted. A customer who keeps coming back is a reassured customer.",
       "ouvertures": "opens over the last 30 days",
-      "vues": "{n} views",
+      "vues": "{n, plural, one {# view} other {# views}}",
       "envoisTitre": "All your parcels on one screen",
       "envoisTexte": "The latest update of every parcel, collected from the carrier. No more opening ten tracking sites.",
       "enTransit": "In transit",
@@ -3189,7 +3189,7 @@
       "medias": "Photos and videos",
       "parCommande": "{n} per order",
       "suiviAuto": "Automatic carrier tracking",
-      "couleurs": "Page in your colours",
+      "couleurs": "Page in your colors",
       "lien": "The link in your name",
       "lienUrl": "droplink.fr/your-shop/…",
       "sansMention": "Your page, without DropLink branding",
@@ -3202,7 +3202,7 @@
       "q1": "Does my customer need to create an account?",
       "r1": "No. They open the link and see their order, on a phone or a computer. No app, no password.",
       "q2": "Which carriers are tracked?",
-      "r2": "Paste the tracking number: the carrier is detected automatically, and you can pick it by hand if it isn’t. The steps update without you having to come back to the order.",
+      "r2": "Paste the tracking number: the carrier is detected automatically, and you can pick it by hand if it isn't. The steps update without you having to come back to the order.",
       "q3": "Can I edit the order after sending the link?",
       "r3": "Yes, as often as you like. Photos, number, status: your customer sees the up-to-date version on the same link, which never changes.",
       "q4": "What happens after the {n} free orders?",
@@ -3240,7 +3240,7 @@
         "n2lieu": "Wissous",
         "consulte": "Link viewed",
         "consultations": "views",
-        "derniere": "Last one {quand}",
+        "derniere": "Last viewed {quand}",
         "valide1": "Photos approved",
         "valide2": "by your customer.",
         "mouvementHier": "Moved yesterday",

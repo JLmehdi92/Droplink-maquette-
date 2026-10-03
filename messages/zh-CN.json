@@ -1218,7 +1218,7 @@
     "livreesSur": "{total} 单中的 {n} 单",
     "reponsesSur": "{total} 单中有 {n} 单已回复",
     "surColisLivres": "基于 {n} 个已送达包裹",
-    "jours": "{n} 天",
+    "jours": "{n, number} 天",
     "evolution": {
       "titre": "订单趋势",
       "aide": "所选周期内创建的订单数。"
@@ -1249,7 +1249,7 @@
       "propulse": "技术支持",
       "slogan": "简单而强大的物流链接。"
     },
-    "vuesParCommande": "每个已打开订单 {n} 次浏览"
+    "vuesParCommande": "每个已打开订单 {n, number} 次浏览"
   },
   "commandes": {
     "titre": "订单",

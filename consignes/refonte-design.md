@@ -1670,6 +1670,41 @@ pages privées, puis un contrôleur qui applique la grille. Premier passage : **
   en chinois).
 - Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1302/1303 (alarme Railway).
 
+### ▶️ 03/10/2026 — relecture des trois langues : l'anglais (session cloud)
+
+Même méthode que le français : un relecteur unique sur les 2 329 clés, le français en regard pour
+le sens ; corrections passées par l'outil qui refuse toute variable changée (les deux pluriels
+ajoutés, refusés comme prévu, appliqués après lecture des appelants).
+- **188 clés corrigées** : orthographe 50 (le catalogue mélangeait britannique et américain :
+  25 « colour », 7 « recognise », licence, cancelled, catalogue, centre… — tout en anglais
+  américain, sauf le nom propre « OCBC Centre »), tournure 45 (« No orders yet » et non le calque
+  « No order », « Learn more about DropLink »), cohérence 43 (log in / log out partout sauf
+  « Sign in with Google », terme de Google ; customer page, seller, limit, dispute — 5 « appeal »
+  de l'administration —, handle), ponctuation 30 (guillemets “ ”, plus de « » ; apostrophe
+  droite, la dominante), grammaire 12, pluriel 4, contresens 3, accord 1.
+- **Les trois contresens** : « Photo completion rate » pour le taux d'APPROBATION des photos ;
+  « the customer comes back » sans le « plusieurs fois » qui porte le sens ; « twenty media,
+  including three videos » qui rendait trois vidéos obligatoires (c'est un maximum).
+- **Pluriels réparés dans le CODE aussi** : `analyses.jours` et `analyses.vuesParCommande`
+  recevaient un nombre déjà formaté en chaîne, d'où « 1 days » possible ; `compteurs-app.tsx`
+  passe désormais le nombre et les catalogues le formatent (`#` en français et en anglais,
+  `{n, number}` en chinois). Mesuré : « 1 day », « 1.5 days », « 1,5 jour », « 1 234,5 jours ».
+  Le français avait le même défaut sur `accueil.vendeur.vues` (« 1 vues ») : corrigé.
+- **Non corrigé, voulu** : `page-publique.suivi.dernierMouvement` et `silenceTitre` restent en
+  `t.raw().replace("{n}")` — ils ne s'affichent qu'à 2 jours et plus, et à 10 jours et plus ;
+  « cap » (pages marketing) et « limit » (application) coexistent, tous deux justes ; le fond
+  légal (« sole trader », « by post ») n'est pas touché.
+- **À reporter dans le design system** (`ui_kits/legal/contenu-legal-en.js`), orthographe,
+  grammaire ou ponctuation seulement : `legal.pages.conditions.sections.{3.blocs.0.p,
+  6.blocs.1.ul.1, 7.blocs.1.p, 8.blocs.0.p, 10.blocs.0.ul.2, 11.blocs.2.p}` et
+  `legal.pages.confidentialite.sections.{1.blocs.1.table.lignes.2.0, 2.blocs.0.table.lignes.4.0,
+  4.blocs.0.table.lignes.5.1, 4.blocs.0.table.lignes.8.1, 6.blocs.1.table.lignes.2.1,
+  8.blocs.0.ul.3}` (licence → license, cancelled → canceled, towards → toward, colour, recognise,
+  defence ; « may be interrupted for maintenance, may change, or may be discontinued » ; « Until
+  the customer unsubscribes or the order is deleted » ; « with a limited lifetime » ; une virgule
+  après tiret retirée). Plus deux libellés du formulaire de signalement (`legal.signalement.*`).
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1302/1303 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

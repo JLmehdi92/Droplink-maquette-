@@ -1218,7 +1218,7 @@
     "livreesSur": "{n} sur {total} créées",
     "reponsesSur": "{n, plural, one {# réponse} other {# réponses}} sur {total}",
     "surColisLivres": "sur {n, plural, one {# colis livré} other {# colis livrés}}",
-    "jours": "{n} jours",
+    "jours": "{n, plural, one {# jour} other {# jours}}",
     "evolution": {
       "titre": "Évolution des commandes",
       "aide": "Nombre de commandes créées sur la période sélectionnée."
@@ -1249,7 +1249,7 @@
       "propulse": "Propulsé par",
       "slogan": "Des liens de suivi simples et puissants."
     },
-    "vuesParCommande": "{n} vues par commande ouverte"
+    "vuesParCommande": "{n, plural, one {# vue par commande ouverte} other {# vues par commande ouverte}}"
   },
   "commandes": {
     "titre": "Commandes",
@@ -3158,7 +3158,7 @@
       "vuesTitre": "Qui a regardé, et combien de fois",
       "vuesTexte": "Chaque ouverture de lien est comptée. Un client qui revient souvent est un client rassuré.",
       "ouvertures": "ouvertures sur 30 jours",
-      "vues": "{n} vues",
+      "vues": "{n, plural, one {# vue} other {# vues}}",
       "envoisTitre": "Tous vos colis sur un écran",
       "envoisTexte": "Le dernier point de chaque colis, relevé chez le transporteur. Vous n'ouvrez plus dix sites de suivi.",
       "enTransit": "En transit",

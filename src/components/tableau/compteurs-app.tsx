@@ -57,7 +57,7 @@ export async function CompteursApp({
     {
       cle: "liensOuverts",
       valeur: format.number(activite.vuesTotales),
-      dessous: vues === null ? t("leClientRevient") : t("vuesParCommande", { n: format.number(vues) }),
+      dessous: vues === null ? t("leClientRevient") : t("vuesParCommande", { n: vues }),
       cleDessous: String(vues),
     },
     {
@@ -68,7 +68,7 @@ export async function CompteursApp({
     },
     {
       cle: "delaiLivraison",
-      valeur: delai?.jours == null ? "—" : t("jours", { n: format.number(delai.jours) }),
+      valeur: delai?.jours == null ? "—" : t("jours", { n: delai.jours }),
       // Une lecture en panne se dit illisible : « sur 0 colis livré » serait un zéro inventé.
       dessous: delai === null ? t("indisponibleCourt") : t("surColisLivres", { n: delai.colis }),
       cleDessous: delai === null ? "-" : String(delai.colis),
