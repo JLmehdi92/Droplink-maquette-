@@ -1420,7 +1420,8 @@
     },
     "resume": "Summary",
     "nbPhotos": "{n, plural, one {# photo} other {# photos}}",
-    "lienCopie": "{client}'s link copied"
+    "lienCopie": "{client}'s link copied",
+    "exportTronque": "Export limited to {n, number} rows. Narrow the filters to get the rest."
   },
   "editeur": {
     "historique": {
@@ -2855,7 +2856,7 @@
     "texte": "Since {date}, your customer sees “This link is no longer valid” instead of their order. If this is a mistake, dispute the block: explain why — an image can help.",
     "contester": "Dispute the block",
     "explication": "Your explanation",
-    "explicationAide": "At least {n} characters. The DropLink team reads it along with the image you attach.",
+    "explicationAide": "At least {n, number} characters. The DropLink team reads it along with the image you attach.",
     "image": "An image (optional)",
     "joindre": "Attach an image",
     "changer": "Change image",
@@ -2873,7 +2874,7 @@
     "aucuneRestante": "All three disputes for this block have been used.",
     "recontester": "Dispute again",
     "erreur": {
-      "saisie": "The explanation must be at least 20 characters long.",
+      "saisie": "The explanation must be at least {n, number} characters long.",
       "image": "The image could not be attached. Try again, or send without an image.",
       "type": "This image format is not accepted: JPEG, PNG or WebP.",
       "taille": "This image exceeds the allowed size.",
@@ -2913,7 +2914,7 @@
       "commandes": {
         "titre": "A cap that resets",
         "texte": "A free account is capped at a lifetime total of orders. On Pro, the cap becomes monthly again.",
-        "texteNombre": "A free account is capped at {n} orders for life. On Pro, the cap becomes monthly again."
+        "texteNombre": "A free account is capped at {n, plural, one {# order} other {# orders}} for life. On Pro, the cap becomes monthly again."
       },
       "colis": {
         "titre": "Tracking that keeps up",

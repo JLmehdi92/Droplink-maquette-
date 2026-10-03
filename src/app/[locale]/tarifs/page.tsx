@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, Crown, Tag } from "lucide-react";
@@ -46,7 +47,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const langue = estLangueSupportee(locale) ? locale : LANGUE_DEFAUT;
   const t = await getTranslations({ locale: langue, namespace: "tarifs" });
-  const format = await getFormatter({ locale: langue });
+  const format = await getFormateur({ locale: langue });
   const description = t("metaDescription", {
     prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
   });
@@ -66,7 +67,7 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
   const p = await getTranslations("passerPro");
   const nav = await getTranslations("navigation");
   const a = await getTranslations("accueil");
-  const format = await getFormatter();
+  const format = await getFormateur();
 
   // Le client serveur ordinaire : `anon` pour un visiteur, `authenticated` pour un
   // vendeur connecté — les deux ont le droit de lire ces deux nombres (096, 176, 196).

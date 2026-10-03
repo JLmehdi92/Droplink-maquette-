@@ -1,5 +1,6 @@
 import "server-only";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import { LANGUES, type Langue } from "@/i18n/config";
 import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
 import { fourchetteDates } from "@/lib/page-publique/fourchette";
@@ -69,7 +70,7 @@ export async function libellesApercu(langue: Langue): Promise<LibellesApercu> {
   const client = await getTranslations({ locale: langue, namespace: "page-publique" });
   const marque = await getTranslations({ locale: langue, namespace: "marque" });
   const accueil = await getTranslations({ locale: langue, namespace: "onboarding" });
-  const format = await getFormatter({ locale: langue });
+  const format = await getFormateur({ locale: langue });
   // Les dates de DÉMONSTRATION de l'aperçu : relatives à aujourd'hui, pour que
   // l'aperçu ne vieillisse pas, et formatées par la langue de la page client.
   const jour = (decalage: number) =>

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { ArrowLeft, Globe } from "lucide-react";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
@@ -71,7 +72,7 @@ export default async function PageDoublons({
   ]);
 
   const t = await getTranslations("admin");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const base = `/${langue}/admin/comptes`;
 
   /* « EN BREF » DÉCRIT CE QUI EST AFFICHÉ. Au-delà de 100 identifiants, la phrase du plafond

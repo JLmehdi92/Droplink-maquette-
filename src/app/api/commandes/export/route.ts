@@ -1,4 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getTranslations } from "next-intl/server";
+import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
 import { lireProfilVendeur, SessionIndisponible } from "@/lib/comptes/profil";
 import { exporterCommandes } from "@/lib/commandes/export-csv";
 import { ParametresListe } from "@/lib/commandes/liste";
@@ -104,7 +106,14 @@ export async function GET(requete: NextRequest): Promise<NextResponse> {
     curseur: null,
   });
 
-  const resultat = await exporterCommandes(parametres, origine, profil.nomDeLien);
+  // La ligne « export coupé » dans la langue de l'interface du vendeur.
+  const t = await getTranslations({
+    locale: estLangueSupportee(profil.langue) ? profil.langue : LANGUE_DEFAUT,
+    namespace: "commandes",
+  });
+  const resultat = await exporterCommandes(parametres, origine, profil.nomDeLien, undefined, (plafond) =>
+    t("exportTronque", { n: plafond }),
+  );
 
   emettreApres(
     EVENEMENTS.EXPORT_CSV,

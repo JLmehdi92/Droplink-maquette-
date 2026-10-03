@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { ArrowRight, BadgeCheck, Check, ChevronRight, Crown, Link as LinkIcon, Package, Truck } from "lucide-react";
 import { LienEcran } from "@/components/lien-ecran";
@@ -70,7 +71,7 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
   await exigerVendeur(langue);
 
   const t = await getTranslations("passerPro");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const supabase = await creerClientServeur();
 
   /*
@@ -216,7 +217,7 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
                   phrase ne cite aucun nombre. */}
               <p>
                 {cle === "commandes" && aVie !== null
-                  ? t("features.commandes.texteNombre", { n: nombre(aVie) })
+                  ? t("features.commandes.texteNombre", { n: aVie })
                   : t(`features.${cle}.texte`)}
               </p>
             </div>

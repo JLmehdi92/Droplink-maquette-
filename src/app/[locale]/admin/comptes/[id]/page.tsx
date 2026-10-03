@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { DialogueSuspension } from "@/components/admin/dialogue-suspension";
 import { EncartTrace } from "@/components/admin/encart-trace";
@@ -84,7 +85,7 @@ export default async function FicheCompte({
 
   const t = await getTranslations("admin");
   const tMarque = await getTranslations("marque");
-  const format = await getFormatter();
+  const format = await getFormateur();
 
   const suspendu = fiche.statut === "suspended";
   const taille = mettreOctetsALEchelle(fiche.stockageOctets);

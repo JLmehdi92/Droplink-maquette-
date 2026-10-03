@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { TableauEnvois } from "@/components/envois/tableau-envois";
 import { onboardingAFaire } from "@/lib/comptes/profil";
@@ -79,7 +80,7 @@ export default async function Envois({
   ]);
 
   const t = await getTranslations("envois");
-  const format = await getFormatter();
+  const format = await getFormateur();
 
   /*
    * ⚠️ CET ÉCRAN NE DÉGRADE PAS, ET C'EST UNE DÉCISION, pas un oubli.

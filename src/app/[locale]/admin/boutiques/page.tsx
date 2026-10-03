@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { EncartTrace } from "@/components/admin/encart-trace";
@@ -97,7 +98,7 @@ export default async function AdminBoutiques({
   ]);
 
   const t = await getTranslations("admin");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const base = `/${langue}/admin/boutiques`;
 
   /** L'URL d'un filtre, en conservant la recherche et en JETANT le curseur. */

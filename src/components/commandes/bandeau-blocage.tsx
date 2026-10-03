@@ -183,7 +183,8 @@ export function BandeauBlocage({
 
       {erreur === null ? null : (
         <p role="alert" className="text-[13px] text-ds-erreur-encre">
-          {t(`erreur.${erreur}`)}
+          {/* Le minimum vient de la base, jamais écrit dans le message (passe du 03/10/2026). */}
+          {t(`erreur.${erreur}`, { n: explicationMin })}
         </p>
       )}
 

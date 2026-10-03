@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { BarresAdmin } from "@/components/admin/barres-admin";
@@ -70,7 +71,7 @@ export default async function SurveillanceAdmin({
   const surveillance = await lireSurveillance(supabase, seuils.retardMinutes);
 
   const t = await getTranslations("admin");
-  const format = await getFormatter();
+  const format = await getFormateur();
 
   // LES PLAFONDS VIENNENT DE LA CONFIGURATION, jamais d'une constante recopiée :
   // une barre remplie contre un plafond faux est pire qu'une barre absente.

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { BoutonAppliquerLangue } from "@/components/parametres/bouton-appliquer-langue";
 import { redirect } from "next/navigation";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import {
   ArrowRight,
@@ -113,7 +114,7 @@ export default async function Parametres({
   const [t, tl, format, supabase] = await Promise.all([
     getTranslations("parametres"),
     getTranslations("marque.langue"),
-    getFormatter(),
+    getFormateur(),
     creerClientServeur(),
   ]);
   const requete = await searchParams;

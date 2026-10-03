@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AnnonceAuChargement } from "@/components/app/annonce";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import {
   Archive,
   ArchiveRestore,
@@ -70,7 +71,7 @@ const ETAPES = ["preparation", "expedie", "en_transit", "livre"] as const;
 
 export async function OutilPeriode({ base, parametres }: { readonly base: string; readonly parametres: ParametresListe }) {
   const t = await getTranslations("commandes");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const jour = (valeur: string): string =>
     format.dateTime(new Date(valeur + "T00:00:00Z"), { day: "numeric", month: "short", timeZone: "UTC" });
   const libelle =
@@ -251,7 +252,7 @@ export async function BarreListe({
 export async function PucesFiltres({ base, parametres }: { readonly base: string; readonly parametres: ParametresListe }) {
   if (!listeFiltree(parametres)) return null;
   const t = await getTranslations("commandes");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const jour = (valeur: string): string =>
     format.dateTime(new Date(valeur + "T00:00:00Z"), { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
   const periode =
@@ -311,7 +312,7 @@ export async function ListeCommandes({
   readonly total: number | null;
 }) {
   const t = await getTranslations("commandes");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const maintenant = new Date();
   const retour = lienListe(base, parametres, {});
   const geste = cheminGesteDeListe(langue);

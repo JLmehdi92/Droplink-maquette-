@@ -1420,7 +1420,8 @@
     },
     "resume": "Résumé",
     "nbPhotos": "{n, plural, one {# photo} other {# photos}}",
-    "lienCopie": "Lien de {client} copié"
+    "lienCopie": "Lien de {client} copié",
+    "exportTronque": "Export limité à {n, number} lignes. Affinez les filtres pour obtenir le reste."
   },
   "editeur": {
     "historique": {
@@ -2855,7 +2856,7 @@
     "texte": "Depuis le {date}, votre client voit « Ce lien n’est plus valable » à la place de sa commande. Si c’est une erreur, contestez le blocage : expliquez pourquoi, une image peut aider.",
     "contester": "Contester le blocage",
     "explication": "Votre explication",
-    "explicationAide": "Au moins {n} caractères. L’équipe DropLink la lit avec l’image que vous joignez.",
+    "explicationAide": "Au moins {n, number} caractères. L’équipe DropLink la lit avec l’image que vous joignez.",
     "image": "Une image (facultative)",
     "joindre": "Joindre une image",
     "changer": "Changer d’image",
@@ -2873,7 +2874,7 @@
     "aucuneRestante": "Les trois contestations de ce blocage ont été utilisées.",
     "recontester": "Contester à nouveau",
     "erreur": {
-      "saisie": "L’explication doit compter au moins 20 caractères.",
+      "saisie": "L’explication doit compter au moins {n, number} caractères.",
       "image": "L’image n’a pas pu être jointe. Réessayez, ou envoyez sans image.",
       "type": "Ce format d’image n’est pas accepté : JPEG, PNG ou WebP.",
       "taille": "Cette image dépasse la taille permise.",
@@ -2913,7 +2914,7 @@
       "commandes": {
         "titre": "Un plafond qui se recharge",
         "texte": "Un compte gratuit est borné à un total de commandes à vie. En Pro, le plafond redevient mensuel.",
-        "texteNombre": "Un compte gratuit est borné à {n} commandes à vie. En Pro, le plafond redevient mensuel."
+        "texteNombre": "Un compte gratuit est borné à {n, plural, one {# commande} other {# commandes}} à vie. En Pro, le plafond redevient mensuel."
       },
       "colis": {
         "titre": "Le suivi qui suit",

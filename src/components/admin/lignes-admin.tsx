@@ -1,4 +1,4 @@
-import { getFormatter } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import { echelle } from "@/components/admin/echelle";
 
 /**
@@ -24,7 +24,7 @@ export async function LignesAdmin({
   readonly fin: string;
 }) {
   const toutes = series.flatMap((s) => s.valeurs.filter((v): v is number => v !== null));
-  const format = await getFormatter();
+  const format = await getFormateur();
   const { plafond, graduations } = echelle(Math.max(0, ...toutes), 4);
   const n = Math.max(2, ...series.map((s) => s.valeurs.length));
   const x = (i: number) => (i / (n - 1)) * L;

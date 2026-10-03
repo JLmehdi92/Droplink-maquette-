@@ -3,7 +3,8 @@
 import { useId, useRef, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { DialogueAdmin, confirmerEtRecharger, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useFormateur } from "@/lib/format/formateur-client";
 import { BoutonAction } from "@/components/bouton-action";
 import {
   debloquerLien,
@@ -47,7 +48,7 @@ export function ContestationLien({
   const t = useTranslations("admin.contestation");
   const td = useTranslations("admin.dialogue");
   const idTitre = useId();
-  const format = useFormatter();
+  const format = useFormateur();
   const dialogue = useRef<HTMLDialogElement>(null);
   const [lecture, setLecture] = useState<Lecture>({ etat: "attente" });
   const [reponse, setReponse] = useState("");

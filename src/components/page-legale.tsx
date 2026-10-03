@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import { ArrowRight, CalendarDays, ChevronDown, FileText, House, ListFilter, Scale, Shield } from "lucide-react";
 import { z } from "zod";
 import { Encart, Liste, Paragraphe, SousTitre, Tableau } from "@/components/docs/briques";
@@ -153,7 +154,7 @@ export async function PageLegale({
   readonly sorte: SorteLegale;
 }) {
   const t = await getTranslations("legal");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const dateMaj = format.dateTime(DERNIERE_MAJ, {
     year: "numeric",
     month: "long",

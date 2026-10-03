@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
@@ -136,7 +137,7 @@ export default async function AdminCommandes({
     contestations.statut === "ok" && contestations.ids.has(l.id);
 
   const t = await getTranslations("admin");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const base = `/${langue}/admin/commandes`;
 
   /** L'URL d'une vue : les critères donnés, et JAMAIS le curseur — il encode

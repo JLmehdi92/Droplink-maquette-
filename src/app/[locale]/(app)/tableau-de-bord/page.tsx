@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { ChevronRight } from "lucide-react";
 import { SelecteurPeriode } from "@/components/tableau/selecteur-periode";
@@ -114,7 +115,7 @@ export default async function TableauDeBord({
   const t = await getTranslations("tableau");
   const ta = await getTranslations("analyses");
   const nav = await getTranslations("navigation");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const base = `/${langue}/tableau-de-bord`;
   const nom = profil.nomAffiche ?? profil.nomBoutique;
 

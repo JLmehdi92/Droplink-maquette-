@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import {
   Archive,
   ArchiveRestore,
@@ -62,7 +63,7 @@ export async function HistoriqueCommande({
   readonly lignes: readonly LigneHistorique[];
 }) {
   const t = await getTranslations("editeur.historique");
-  const format = await getFormatter();
+  const format = await getFormateur();
 
   /*
    * ⚠️ LA DATE EST ABSOLUE, ET ELLE ETAIT RELATIVE.

@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import { ChevronDown, ChevronsUpDown, CircleAlert, Ellipsis, ExternalLink, Package, Search } from "lucide-react";
 import { decrireSilence } from "@/lib/tracking/silence";
 import type { CompteursEnvois, Etat, EvolutionEnvois, PageEnvois, ParametresEnvois } from "@/lib/envois/liste";
@@ -64,7 +65,7 @@ export async function TableauEnvois({
   readonly maintenant: Date;
 }) {
   const t = await getTranslations("envois");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const aUnFiltre =
     parametres.etat !== null || parametres.silencieux || parametres.abandonnes !== null || parametres.transporteur !== null || parametres.q !== null;
   const commandes = base.replace(/\/envois$/, "/commandes");

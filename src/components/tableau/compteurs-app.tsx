@@ -1,6 +1,7 @@
 import { ValeurRoulee } from "@/components/app/couche-v4";
 import { Changeant } from "@/components/app/changeant";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import {
   ecartPeriodePrecedente,
   vuesParCommandeOuverte,
@@ -25,7 +26,7 @@ export async function CompteursApp({
   readonly delai: DelaiLivraison | null;
 }) {
   const t = await getTranslations("analyses");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const ecart = ecartPeriodePrecedente(activite);
   const reponses = activite.qcApprouve + activite.qcRefuse;
   const validation = reponses === 0 ? null : Math.round((activite.qcApprouve / reponses) * 100);

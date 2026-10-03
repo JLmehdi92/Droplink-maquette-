@@ -37,5 +37,6 @@ function dateLisible(iso: string): string {
   const [annee, mois, jour] = iso.split("-");
   const nom = MOIS[Number(mois) - 1];
   if (annee === undefined || jour === undefined || nom === undefined) return iso;
-  return `${Number(jour)} ${nom} ${annee}`;
+  // « 1er » : la typographie française (passe de finition du 03/10/2026).
+  return `${Number(jour) === 1 ? "1er" : Number(jour)} ${nom} ${annee}`;
 }

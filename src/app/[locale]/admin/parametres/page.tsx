@@ -1,8 +1,5 @@
-import {
-  getFormatter,
-  getTranslations,
-  setRequestLocale,
-} from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { CarteReglages } from "@/components/admin/carte-reglages";
 import { KeyRound } from "lucide-react";
@@ -185,7 +182,7 @@ export default async function ParametresAdmin({
   const parametres = await lireParametres(supabase);
 
   const t = await getTranslations("admin.parametres");
-  const format = await getFormatter();
+  const format = await getFormateur();
 
   const parCle = new Map<string, ParametreAffiche>(parametres.map((p) => [p.cle, p]));
   const constates = new Map(reglagesConstates().map((r) => [r.id, r]));

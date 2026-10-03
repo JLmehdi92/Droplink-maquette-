@@ -2,7 +2,8 @@ import type { CSSProperties, ReactNode } from "react";
 import { fourchetteDates } from "@/lib/page-publique/fourchette";
 import { lieuxDuTrajet, textesDuTrajet } from "@/lib/tracking/lieux-trajet";
 import { Image as ImageIcon } from "lucide-react";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import { ArbitrageQc } from "@/components/publique/arbitrage-qc";
 import { CarteContact } from "@/components/publique/carte-contact";
 import { CarteLivraison, type LigneLivraison } from "@/components/publique/carte-livraison";
@@ -96,7 +97,7 @@ export async function PageClient({
   const langue = estLangueSupportee(commande.boutique.langue) ? commande.boutique.langue : "fr";
   const t = await getTranslations({ locale: langue, namespace: "page-publique" });
   const tn = await getTranslations({ locale: langue, namespace: "notifications.carte" });
-  const format = await getFormatter({ locale: langue });
+  const format = await getFormateur({ locale: langue });
 
   // L'INSTANT EST PRIS UNE SEULE FOIS, ici, et descendu en propriété. Un
   // composant qui lit l'horloge lui-même rend une chose au serveur et une autre

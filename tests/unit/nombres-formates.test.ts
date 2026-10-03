@@ -54,6 +54,9 @@ const CLES: ReadonlyArray<readonly [string, Record<string, number | string>]> = 
   ["admin.parametres.constate.medias_par_commande.aide", { videos: 1248 }],
   ["admin.contestation.aide", { date: "30 sept. 2026", rang: 1248 }],
   ["blocageVendeur.restantes", { n: 1248 }],
+  ["blocageVendeur.erreur.saisie", { n: 1248 }],
+  ["passerPro.features.commandes.texteNombre", { n: 1248 }],
+  ["commandes.exportTronque", { n: 1248 }],
 ];
 
 /** La forme de 1248 dans chaque langue, telle que `Intl.NumberFormat` l'écrit. */

@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import { Eye, SlidersHorizontal, UserCheck, UserX } from "lucide-react";
 import { natureDAction } from "@/lib/admin/nature-d-action";
 import type { LigneJournal } from "@/lib/audit/comptes";
@@ -22,7 +23,7 @@ const ICONES = { suspension: UserX, reactivation: UserCheck, parametre: SlidersH
 
 export async function EntreeJournal({ ligne }: { readonly ligne: LigneJournal }) {
   const t = await getTranslations("admin");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const nature = natureDAction(ligne.action);
   const Icone = ICONES[nature];
   // LE POINT DEVIENT UN SOULIGNÉ : next-intl traite le point comme un séparateur de NIVEAU.

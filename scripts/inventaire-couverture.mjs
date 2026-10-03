@@ -57,6 +57,17 @@ const EXCEPTIONS = new Map([
   //    bout en bout par la fumée — relevé le 23/09/2026 en croisant les
   //    appelants de `src/app` avec les chemins que `scripts/fumee.mjs` demande.
   [
+    "src/lib/format/formateur.ts",
+    "`getFormatter` et `getLocale` exigent le contexte d'une requête Next. Toute sa logique " +
+      "est dans `premier-du-mois.ts`, traversé par `tests/unit/premier-du-mois.test.ts` ; " +
+      "lui-même est atteint par la fumée sur chaque page qui affiche une date (03/10/2026).",
+  ],
+  [
+    "src/lib/format/formateur-client.ts",
+    "Un hook React (`useFormatter`, `useLocale`) : il n'existe que dans un rendu. Même logique, " +
+      "même test que `formateur.ts` ; seul appelant : le dialogue de contestation de l'administration.",
+  ],
+  [
     "src/lib/comptes/apres-session.ts",
     "Redirections `next/navigation` après ouverture de session. Atteinte par la fumée " +
       "sur les douze routes vendeur et d'accès qui l'appellent.",

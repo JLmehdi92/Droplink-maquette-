@@ -1,4 +1,4 @@
-import { getFormatter } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import { echelle } from "@/components/admin/echelle";
 
 /**
@@ -29,7 +29,7 @@ export async function BarresAdmin({
   /** Part de hauteur donnée à une barre nulle (la frise des colis : 2 %). */
   readonly hauteurMinimale?: number;
 }) {
-  const format = await getFormatter();
+  const format = await getFormateur();
   const { plafond, graduations } = echelle(Math.max(0, ...valeurs.map((v) => v.valeur)), 4);
   const pas = L / Math.max(1, valeurs.length);
   const largeur = pas * 0.64;

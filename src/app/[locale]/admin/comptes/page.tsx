@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LienEcran } from "@/components/lien-ecran";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { EncartTrace } from "@/components/admin/encart-trace";
@@ -99,7 +100,7 @@ export default async function AdminComptes({
   ]);
 
   const t = await getTranslations("admin");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const base = `/${langue}/admin/comptes`;
 
   /** La part d'une population dans le total, arrondie — jamais un total nul divisé. */

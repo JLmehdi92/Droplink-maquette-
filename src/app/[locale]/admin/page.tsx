@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { ArrowRight, CircleAlert, Clock, Lock, Users } from "lucide-react";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
@@ -117,7 +118,7 @@ export default async function PanneauAdmin({
   ]);
 
   const t = await getTranslations("admin");
-  const format = await getFormatter();
+  const format = await getFormateur();
 
   // `null` porte les DEUX cas où l'on n'affiche pas de chiffre : pas de
   // mécanisme de mesure, ou pas de valeur rendue. Les distinguer à l'écran

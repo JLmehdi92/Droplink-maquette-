@@ -3,7 +3,8 @@ import { EXPLICATION_MIN, lireEtatBlocage } from "@/lib/commandes/contestation";
 import { limites } from "@/lib/storage/limites";
 import { cache } from "react";
 import { notFound } from "next/navigation";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { TraductionsClient } from "@/components/traductions-client";
 import { Editeur } from "@/components/commandes/editeur";
@@ -237,7 +238,7 @@ export default async function EditeurCommande({
     else suiviBloque = EtatQuota.parse(quota);
   }
 
-  const format = await getFormatter();
+  const format = await getFormateur();
   const instant = (iso: string): string =>
     format.dateTime(new Date(iso), {
       day: "numeric",

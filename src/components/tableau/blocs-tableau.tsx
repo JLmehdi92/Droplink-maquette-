@@ -1,7 +1,9 @@
+import type { Formateur } from "@/lib/format/formateur";
 import { Changeant } from "@/components/app/changeant";
 import { BoutonEnvoiAttente } from "@/components/app/bouton-envoi-attente";
 import { ValeurRoulee } from "@/components/app/couche-v4";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import {
   Archive,
   ArrowUpDown,
@@ -31,7 +33,7 @@ import type { FaitRecent } from "@/lib/analyses/recente";
 import type { TypeEvenement } from "@/lib/commandes/journal";
 
 /** Le taux d'approbation, arrondi vers le bas : 199 sur 200 ne s'affiche jamais « 100 % ». */
-function tauxQc(approuve: number, repondu: number, format: Awaited<ReturnType<typeof getFormatter>>): string {
+function tauxQc(approuve: number, repondu: number, format: Formateur): string {
   return format.number(Math.floor((approuve / repondu) * 100) / 100, { style: "percent" });
 }
 
@@ -96,7 +98,7 @@ export async function DernieresCommandesBloc({
 }) {
   const t = await getTranslations("tableau");
   const tc = await getTranslations("commandes");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const maintenant = new Date();
   return (
     <section className="bloc v4-carte" aria-labelledby="t-dernieres">
@@ -198,7 +200,7 @@ export async function RepartitionBloc({
 }) {
   const t = await getTranslations("analyses");
   const tt = await getTranslations("tableau");
-  const format = await getFormatter();
+  const format = await getFormateur();
   /* Chaque part porte aussi son libellé et sa valeur : jamais la couleur seule.
      ⚠️ QUATRE STATUTS QUI NE SE CHEVAUCHENT PAS. La maquette empile « Sans
      mouvement » comme une cinquième part ; dans le produit c'est un FILTRE posé
@@ -253,7 +255,7 @@ async function BarreEtLegende({
   readonly parts: ReadonlyArray<{ readonly cle: string; readonly libelle: string; readonly valeur: number }>;
   readonly total: number;
 }) {
-  const format = await getFormatter();
+  const format = await getFormateur();
   return (
     <>
       <div className="empile" role="img" aria-label={parts.map((p) => `${p.libelle} : ${p.valeur}`).join(", ")}>
@@ -286,7 +288,7 @@ export async function ConsulteesBloc({
   readonly langue: string;
 }) {
   const t = await getTranslations("analyses");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const max = Math.max(1, ...commandes.map((c) => c.vues));
   return (
     <section className="bloc v4-carte" aria-labelledby="t-consultees">
@@ -332,7 +334,7 @@ export async function ConsulteesBloc({
    une commande sans réponse n'est pas un refus. Le gris sépare le vert du rouge. */
 export async function ReponsesBloc({ activite }: { readonly activite: Activite | null }) {
   const t = await getTranslations("analyses");
-  const format = await getFormatter();
+  const format = await getFormateur();
   // L'état du panneau vient de la règle testée (`etatPanneauQc`), jamais d'un recalcul ici.
   const etat = etatPanneauQc(activite);
   const total = etat.etat === "parts" ? etat.total : 0;
@@ -395,7 +397,7 @@ export async function TransporteursBloc({
   readonly voirTout?: string;
 }) {
   const t = await getTranslations("analyses");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const nommees = parts.map((p) => ({
     nom: (p.code === null ? null : lireTransporteur(p.code)?.nom) ?? t("transporteurs.inconnu"),
     nombre: p.nombre,
@@ -463,7 +465,7 @@ export async function ActiviteBloc({
 }) {
   const t = await getTranslations("analyses");
   const tHisto = await getTranslations("editeur.historique");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const maintenant = new Date();
   return (
     <section className="bloc v4-carte" aria-labelledby="t-activite">

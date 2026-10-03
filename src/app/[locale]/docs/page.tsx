@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import {
   Encart,
   Etapes,
@@ -109,7 +110,7 @@ export default async function Documentation({
   const [t, legal, format, plafondPro, plafondGratuit] = await Promise.all([
     getTranslations("docs"),
     getTranslations("legal"),
-    getFormatter(),
+    getFormateur(),
     supabase.rpc("lire_plafond_commandes"),
     supabase.rpc("lire_plafond_gratuit_a_vie"),
   ]);

@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
@@ -101,7 +102,7 @@ export default async function AdminStatistiques({
   ]);
 
   const t = await getTranslations("admin");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const base = `/${langue}/admin/statistiques`;
 
   const lien = (criteres: { jours?: string; vue?: string }): string => {

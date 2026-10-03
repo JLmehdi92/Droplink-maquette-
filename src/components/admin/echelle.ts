@@ -1,4 +1,4 @@
-import type { getFormatter } from "next-intl/server";
+import type { Formateur } from "@/lib/format/formateur";
 
 /**
  * L'ÉCHELLE DES GRAPHIQUES D'ADMINISTRATION — un seul endroit pour les
@@ -36,6 +36,6 @@ export function echelle(maximum: number, intervalles: number): { plafond: number
  * est FORCÉ À UTC : la base rend un JOUR déjà résolu en UTC, et le relire dans
  * le fuseau du serveur le ferait reculer d'un jour pour la moitié du globe.
  */
-export function jourCourt(format: Awaited<ReturnType<typeof getFormatter>>, jour: string): string {
+export function jourCourt(format: Formateur, jour: string): string {
   return format.dateTime(new Date(`${jour}T00:00:00Z`), { day: "numeric", month: "short", timeZone: "UTC" });
 }

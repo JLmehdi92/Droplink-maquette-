@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 
 /**
  * L'ANNEAU DE RÉPARTITION — refonte du 02/10/2026 (maquette, `.adm-anneau` et
@@ -37,7 +38,7 @@ export async function Anneau({
   /** Ce que l'anneau répartit, pour qui ne le voit pas. */
   readonly etiquette: string;
 }) {
-  const format = await getFormatter();
+  const format = await getFormateur();
   const t = await getTranslations("admin");
   const pourcent = (v: number) => (total === 0 ? 0 : Math.round((100 * v) / total));
   // Les segments sont calculés AVANT le rendu : un cumul tenu pendant le `map`

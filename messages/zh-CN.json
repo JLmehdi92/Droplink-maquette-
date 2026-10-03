@@ -1420,7 +1420,8 @@
     },
     "resume": "概览",
     "nbPhotos": "{n, number} 张照片",
-    "lienCopie": "已复制 {client} 的链接"
+    "lienCopie": "已复制 {client} 的链接",
+    "exportTronque": "导出上限为 {n, number} 行。请缩小筛选范围以获取其余内容。"
   },
   "editeur": {
     "historique": {
@@ -2855,7 +2856,7 @@
     "texte": "自 {date} 起，您的客户看到的是“此链接已失效”，而不是其订单。如果这是误判，请提出申诉：说明原因，附上图片会更有帮助。",
     "contester": "对停用提出申诉",
     "explication": "您的说明",
-    "explicationAide": "至少 {n} 个字符。DropLink 团队会连同您附上的图片一起阅读。",
+    "explicationAide": "至少 {n, number} 个字符。DropLink 团队会连同您附上的图片一起阅读。",
     "image": "图片（可选）",
     "joindre": "附上图片",
     "changer": "更换图片",
@@ -2873,7 +2874,7 @@
     "aucuneRestante": "此次停用的三次申诉机会已用完。",
     "recontester": "再次申诉",
     "erreur": {
-      "saisie": "说明至少需要 20 个字符。",
+      "saisie": "说明至少需要 {n, number} 个字符。",
       "image": "无法附上图片。请重试，或不附图片直接提交。",
       "type": "不支持此图片格式：请使用 JPEG、PNG 或 WebP。",
       "taille": "该图片超出允许的大小。",
@@ -2913,7 +2914,7 @@
       "commandes": {
         "titre": "按月重置的上限",
         "texte": "免费账户受终身订单总量限制。升级 Pro 后，上限恢复为按月计算。",
-        "texteNombre": "免费账户终身最多可创建 {n} 笔订单。升级 Pro 后，上限恢复为按月计算。"
+        "texteNombre": "免费账户终身最多可创建 {n, number} 笔订单。升级 Pro 后，上限恢复为按月计算。"
       },
       "colis": {
         "titre": "跟上节奏的物流跟踪",

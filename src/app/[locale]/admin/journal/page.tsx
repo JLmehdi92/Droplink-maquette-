@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { LockKeyhole } from "lucide-react";
@@ -97,7 +98,7 @@ export default async function AdminJournal({
   const { total, depasse } = decompte;
 
   const t = await getTranslations("admin");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const base = `/${langue}/admin/journal`;
 
   /** Une URL de filtre. Le CURSEUR est jeté : il désigne une position dans un

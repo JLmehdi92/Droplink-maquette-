@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -94,7 +95,7 @@ export default async function Accueil({ params }: { params: Promise<{ locale: st
   const tl = await getTranslations("landing");
   const nav = await getTranslations("navigation");
   const pp = await getTranslations("page-publique");
-  const format = await getFormatter();
+  const format = await getFormateur();
 
   const [{ gratuitAVie, proParMois }, enCatalogues] = await Promise.all([
     lirePlafondsPublics(),

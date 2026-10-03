@@ -117,6 +117,13 @@ export async function exporterCommandes(
    */
   nomDeLien: string | null,
   client?: ClientLecture,
+  /**
+   * La ligne qui dit l'export coupé, dans la langue du vendeur (passe du
+   * 03/10/2026 : elle était écrite en français quelle que soit la langue).
+   * Le plafond lui est passé ; sans traducteur, la phrase française d'origine.
+   */
+  avertirTronque: (plafond: number) => string = (plafond) =>
+    "Export limité à " + String(plafond) + " lignes. Affinez les filtres pour obtenir le reste.",
 ): Promise<ResultatExport> {
   const lignes: string[] = [ENTETES.join(",")];
   let curseur: string | null = parametres.curseur;
@@ -163,13 +170,7 @@ export async function exporterCommandes(
     // mois, pas l'écran qui l'a produit. Une ligne de commentaire plutôt qu'une
     // ligne de données : elle ne peut pas être prise pour une commande.
     lignes.push("");
-    lignes.push(
-      cellule(
-        "Export limité à " +
-          String(PLAFOND_LIGNES) +
-          " lignes. Affinez les filtres pour obtenir le reste.",
-      ),
-    );
+    lignes.push(cellule(avertirTronque(PLAFOND_LIGNES)));
   }
 
   // BOM UTF-8 : sans lui, Excel sous Windows lit le fichier en ANSI et « Crème »

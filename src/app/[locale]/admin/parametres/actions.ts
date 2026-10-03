@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import { z } from "zod";
 import { exigerAdmin } from "@/lib/audit/garde";
 import {
@@ -130,7 +131,7 @@ export async function enregistrerParametre(
   if (relu === undefined) return { statut: "erreur", motif: "panne" };
 
   const t = await getTranslations("admin.parametres");
-  const format = await getFormatter();
+  const format = await getFormateur();
   const quand = (iso: string | null): string =>
     // Le format nommé de l'écran : l'origine ne change pas de forme après un enregistrement.
     format.dateTime(new Date(iso ?? 0), "origine");

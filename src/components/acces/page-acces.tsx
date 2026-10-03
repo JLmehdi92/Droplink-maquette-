@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { getFormateur } from "@/lib/format/formateur";
 import { LogoDropLink } from "@/components/logo-droplink";
 import { PageClientDemo } from "@/components/landing/page-client-demo";
 import { FilmAcces, type TextesFilm } from "@/components/acces/film-acces";
@@ -34,7 +35,7 @@ export async function PageAcces({
   const ta = await getTranslations("accueil");
   const nav = await getTranslations("navigation");
   const pp = await getTranslations("page-publique");
-  const format = await getFormatter();
+  const format = await getFormateur();
 
   const jour = (iso: string) => format.dateTime(new Date(iso), { day: "numeric", month: "short", timeZone: "UTC" });
   const heure = (iso: string) => format.dateTime(new Date(iso), { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
