@@ -5578,7 +5578,11 @@ function ageHsts(entetes) {
 // regression de configuration ne touche pas une ligne de code source.
 {
   // `/tarifs` ajouté le 26/09/2026, en même temps qu'au plan de site et à `tests/unit/seo.test.ts`.
-  const CHEMINS_INDEXABLES = ["", "/tarifs", "/conditions", "/confidentialite", "/mentions-legales", "/signalement", "/docs"];
+  // `/signalement` n'est annoncé que si le canal est ouvert (audit SEO du 03/10/2026) :
+  // la sonde éprouve la même règle que `sitemap.ts`, sinon elle exigerait trois 404.
+  const CHEMINS_INDEXABLES = ["", "/tarifs", "/conditions", "/confidentialite", "/mentions-legales", "/signalement", "/docs"].filter(
+    (c) => c !== "/signalement" || canalOuvert,
+  );
   const LANGUES_SERVIES = ["fr", "en", "zh-CN"];
 
   const robots = await fetch(`${base}/robots.txt`);

@@ -80,9 +80,11 @@ export async function PageClientDemo({
         </div>
       </section>
       <section className="pc__photos">
-        <h4>
+        {/* PAS UN TITRE : cette carte est une IMAGE de la page client, posée sous un h3.
+            En h4, la landing sautait du h2 au h4 (audit SEO du 03/10/2026). */}
+        <div className="pc__titre">
           <span>{p("galerie.titre")}</span> <span data-pc-compte>(4)</span>
-        </h4>
+        </div>
         <div className="pc__vide" data-pc-vide>
           <Images aria-hidden="true" className="ic" />
           <strong>{p("galerie.videTitre")}</strong>
@@ -97,7 +99,7 @@ export async function PageClientDemo({
         </div>
       </section>
       <section className="pc__qc">
-        <h4>{p("qc.titre")}</h4>
+        <div className="pc__titre">{p("qc.titre")}</div>
         <p>{p("qc.texte")}</p>
         <div className="pc__qc-actions">
           <span>{p("qc.refuser")}</span>

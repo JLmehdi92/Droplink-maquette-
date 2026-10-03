@@ -1630,6 +1630,46 @@ lecture des appelants).
 - Portes : `typecheck` 0, `lint` 0 erreur (1 avertissement préexistant), `build` vert, `test`
   1301/1302 (alarme Railway).
 
+### ▶️ 03/10/2026 — audit SEO, lot 1 : structure (session cloud)
+
+Méthode : le pack `claude-seo` v2.4.1 cloné HORS du dépôt et lu comme grille (technique, page,
+hreflang, schema, sitemap, images, audit) ; aucun de ses scripts réseau lancé, `parse_html.py`
+inutilisable (BeautifulSoup absent, rien installé) — sa règle est appliquée par une sonde
+Playwright qui enregistre le HTML SERVEUR (JavaScript coupé) des 27 pages indexables et de 14
+pages privées, puis un contrôleur qui applique la grille. Premier passage : **124 défauts**.
+- **`/signalement` annoncé sans exister** : sans adresse de signalement la page rend 404, mais
+  le plan de site la déclarait toujours (trois URL mortes) et le guide y menait (trois liens
+  morts). Les deux suivent désormais `signalementDisponible()`, comme le pied de page ; la
+  fumée éprouve la même règle (`canalOuvert`). Audité ensuite avec une adresse factice.
+- **Hiérarchie des titres** : la démo de page client de la landing sautait du h2 au h4 (ses
+  « titres » sont une image de la page client) → `div.pc__titre`, et de même dans l'aperçu de
+  Ma marque et de `/bienvenue`, qui partageaient la règle `.pc h4` (régression trouvée par la
+  revue, corrigée avant commit) ; `/signalement` sautait du h1 au h3 du pied → les deux titres
+  de colonne du pied passent en h2 (même rendu, `.pied h2`).
+- **Données structurées sur toutes les pages indexables** : seules la landing et les articles en
+  avaient. `donneesPage` décrit les autres (WebPage, ContactPage pour le signalement,
+  CollectionPage pour le blog) avec leur fil d'Ariane, rattachées par `@id` au site et à
+  l'organisation ; l'article gagne `author` (l'organisation), `image` (l'aperçu réellement
+  servi) et son fil d'Ariane dans `mainEntityOfPage` ; l'organisation gagne son `logo` (le
+  symbole affiché partout). Aucun prix, aucune note, aucun avis. Nouvelle garde dans
+  `seo.test.ts`, vue rouge deux fois (tarifs, article) avant d'être verte.
+- Un article se partage en `og:type=article` avec sa date ; une seule balise `<script>`
+  JSON-LD, `GrapheJsonLd`, au lieu de deux copies.
+- **Vérifié sans défaut** : `<html lang>` exact, canonique absolue et auto-référente, hreflang
+  réciproques fr / en / zh-CN + `x-default` (français) identiques au plan de site, Open
+  Graph (image absolue 1200 × 630, `og:locale` et ses deux alternatives) et Twitter sur les
+  27 pages ; toutes les images ont un `alt` (vide si décoratives) et leurs dimensions ; aucun
+  lien sans texte ; les 34 cibles internes répondent. Pages privées : connexion, inscription,
+  mot de passe, vérification, bienvenue, notification, espace vendeur, `/en/blog` portent
+  `noindex` ou redirigent vers la connexion ; `/fr/admin` et `/p/<jeton inventé>` rendent 404.
+- Core Web Vitals en local (CPU ×4, médiane de 3, avant les textes du lot 2) : LCP 0,5 à 1,1 s
+  sur la landing et les pages légales, CLS 0,000 partout — sauf la landing CHINOISE au bureau,
+  LCP ≈ 2,8 à 3,3 s : l'élément mesuré est la ligne « 整笔订单。 » du titre, révélée par
+  l'animation d'entrée. Antérieur à cet audit, noté pour Mehdi (§ 9).
+- Reste pour le lot 2 : longueur des titres et descriptions (35 écarts, surtout en anglais et
+  en chinois).
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1302/1303 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

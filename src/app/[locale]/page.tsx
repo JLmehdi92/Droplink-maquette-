@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { routing } from "@/i18n/routing";
 import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
+import { GrapheJsonLd } from "@/components/seo/graphe-json-ld";
 import { donneesStructurees } from "@/lib/seo/donnees-structurees";
 import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
 import { lirePlafondsPublics } from "@/lib/page-publique/plafonds";
@@ -157,12 +158,7 @@ export default async function Accueil({ params }: { params: Promise<{ locale: st
 
   return (
     <div className="l4">
-      {graphe === null ? null : (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(graphe).replace(/</g, "\\u003c") }}
-        />
-      )}
+      <GrapheJsonLd graphe={graphe} />
       {/* Le mouvement de la landing est gardé par la classe `js`, posée avant le
           premier rendu par `ScriptJs` (coque de langue), comme sur toutes les surfaces. */}
       <a className="evitement" href="#contenu">

@@ -245,6 +245,24 @@ describe("Le SEO : chaque page est soit déclarée, soit fermée", () => {
     }
   });
 
+  test("chaque page indexable rend un graphe JSON-LD", () => {
+    /*
+     * ⚠️ AUDIT SEO DU 03/10/2026 : seules la landing et les articles en
+     * portaient un. Tarifs, guide, pages légales, signalement et blog n'en
+     * avaient AUCUN — rien ne les rattachait au site ni à l'organisation.
+     * Une page qui se déclare indexable (alternates) doit aussi se décrire.
+     */
+    const indexables = pagesDeLApp().filter((p) =>
+      /alternatesDe\(|alternatesUneSeuleLangue\(/.test(codeSansCommentaires(join(RACINE_APP, p))),
+    );
+    // UN ENSEMBLE VIDE PASSE TOUT : 7 pages trilingues et les 2 du blog.
+    expect(indexables.length, "la sonde ne trouve pas les pages indexables").toBeGreaterThanOrEqual(9);
+    const sansGraphe = indexables.filter(
+      (p) => !/<GrapheJsonLd\s/.test(codeSansCommentaires(join(RACINE_APP, p))),
+    );
+    expect(sansGraphe, "Ces pages indexables ne rendent aucune donnée structurée.").toEqual([]);
+  });
+
   test("les données structurées ne déclarent AUCUN prix", () => {
     /*
      * ⚠️ PROTECTION DE PRODUIT AUTANT QUE DE SEO, ET LA PRESSION REVIENDRA.

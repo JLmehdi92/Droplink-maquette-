@@ -2,6 +2,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { PageLegale } from "@/components/page-legale";
 import { routing } from "@/i18n/routing";
+import { GrapheJsonLd } from "@/components/seo/graphe-json-ld";
+import { donneesPage } from "@/lib/seo/donnees-structurees";
 import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
 import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
 
@@ -40,5 +42,16 @@ export default async function Confidentialite({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <PageLegale locale={locale} sorte="confidentialite" />;
+  const langue = estLangueSupportee(locale) ? locale : LANGUE_DEFAUT;
+  const t = await getTranslations({ locale: langue, namespace: "legal" });
+  const graphe = donneesPage(langue, "/confidentialite", {
+    nom: t("confidentialiteTitre"),
+    description: t("confidentialiteMetaDescription"),
+  });
+  return (
+    <>
+      <GrapheJsonLd graphe={graphe} />
+      <PageLegale locale={locale} sorte="confidentialite" />
+    </>
+  );
 }

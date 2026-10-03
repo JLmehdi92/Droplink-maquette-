@@ -4,6 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { ArrowRight, FileText } from "lucide-react";
 import { CoqueSite } from "@/components/public/coque-site";
+import { GrapheJsonLd } from "@/components/seo/graphe-json-ld";
+import { donneesPage } from "@/lib/seo/donnees-structurees";
 import { MetaArticle } from "@/components/blog/meta-article";
 import { estLangueDuBlog, LANGUE_DU_BLOG, tousLesArticles } from "@/lib/blog/articles";
 import { alternatesUneSeuleLangue, openGraphDe } from "@/lib/seo/alternates";
@@ -25,7 +27,9 @@ import { routing } from "@/i18n/routing";
  */
 const CHEMIN = "/blog";
 
-const TITRE = "Le blog — DropLink";
+/** Le nom de la page, tel que l'étiquette l'affiche et que le fil d'Ariane le dit. */
+const NOM = "Le blog";
+const TITRE = `${NOM} — DropLink`;
 const DESCRIPTION =
   "Ce qu'on apprend en parlant à des vendeurs qui envoient leurs commandes en message privé : les outils, les pièges, et ce qui fait qu'un client cesse de demander où en est son colis.";
 
@@ -78,13 +82,14 @@ export default async function Blog({ params }: { params: Promise<{ locale: strin
      textes vivent dans `lib/blog/articles`, pas dans les catalogues. */
   return (
     <CoqueSite locale={locale} page="blog">
+      <GrapheJsonLd graphe={donneesPage(langue, CHEMIN, { nom: NOM, description: DESCRIPTION }, "CollectionPage")} />
       <main id="contenu" className="pub">
         <section className="pub-tete conteneur">
           <p className="l4-etiquette">
             <span>
               <FileText aria-hidden="true" className="ic" />
             </span>
-            Le blog
+            {NOM}
           </p>
           <h1 className="pub-titre l4-titre">
             <span className="l4-ligne" style={{ "--l": 0 } as React.CSSProperties}>Vendre en direct, sans y passer ses soirées</span>

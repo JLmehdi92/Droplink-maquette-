@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { ArrowLeft, ArrowRight, FileText } from "lucide-react";
 import { CoqueSite } from "@/components/public/coque-site";
+import { GrapheJsonLd } from "@/components/seo/graphe-json-ld";
 import { MetaArticle } from "@/components/blog/meta-article";
 import { CorpsArticle } from "@/components/blog/corps-article";
 import { articleParSlug, estLangueDuBlog, LANGUE_DU_BLOG, slugs, tousLesArticles } from "@/lib/blog/articles";
@@ -51,14 +52,15 @@ export async function generateMetadata({
   if (article === null || !estLangueDuBlog(langue)) return {};
 
   const chemin = `/blog/${article.slug}`;
+  // Sans origine, `openGraphDe` ne rend rien : on n'ajoute alors pas un `og:type` orphelin.
+  const ogArticle = openGraphDe(langue, chemin, { titre: article.titre, description: article.description });
   return {
     title: `${article.titreMeta ?? article.titre} — DropLink`,
     description: article.description,
     alternates: alternatesUneSeuleLangue(langue, chemin),
-    openGraph: openGraphDe(langue, chemin, {
-      titre: article.titre,
-      description: article.description,
-    }),
+    // Un article se partage comme un ARTICLE, avec sa date de publication (audit SEO
+    // du 03/10/2026) ; le reste — image, locale, URL — est celui de toutes les pages.
+    openGraph: ogArticle === undefined ? undefined : { ...ogArticle, type: "article", publishedTime: article.date },
   };
 }
 
@@ -89,12 +91,7 @@ export default async function ArticleDuBlog({
       {/* Le graphe est rendu CÔTÉ SERVEUR : Google traite les données structurées
           injectées par JS avec retard. Seul `<` est neutralisé — il pourrait fermer
           la balise ; la valeur ne vient d'aucune entrée utilisateur. */}
-      {graphe === null ? null : (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(graphe).replace(/</g, "\\u003c") }}
-        />
-      )}
+      <GrapheJsonLd graphe={graphe} />
 
       {/* LA REFONTE (02/10/2026) suit les articles de la maquette (`.art`) : 760 px de
           texte, au-delà l'œil perd le début de la ligne suivante. La barre de progression

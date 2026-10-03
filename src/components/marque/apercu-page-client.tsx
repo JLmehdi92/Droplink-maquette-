@@ -148,9 +148,11 @@ export function ApercuPageClient({
 
   const photos = (
     <section className="pc__photos">
-      <h4>
+      {/* Pas des titres : l'aperçu est une IMAGE de la page client (même règle que la
+          démo de la landing, `.pc__titre`, audit SEO du 03/10/2026). */}
+      <div className="pc__titre">
         <span>{textes.galerie}</span> <span data-pc-compte="">({IMAGES_DEMO.length})</span>
-      </h4>
+      </div>
       <div className="pc__grille" data-pc-grille="">
         {IMAGES_DEMO.map((img, i) => (
           <figure key={i}>
@@ -163,7 +165,7 @@ export function ApercuPageClient({
 
   const qc = (
     <section className="pc__qc">
-      <h4>{textes.qcTitre}</h4>
+      <div className="pc__titre">{textes.qcTitre}</div>
       <p>{textes.qcTexte}</p>
       <div className="pc__qc-actions">
         <span>{textes.qcRefuser}</span>
@@ -174,7 +176,7 @@ export function ApercuPageClient({
 
   const livraison = (
     <section className="pc__carte pc__livraison">
-      <h4>{textes.livraisonTitre}</h4>
+      <div className="pc__titre">{textes.livraisonTitre}</div>
       <dl>
         <div>
           <dt>{textes.transporteur}</dt>

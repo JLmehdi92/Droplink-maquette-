@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CircleAlert, Shield } from "lucide-react";
 import { CoqueSite } from "@/components/public/coque-site";
+import { GrapheJsonLd } from "@/components/seo/graphe-json-ld";
+import { donneesPage } from "@/lib/seo/donnees-structurees";
 import { FormulaireSignalement } from "@/components/formulaire-signalement";
 import { TraductionsClient } from "@/components/traductions-client";
 import { adresseAbus } from "@/lib/contact";
@@ -77,6 +79,14 @@ export default async function Signalement({
      silence qui fait recommencer ou renoncer), à droite le formulaire. */
   return (
     <CoqueSite locale={locale} page="signalement">
+      <GrapheJsonLd
+        graphe={donneesPage(
+          estLangueSupportee(locale) ? locale : LANGUE_DEFAUT,
+          "/signalement",
+          { nom: t("signalementTitre"), description: t("signalementMetaDescription") },
+          "ContactPage",
+        )}
+      />
       <main id="contenu" className="pub">
         <div className="conteneur sig">
           <div className="sig-gauche">

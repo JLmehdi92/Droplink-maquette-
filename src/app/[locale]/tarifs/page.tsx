@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, Crown, Tag } from "lucide-react";
 import { CoqueSite } from "@/components/public/coque-site";
+import { GrapheJsonLd } from "@/components/seo/graphe-json-ld";
+import { donneesPage } from "@/lib/seo/donnees-structurees";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { PRIX_PRO_EUR } from "@/lib/paiement/plan";
 import { routing } from "@/i18n/routing";
@@ -148,6 +150,14 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
      sur « Commencer avec Pro », la seule action principale de l'écran (règle 3). */
   return (
     <CoqueSite locale={locale} page="tarifs">
+      {/* La description du graphe est le chapeau, sans montant : les données
+          structurées ne déclarent aucun prix (`seo.test.ts`). */}
+      <GrapheJsonLd
+        graphe={donneesPage(estLangueSupportee(locale) ? locale : LANGUE_DEFAUT, "/tarifs", {
+          nom: t("eyebrow"),
+          description: t("intro"),
+        })}
+      />
       <main id="contenu" className="pub">
         <section className="pub-tete conteneur">
           <p className="l4-etiquette">

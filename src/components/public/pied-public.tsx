@@ -38,14 +38,14 @@ export async function PiedPublic({
           <p className="pied__devise">{t("pied.devise")}</p>
         </div>
         <nav aria-label={t("pied.produit")}>
-          <h3>{t("pied.produit")}</h3>
+          <h2>{t("pied.produit")}</h2>
           <Link className="min-h-11" href={`/${locale}#studio`}>{t("nav.comment")}</Link>
           <Link className="min-h-11" href={`/${locale}/tarifs`}>{t("nav.tarifs")}</Link>
           <Link className="min-h-11" href={`/${locale}/docs`}>{t("pied.documentation")}</Link>
           {locale === "fr" ? <Link className="min-h-11" href="/fr/blog">{t("pied.blog")}</Link> : null}
         </nav>
         <nav aria-label={t("pied.legal")}>
-          <h3>{t("pied.legal")}</h3>
+          <h2>{t("pied.legal")}</h2>
           <Link className="min-h-11" href={`/${locale}/conditions`}>{t("pied.conditions")}</Link>
           <Link className="min-h-11" href={`/${locale}/confidentialite`}>{t("pied.confidentialite")}</Link>
           <Link className="min-h-11" href={`/${locale}/mentions-legales`}>{t("pied.mentions")}</Link>

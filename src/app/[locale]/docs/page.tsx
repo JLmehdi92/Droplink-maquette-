@@ -15,6 +15,8 @@ import {
 } from "@/components/docs/briques";
 import { SommaireDocs } from "@/components/docs/sommaire-docs";
 import { CoqueSite } from "@/components/public/coque-site";
+import { GrapheJsonLd } from "@/components/seo/graphe-json-ld";
+import { donneesPage } from "@/lib/seo/donnees-structurees";
 
 /** L'adresse du support : le texte la porte dans chaque langue, le lien la reprend ici. */
 const COURRIEL_SUPPORT = "contact@droplink.fr";
@@ -23,6 +25,7 @@ const COURRIEL_SUPPORT = "contact@droplink.fr";
 const MISE_A_JOUR = new Date("2026-09-14T00:00:00Z");
 import { LienEcran } from "@/components/lien-ecran";
 import { estLangueSupportee, LANGUES } from "@/i18n/config";
+import { signalementDisponible } from "@/lib/contact";
 import { PRIX_PRO_EUR } from "@/lib/paiement/plan";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
@@ -161,6 +164,7 @@ export default async function Documentation({
 
   return (
     <CoqueSite locale={langue} page="docs">
+      <GrapheJsonLd graphe={donneesPage(langue, "/docs", { nom: t("titre"), description: t("metaDescription") })} />
       <main id="contenu" className="pub">
         <div className="conteneur doc">
           <aside className="doc-cote">
@@ -401,12 +405,16 @@ export default async function Documentation({
                   ),
                 })}
               </Paragraphe>
-              <p>
-                <LienEcran className="lien-texte doc-lien" href={`/${langue}/signalement`}>
-                  {t("supportSignaler")}
-                  <ArrowRight aria-hidden="true" className="ic" />
-                </LienEcran>
-              </p>
+              {/* Le lien suit la même condition que le pied de page : sans adresse de
+                  signalement la page rend 404, et un lien mort vaut moins que pas de lien. */}
+              {signalementDisponible() ? (
+                <p>
+                  <LienEcran className="lien-texte doc-lien" href={`/${langue}/signalement`}>
+                    {t("supportSignaler")}
+                    <ArrowRight aria-hidden="true" className="ic" />
+                  </LienEcran>
+                </p>
+              ) : null}
             </Section>
 
             {/* L'APPEL FINAL : une carte, et le dégradé sur son bouton — la seule action

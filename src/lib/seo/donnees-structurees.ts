@@ -34,10 +34,13 @@ import { origineConfiguree } from "@/lib/site";
  * deviendrait fausse en phase 2 **avant que quiconque pense à la relire**. Une
  * absence est réversible ; une donnée structurée périmée circule.
  *
- * **Aucun `logo`, aucune `image`.** `public/` ne contient que les polices — il
- * n'existe pas de fichier de logo. Pointer vers une URL qui rend 404 vaudrait
- * moins que ne rien dire : *une information absente est OMISE, jamais remplacée
- * par une valeur inventée* (décision 26).
+ * **Un `logo`, depuis le 03/10/2026.** Ce bloc disait « aucun logo : `public/`
+ * ne contient que les polices ». Ce n'est plus vrai : la refonte a posé
+ * `public/marque/logo-symbole.png` (520 × 724), le symbole que `LogoDropLink`
+ * affiche sur toutes les pages.
+ * La règle d'origine tient toujours — *une information absente est OMISE,
+ * jamais remplacée par une valeur inventée* (décision 26) — mais celle-ci
+ * n'est plus absente.
  *
  * **Aucune `FAQPage`, aucun `HowTo`.** Le premier exigerait des questions
  * réellement présentes sur la page ; le second est un type que Google a
@@ -75,6 +78,7 @@ export function donneesStructurees(
         "@id": idOrganisation,
         name: "DropLink",
         url: origine,
+        logo: `${origine}/marque/logo-symbole.png`,
       },
       {
         "@type": "WebSite",
@@ -151,7 +155,84 @@ export function donneesArticle(
      * `dateModified` non fiable comme du bruit et cesse de la lire.
      */
     dateModified: article.date,
-    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    // Le fil d'Ariane appartient à la PAGE (`WebPage.breadcrumb`), pas à l'article :
+    // schema.org ne le connaît pas sur `Article`.
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+      breadcrumb: {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "DropLink", item: `${origine}/${langue}` },
+          { "@type": "ListItem", position: 2, name: "Le blog", item: `${origine}/${langue}/blog` },
+          { "@type": "ListItem", position: 3, name: article.titre, item: url },
+        ],
+      },
+    },
     publisher: { "@id": `${origine}/#organisation` },
+    // L'auteur est l'ORGANISATION, par `@id` (audit SEO du 03/10/2026) : Google
+    // attend un `author` sur un article, et la réponse vraie existait déjà
+    // ci-dessus — sans nom de personne.
+    author: { "@id": `${origine}/#organisation` },
+    // L'image d'aperçu réellement servie en Open Graph (1200 × 630).
+    image: `${origine}/og-droplink.jpg`,
+  };
+}
+
+/** Le type schema.org d'une page secondaire. Liste fermée : rien qui promette un résultat enrichi. */
+export type TypeDePage = "WebPage" | "ContactPage" | "CollectionPage";
+
+/**
+ * Le graphe d'une page SECONDAIRE (tarifs, pages légales, guide, signalement, blog).
+ *
+ * ⚠️ AJOUTÉ PAR L'AUDIT SEO DU 03/10/2026 : seules la landing et les articles
+ * portaient un graphe. Les autres pages publiques n'en avaient AUCUN, et rien ne
+ * les rattachait au site ni à l'organisation déclarés sur la landing.
+ *
+ * On ne décrit que ce que la page EST : son nom, sa description (celle de ses
+ * balises, sauf `/tarifs` qui donne son chapeau : sa balise porte un montant),
+ * sa langue, le site dont elle fait partie (par `@id`, sans
+ * redéclarer l'entité) et son fil d'Ariane. Aucune note, aucun avis, aucun
+ * montant — le test `seo.test.ts` refuse ces mots dans ce fichier.
+ *
+ * Le fil d'Ariane a deux maillons, ou trois quand la page a un parent (un
+ * article sous le blog) : la racine s'appelle « DropLink », une marque qui ne
+ * se traduit pas, ce qui évite un libellé de plus dans trois catalogues.
+ */
+export function donneesPage(
+  langue: Langue,
+  chemin: string,
+  textes: { readonly nom: string; readonly description: string },
+  type: TypeDePage = "WebPage",
+  parent?: { readonly nom: string; readonly chemin: string },
+): Record<string, unknown> | null {
+  const origine = origineConfiguree();
+  if (origine === null) return null;
+
+  const url = `${origine}/${langue}${chemin}`;
+  const maillons = [
+    { nom: "DropLink", url: `${origine}/${langue}` },
+    ...(parent === undefined ? [] : [{ nom: parent.nom, url: `${origine}/${langue}${parent.chemin}` }]),
+    { nom: textes.nom, url },
+  ];
+  return {
+    "@context": "https://schema.org",
+    "@type": type,
+    "@id": url,
+    url,
+    name: textes.nom,
+    description: textes.description,
+    inLanguage: langue,
+    isPartOf: { "@id": `${origine}/#site` },
+    publisher: { "@id": `${origine}/#organisation` },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: maillons.map((m, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: m.nom,
+        item: m.url,
+      })),
+    },
   };
 }

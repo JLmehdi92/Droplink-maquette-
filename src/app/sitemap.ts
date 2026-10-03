@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { LANGUES, LANGUE_DEFAUT } from "@/i18n/config";
 import { slugs } from "@/lib/blog/articles";
+import { signalementDisponible } from "@/lib/contact";
 import { origineConfiguree } from "@/lib/site";
 
 /**
@@ -108,7 +109,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     };
   });
 
-  const trilingues = CHEMINS_INDEXABLES.flatMap((chemin) => {
+  /*
+   * ⚠️ `/signalement` N'EST ANNONCÉ QUE S'IL EXISTE (audit SEO du 03/10/2026).
+   * Sans adresse de signalement, la page rend 404 (`lib/contact.ts`) : la
+   * déclarer quand même annoncerait trois adresses mortes, et un plan de site
+   * qui ment sur une ligne perd la confiance des moteurs sur toutes. La liste
+   * reste FERMÉE et déclarée ci-dessus ; on n'en retire qu'une entrée, à la
+   * même condition que le lien du pied de page.
+   */
+  const servis = CHEMINS_INDEXABLES.filter((c) => c !== "/signalement" || signalementDisponible());
+
+  const trilingues = servis.flatMap((chemin) => {
     const languages: Record<string, string> = {};
     for (const l of LANGUES) languages[l] = url(l, chemin);
     languages["x-default"] = url(LANGUE_DEFAUT, chemin);
