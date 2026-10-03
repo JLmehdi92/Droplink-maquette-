@@ -7,7 +7,7 @@ import {
   type ResultatChangement,
 } from "@/app/[locale]/nouveau-mot-de-passe/actions";
 import { BoutonPrincipalDs, ChampAcces, MessageErreurDs } from "@/components/acces-champs";
-import { secouer, secouerInvalides, tropCourt, valeurEnvoyee } from "@/components/acces/validation-locale";
+import { contientAdresse, secouer, secouerInvalides, tropCourt, valeurEnvoyee } from "@/components/acces/validation-locale";
 
 /**
  * SAISIR LE NOUVEAU MOT DE PASSE — `ResetScreen` du kit `auth`, écrit le
@@ -17,7 +17,10 @@ import { secouer, secouerInvalides, tropCourt, valeurEnvoyee } from "@/component
  * lue DANS LA SESSION côté serveur. La faire voyager par le formulaire
  * permettrait d'en soumettre une autre, donc de contourner le seul contrôle de
  * contenu qu'on applique — celui qui refuse un mot de passe contenant l'identité
- * qu'il protège.
+ * qu'il protège. L'adresse que la page connaît (celle de la session, déjà
+ * affichée en sous-titre) sert seulement à DIRE ce refus plus tôt, à la sortie du
+ * champ et à l'envoi, comme la maquette (`acces.js`) : elle ne part jamais avec
+ * le formulaire, et l'action relit la sienne.
  *
  * PAS DE SECOND CHAMP DE CONFIRMATION : le gestionnaire de mots de passe remplit
  * les deux à l'identique, et le champ du kit se dévoile d'un geste.
@@ -28,8 +31,11 @@ const INITIAL: ResultatChangement = { statut: "inactif" };
 export function FormulaireNouveauMotDePasse({
   locale,
   longueurMinimale,
+  adresse,
 }: {
   readonly locale: string;
+  /** L'adresse de la SESSION, lue par la page : pour le refus immédiat, jamais envoyée. */
+  readonly adresse: string;
   /** Arrive du serveur (`LONGUEUR_MINIMALE`) : afficher un autre nombre promettrait un mot de passe refusé. */
   readonly longueurMinimale: number;
 }) {
@@ -38,8 +44,7 @@ export function FormulaireNouveauMotDePasse({
   const ti = useTranslations("inscription");
   const [resultat, action] = useActionState(changerMotDePasse, INITIAL);
   const [motDePasse, setMotDePasse] = useState("");
-  // Le refus de la saisie (maquette, `acces.js`) : la longueur seulement, la seule
-  // règle que le navigateur voit ici (l'adresse n'est pas dans la page).
+  // Le refus de la saisie (maquette, `acces.js`) : la longueur, et l'adresse recopiée.
   const [erreurMdp, setErreurMdp] = useState("");
   const formulaire = useRef<HTMLFormElement>(null);
 
@@ -72,12 +77,18 @@ export function FormulaireNouveauMotDePasse({
       className="formulaire v4-carte"
       noValidate
       onSubmit={(e) => {
-        if (!tropCourt(valeurEnvoyee(e.currentTarget, "motDePasse"), longueurMinimale)) {
+        const envoye = valeurEnvoyee(e.currentTarget, "motDePasse");
+        const refus = tropCourt(envoye, longueurMinimale)
+          ? ti("erreurMdpTropCourt")
+          : contientAdresse(envoye, adresse)
+            ? ti("erreurMdpContientEmail")
+            : "";
+        if (refus === "") {
           setErreurMdp("");
           return;
         }
         e.preventDefault();
-        setErreurMdp(ti("erreurMdpTropCourt"));
+        setErreurMdp(refus);
         const champ = e.currentTarget.querySelector<HTMLInputElement>("#nouveau-mot-de-passe");
         secouer(champ?.closest(".champ-acces__boite"));
         champ?.focus();
@@ -97,7 +108,12 @@ export function FormulaireNouveauMotDePasse({
         valeur={motDePasse}
         surChangement={(v) => {
           setMotDePasse(v);
-          if (erreurMdp !== "" && !tropCourt(v, longueurMinimale)) setErreurMdp("");
+          // Le texte suit la saisie : « trop court » levé, l'adresse recopiée reste dite.
+          if (erreurMdp !== "")
+            setErreurMdp(tropCourt(v, longueurMinimale) ? erreurMdp : contientAdresse(v, adresse) ? ti("erreurMdpContientEmail") : "");
+        }}
+        surSortie={() => {
+          if (contientAdresse(motDePasse, adresse)) setErreurMdp(ti("erreurMdpContientEmail"));
         }}
         erreurLocale={erreurMdp}
         libellesOeil={{ afficher: t("afficherMotDePasse"), masquer: t("masquerMotDePasse") }}

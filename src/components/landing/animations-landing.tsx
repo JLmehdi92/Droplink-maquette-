@@ -139,50 +139,68 @@ export function AnimationsLanding() {
         cartes.forEach((c) => (c.style.opacity = "0"));
         photos.forEach((f) => (f.style.opacity = "0"));
         tampon.style.opacity = "0";
+        // L'îlot tient désormais le masquage (en ligne, puis par le remplissage de chaque
+        // animation) : la règle CSS qui cachait les cartes avant lui s'efface, pour que
+        // rendre l'opacité au style (`""`, comme `l4.js`) les laisse visibles.
+        hx.dataset.hxParti = "";
         void document.fonts.ready.then(() => {
           if (!vivant) return;
-          tracer();
-          const chemins = $$<SVGPathElement>("path", fils);
-          chemins.forEach((p) => {
-            p.style.strokeDasharray = "1 1";
-            p.style.strokeDashoffset = "1";
-          });
-          const points = $$<SVGCircleElement>("circle", fils);
-          const t0 = 650;
-          lien.animate([{ transform: "scale(1)" }, { transform: "scale(.96)", offset: 0.35 }, { transform: "scale(1)" }], { duration: 420, delay: t0, easing: "ease-out" });
-          lien.animate([{ boxShadow: "0 0 0 0 rgba(91, 75, 245, .45)" }, { boxShadow: "0 0 0 14px rgba(91, 75, 245, 0)" }], { duration: 700, delay: t0 + 120, easing: "ease-out" });
-          const o = repere(lien);
-          cartes.forEach((c, i) => {
-            const r = repere(c);
-            // chaque carte part du lien : déplacement et échelle calculés, pas devinés
-            const dx = o.x + o.l / 2 - (r.x + r.l / 2);
-            const dy = o.y + o.h / 2 - (r.y + r.h / 2);
-            const d = t0 + 260 + i * 120;
-            c.animate(
-              [
-                { opacity: 0, transform: `translate(${dx}px, ${dy}px) scale(.14)`, filter: "blur(10px)" },
-                { opacity: 1, offset: 0.35, filter: "blur(2px)" },
-                { opacity: 1, transform: "translate(0, 0) scale(1)", filter: "blur(0)" },
-              ],
-              { duration: 980, delay: d, easing: "cubic-bezier(.2, .9, .25, 1.08)", fill: "backwards" },
-            );
-            c.style.opacity = "1";
-            chemins[i]?.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 700, delay: d - 120, easing: EO, fill: "both" });
-            points[i]?.animate([{ opacity: 0, transform: "scale(0)" }, { opacity: 1, transform: "scale(1)" }], { duration: 360, delay: d + 420, easing: "cubic-bezier(.2, .9, .25, 1.3)", fill: "backwards" });
-          });
-          const tP = t0 + 1500;
-          photos.forEach((f, i) => {
-            f.animate([{ opacity: 0, transform: "translateY(-14px) scale(.9)" }, { opacity: 1, transform: "none" }], { duration: 520, delay: tP + i * 110, easing: "cubic-bezier(.2, .9, .25, 1.15)", fill: "backwards" });
-            f.style.opacity = "1";
-          });
-          const m1 = setTimeout(enTransit, t0 + 2300);
-          const m2 = setTimeout(() => (pose = true), t0 + 1900);
-          nettoyages.push(() => {
-            clearTimeout(m1);
-            clearTimeout(m2);
-          });
-          tampon.animate([{ opacity: 0, transform: "translateY(8px) scale(.94)" }, { opacity: 1, transform: "none" }], { duration: 560, delay: tP + 1500, easing: "cubic-bezier(.2, .9, .25, 1.2)", fill: "backwards" });
-          tampon.style.opacity = "1";
+          try {
+            tracer();
+            const chemins = $$<SVGPathElement>("path", fils);
+            chemins.forEach((p) => {
+              p.style.strokeDasharray = "1 1";
+              p.style.strokeDashoffset = "1";
+            });
+            const points = $$<SVGCircleElement>("circle", fils);
+            const t0 = 650;
+            lien.animate([{ transform: "scale(1)" }, { transform: "scale(.96)", offset: 0.35 }, { transform: "scale(1)" }], { duration: 420, delay: t0, easing: "ease-out" });
+            lien.animate([{ boxShadow: "0 0 0 0 rgba(91, 75, 245, .45)" }, { boxShadow: "0 0 0 14px rgba(91, 75, 245, 0)" }], { duration: 700, delay: t0 + 120, easing: "ease-out" });
+            const o = repere(lien);
+            cartes.forEach((c, i) => {
+              const r = repere(c);
+              // chaque carte part du lien : déplacement et échelle calculés, pas devinés
+              const dx = o.x + o.l / 2 - (r.x + r.l / 2);
+              const dy = o.y + o.h / 2 - (r.y + r.h / 2);
+              const d = t0 + 260 + i * 120;
+              c.animate(
+                [
+                  { opacity: 0, transform: `translate(${dx}px, ${dy}px) scale(.14)`, filter: "blur(10px)" },
+                  { opacity: 1, offset: 0.35, filter: "blur(2px)" },
+                  { opacity: 1, transform: "translate(0, 0) scale(1)", filter: "blur(0)" },
+                ],
+                { duration: 980, delay: d, easing: "cubic-bezier(.2, .9, .25, 1.08)", fill: "backwards" },
+              ).finished.then(
+                () => {
+                  c.style.opacity = "";
+                },
+                // Annulée au démontage : la carte reste à son style, rien à rendre.
+                () => undefined,
+              );
+              c.style.opacity = "";
+              chemins[i]?.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 700, delay: d - 120, easing: EO, fill: "both" });
+              points[i]?.animate([{ opacity: 0, transform: "scale(0)" }, { opacity: 1, transform: "scale(1)" }], { duration: 360, delay: d + 420, easing: "cubic-bezier(.2, .9, .25, 1.3)", fill: "backwards" });
+            });
+            const tP = t0 + 1500;
+            photos.forEach((f, i) => {
+              f.animate([{ opacity: 0, transform: "translateY(-14px) scale(.9)" }, { opacity: 1, transform: "none" }], { duration: 520, delay: tP + i * 110, easing: "cubic-bezier(.2, .9, .25, 1.15)", fill: "backwards" });
+              f.style.opacity = "";
+            });
+            const m1 = setTimeout(enTransit, t0 + 2300);
+            const m2 = setTimeout(() => (pose = true), t0 + 1900);
+            nettoyages.push(() => {
+              clearTimeout(m1);
+              clearTimeout(m2);
+            });
+            tampon.animate([{ opacity: 0, transform: "translateY(8px) scale(.94)" }, { opacity: 1, transform: "none" }], { duration: 560, delay: tP + 1500, easing: "cubic-bezier(.2, .9, .25, 1.2)", fill: "backwards" });
+            tampon.style.opacity = "";
+          } catch (erreur) {
+            // UNE SCÈNE QUI NE SE JOUE PAS RESTE LISIBLE (relecture du 03/10/2026) : sans ce
+            // filet, une erreur ici laissait cartes, photos et tampon à l'opacité 0 posée en
+            // ligne, pour toujours — retirer `js` ne touche pas un style en ligne.
+            [...cartes, ...photos, tampon].forEach((e) => (e.style.opacity = ""));
+            console.error("[landing] scène du héros interrompue", erreur);
+          }
         });
       }
       // les fils suivent la mise en page ; pendant le parallaxe, ils restent posés

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { ArrowRight, Building2, CalendarDays, ChevronDown, FileText, ListFilter, Scale, Shield } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronDown, FileText, House, ListFilter, Scale, Shield } from "lucide-react";
 import { z } from "zod";
 import { Encart, Liste, Paragraphe, SousTitre, Tableau } from "@/components/docs/briques";
 import { CoqueSite } from "@/components/public/coque-site";
@@ -220,7 +220,7 @@ export async function PageLegale({
                 avant en français, aucune en anglais ni en chinois. */}
             {t("misAJourDate", { date: dateMaj })}
             <span aria-hidden="true">·</span>
-            <Building2 aria-hidden="true" className="ic" />
+            <House aria-hidden="true" className="ic" />
             {t("editeurLigne", { nom: t("editeurNom") })}
           </p>
         </section>

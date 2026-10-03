@@ -1370,6 +1370,52 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
 - **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1296/1297 (alarme
   Railway).
 
+### ▶️ 03/10/2026 — lot 15 : clavier, pages publiques, accès, bienvenue, fluidité (session cloud)
+
+- **C2 (clavier)** : la bascule du graphique du tableau de bord est un `tablist` (flèches qui
+  bouclent, un seul arrêt de tabulation, panneau `tabpanel` relié) ; les onglets des
+  Paramètres aussi (flèches, Début, Fin, tabindex mobile), et ce restent des LIENS :
+  `?section=` est toujours la source de vérité, le focus reste sur l'onglet après la
+  navigation. Alt+← et Cmd+← (Retour du navigateur) ne sont jamais avalés. Activation
+  automatique, comme la maquette — gardée : une saisie non enregistrée se perd comme au clic.
+  À l'ouverture d'un déroulant (Commandes, Envois, menus de ligne), le focus va à l'option
+  choisie, sinon au premier champ ; la cloche porte `aria-expanded`/`aria-controls`, alignés
+  à chaque geste et au montage. Mesuré au navigateur, geste par geste.
+- **C4** : Docs — l'encart « Le lien ne change jamais tout seul » en ton info (étincelles) ;
+  le support retrouve « Signaler un contenu » (44 px) et l'adresse en `mailto:` restée
+  sélectionnable, dans les trois langues. Blog — « N min (de lecture) » par next-intl.
+  Pages légales — icône maison. Nouveau mot de passe et Paramètres — « ne doit pas contenir
+  votre adresse » dès la sortie du champ et à l'envoi (0 requête partie, focus rendu au
+  champ) ; l'adresse vient de la SESSION, ne part jamais avec le formulaire, le serveur relit
+  la sienne. Mesuré sur une vraie session de récupération (lien généré en base de tests).
+  Menu mobile de la landing : les quatre ancres puis « Se connecter ». ⚠️ Au téléphone, le
+  bouton « Créer un compte » de la barre est masqué : une page publique sans appel dans son
+  corps n'a plus de chemin vers l'inscription (§ 9).
+  Héros de la landing : l'opacité est rendue au style (`""`, comme `l4.js`) et la règle CSS
+  anti-clignement se lève quand l'îlot prend la main (`data-hx-parti`) ; une scène qui lève
+  rend ses cartes visibles. Mesuré : 7 éléments à 1,00 en fin de scène à CPU ×1 et ×4, aucune
+  opacité en ligne résiduelle, 1,00 sous mouvement réduit.
+- **C5** : l'aperçu de `/bienvenue` comparé à la maquette au navigateur (1 440 et 390) : même
+  structure ; la fourchette suit désormais la règle de `/p` (« October 4–5 », plus
+  « October 4 – 5 »). Le bas de l'aperçu est rogné par l'écran du téléphone des deux côtés.
+- **C6** : le sommaire des Docs et la bordure lumineuse (CoucheV4) écrivent au plus une fois
+  par image (`requestAnimationFrame`, annulé au démontage). La veille `MutationObserver` de
+  `TransitionsEcran` est coupée au premier geste, après 8 s et au démontage — vérifié.
+- **D4a** : l'en-tête de la landing était DÉJÀ celui de la maquette, sans flou — mesuré à
+  1 280 et 390 px, en haut et après défilement (fond, ombre, hauteur, transition identiques).
+  **D4b** : la note de facturation des Tarifs est au gris sourdine de la maquette, inchangée.
+- **Relecture** : 0 HIGH ; 3 MEDIUM corrigés (le refus local remontait le pied et détruisait
+  le bouton visé par Tab ; un ancien message du serveur revenait sans envoi ; le focus ne
+  pouvait pas entrer dans un menu de ligne encore masqué) ; LOW corrigés (touches modifiées,
+  panneau du graphique, `aria-expanded` avant hydratation, texte d'erreur périmé, scène du
+  héros qui lève, commentaire du menu mobile).
+- **Mesures** : fumée de `/fr`, `/en/docs`, `/zh-CN/docs`, blog, mentions légales, tarifs,
+  tableau de bord, paramètres, commandes, envois — 1 440 et 390 px, mouvement réduit compris :
+  aucune violation CSP, aucune erreur console, 0 px de débordement (au téléphone la sonde
+  relève le tiroir de navigation FERMÉ, en `visibility: hidden`, voulu).
+- **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1299/1300 (alarme
+  Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

@@ -2743,7 +2743,7 @@ img.compte__avatar { object-fit: cover; }
    serveur les peindrait, puis l'îlot les cacherait pour les rejouer : un clignement).
    Le filet du script inline retire `js` si l'îlot ne démarre pas. */
 @media (prefers-reduced-motion: no-preference) {
-  .js [data-hx-carte], .js [data-hx-photo], .js [data-hx-tampon] { opacity: 0; }
+  .js [data-hx]:not([data-hx-parti]) :is([data-hx-carte], [data-hx-photo], [data-hx-tampon]) { opacity: 0; }
 }
 .formulaire__statut--erreur { background: color-mix(in srgb, var(--erreur-encre) 8%, var(--surface)); color: var(--erreur-encre); }
 }
@@ -2752,3 +2752,6 @@ img.compte__avatar { object-fit: cover; }
 @media print {
   .js .tp[data-anime] tbody tr, .js .tp[data-anime] thead th, .js .tp[data-anime] thead td { opacity: 1; transform: none; }
 }
+/* Le lien « Signaler un contenu » de la documentation est seul sur sa ligne : une cible
+   tactile de 44 px (règle 5), sans changer son allure de lien de texte. */
+.doc-section .doc-lien { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; }

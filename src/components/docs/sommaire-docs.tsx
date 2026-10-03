@@ -44,9 +44,23 @@ export function SommaireDocs({
       }
       setActive(courante);
     };
-    window.addEventListener("scroll", suivre, { passive: true });
+    // UNE LECTURE PAR IMAGE AU PLUS (contre-audit du 03/10/2026, C6) : un défilement
+    // émet plusieurs événements par image, et chacun relisait la position de toutes
+    // les sections — autant de mises en page forcées.
+    let image = 0;
+    const auDefilement = () => {
+      if (image !== 0) return;
+      image = requestAnimationFrame(() => {
+        image = 0;
+        suivre();
+      });
+    };
+    window.addEventListener("scroll", auDefilement, { passive: true });
     suivre();
-    return () => window.removeEventListener("scroll", suivre);
+    return () => {
+      window.removeEventListener("scroll", auDefilement);
+      cancelAnimationFrame(image);
+    };
   }, []);
 
   const liens = (fermer: boolean) =>

@@ -2,6 +2,7 @@ import "server-only";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { LANGUES, type Langue } from "@/i18n/config";
 import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
+import { fourchetteDates } from "@/lib/page-publique/fourchette";
 
 /**
  * LES PHRASES QUE MONTRE UN APERÇU « CE QUE VOIT LE CLIENT ».
@@ -89,7 +90,14 @@ export async function libellesApercu(langue: Langue): Promise<LibellesApercu> {
       titre: client("titre"),
       sousTitre: client("commande.sousTitre"),
       dateEstimee: client("commande.dateEstimee"),
-      dates: format.dateTimeRange(du, au, { day: "numeric", month: "long" }),
+      // La même règle que la page client (« 1 au 2 octobre », `fourchetteDates`) : l'aperçu
+      // montre ce que le client lira, pas la plage d'Intl (« October 4 – 5 »).
+      dates: fourchetteDates(
+        du,
+        au,
+        { memeMois: (v) => client("fourchette.memeMois", v), autreMois: (v) => client("fourchette.autreMois", v) },
+        (x, o) => format.dateTime(x, o),
+      ),
       etapes: [client("frise.preparation"), client("frise.expedie"), client("frise.en_transit"), client("frise.livre")],
       quand: [jour(-2), jour(-1), jour(0), jour(1)],
       enCours: client("frise.enCours"),

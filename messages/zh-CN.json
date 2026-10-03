@@ -1,6 +1,8 @@
 {
   "commun": {
-    "chargement": "加载中…"
+    "chargement": "加载中…",
+    "dureeLecture": "阅读约 {n} 分钟",
+    "dureeCourte": "{n} 分钟"
   },
   "navigation": {
     "seConnecter": "登录",
@@ -2577,7 +2579,8 @@
     "faqQ6": "如果我吊销了链接，客户会看到什么？",
     "faqR6": "会看到 DropLink 的提示页面，说明链接已失效并建议联系您。该页面不会透露您店铺的任何信息。",
     "support": "联系客服",
-    "supportTexte": "这里没有找到答案？请写信至 contact@droplink.fr：每条消息都会送达产品团队。",
+    "supportTexte": "这里没有找到答案？请写信至 <courriel>contact@droplink.fr</courriel>：每条消息都会送达产品团队。",
+    "supportSignaler": "举报内容",
     "ctaTitre": "准备创建第一个链接了吗？",
     "ctaTexte": "免费账号，无需银行卡，一分钟内完成。",
     "ctaBouton": "创建账号",

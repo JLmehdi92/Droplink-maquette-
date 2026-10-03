@@ -38,6 +38,13 @@ export function DetailsFermable({
     if (ref.current) ref.current.open = false;
   }, [chemin]);
 
+  // Ouvert AVANT l'hydratation (il s'ouvre sans JavaScript), le `toggle` n'est pas rejoué :
+  // l'état annoncé s'aligne donc aussi au montage (relecture du 03/10/2026).
+  useEffect(() => {
+    const resume = ref.current?.querySelector("summary");
+    if (resume?.hasAttribute("aria-controls")) resume.setAttribute("aria-expanded", String(ref.current?.open === true));
+  }, []);
+
   useEffect(() => {
     const surClic = (e: PointerEvent): void => {
       const details = ref.current;
@@ -81,7 +88,27 @@ export function DetailsFermable({
       name={name}
       onToggle={(e) => {
         const d = e.currentTarget;
-        if (!fixe) return;
+        // Un bouton qui nomme son panneau (`aria-controls`, la cloche — maquette `coque.html`)
+        // dit aussi s'il est ouvert, quel que soit le geste qui l'a ouvert ou fermé.
+        const resume = d.querySelector("summary");
+        if (resume?.hasAttribute("aria-controls")) resume.setAttribute("aria-expanded", String(d.open));
+        // MAQUETTE (`commandes.js:228`, `envois.js:180`) : à l'ouverture, le focus va dans le
+        // panneau — l'option choisie d'abord, sinon le premier champ ou bouton. Seulement si
+        // le focus était sur le bouton du menu : une ouverture par programme ne le vole pas.
+        // Appelé APRÈS le placement d'un menu `fixe` : avant, son panneau est encore en
+        // `visibility: hidden`, et `focus()` n'y fait rien (relecture du 03/10/2026).
+        const focaliserDedans = (): void => {
+          if (!d.open || d.querySelector("summary") !== document.activeElement) return;
+          const pop = d.querySelector<HTMLElement>(".pop");
+          const cible =
+            pop?.querySelector<HTMLElement>('[aria-current="true"], [aria-current="page"], [aria-selected="true"]') ??
+            pop?.querySelector<HTMLElement>("select, input:not([type=hidden]), button, a[href]");
+          cible?.focus({ preventScroll: true });
+        };
+        if (!fixe) {
+          focaliserDedans();
+          return;
+        }
         if (!d.open) {
           delete d.dataset.place;
           return;
@@ -93,6 +120,7 @@ export function DetailsFermable({
         pop.style.top = `${Math.round(Math.min(window.innerHeight - pop.offsetHeight - 12, bouton.bottom + 6))}px`;
         pop.style.left = `${Math.round(Math.max(12, bouton.right - pop.offsetWidth))}px`;
         d.dataset.place = "1";
+        focaliserDedans();
       }}
       onClick={(e) => {
         // Un lien suivi depuis le menu le referme, même vers le chemin courant

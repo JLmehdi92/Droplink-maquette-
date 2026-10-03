@@ -12,9 +12,17 @@ import { LienEcran } from "@/components/lien-ecran";
 export function VuesListe({
   etiquette,
   vues,
+  panneau,
 }: {
   readonly etiquette: string;
   readonly vues: ReadonlyArray<{ readonly clef: string; readonly href: string; readonly libelle: React.ReactNode; readonly actif: boolean }>;
+  /**
+   * Posé, la rangée devient des ONGLETS (Paramètres, maquette `parametres.js:43-51`) : rôle
+   * `tablist`/`tab`, un seul arrêt de tabulation sur l'onglet choisi, flèches, Début et Fin.
+   * Ce restent des liens : la section vit dans l'URL (`?section=`), qui reste la source de
+   * vérité — la flèche suit le lien, le serveur rend la section, le focus reste sur l'onglet.
+   */
+  readonly panneau?: string;
 }) {
   const rangee = useRef<HTMLElement>(null);
   const trait = useRef<HTMLElement>(null);
@@ -74,6 +82,44 @@ export function VuesListe({
       r.removeEventListener("scroll", auDefilement);
     };
   }, [actif]);
+
+  if (panneau !== undefined) {
+    const aller = (e: React.KeyboardEvent<HTMLAnchorElement>, rang: number): void => {
+      // Alt+← et Cmd+← sont le Retour du navigateur : jamais avalés par les onglets.
+      if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const pas: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+      const n = vues.length;
+      const cible = e.key in pas ? (rang + (pas[e.key] ?? 0) + n) % n : e.key === "Home" ? 0 : e.key === "End" ? n - 1 : null;
+      if (cible === null) return;
+      e.preventDefault();
+      const liens = rangee.current?.querySelectorAll<HTMLAnchorElement>('[role="tab"]');
+      const lien = liens?.[cible];
+      if (lien === undefined) return;
+      lien.focus();
+      if (cible !== rang) lien.click();
+    };
+    return (
+      <div ref={rangee as React.RefObject<HTMLDivElement | null>} className="vues-liste" role="tablist" aria-label={etiquette}>
+        <i ref={trait} className="vues-liste__trait" aria-hidden="true" />
+        {vues.map((v, rang) => (
+          <LienEcran
+            key={v.clef}
+            href={v.href}
+            id={`onglet-${v.clef}`}
+            role="tab"
+            aria-selected={v.actif}
+            // Le seul panneau rendu est celui de l'onglet choisi.
+            aria-controls={v.actif ? panneau : undefined}
+            aria-current={v.actif ? "page" : undefined}
+            tabIndex={v.actif ? 0 : -1}
+            onKeyDown={(e) => aller(e, rang)}
+          >
+            {v.libelle}
+          </LienEcran>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <nav ref={rangee} className="vues-liste" aria-label={etiquette}>

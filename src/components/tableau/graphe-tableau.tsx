@@ -321,13 +321,31 @@ export function GrapheTableau({
         <h2 id={`t-graphe-${id}`}>{titre}</h2>
         {meta === undefined ? null : <p className="bloc__meta">{meta}</p>}
         {fixe !== undefined ? null : (
-        <div className="bascule" role="group" aria-label={textes.bascule}>
-          {(["semaines", "liens"] as const).map((v) => (
+        <div className="bascule" role="tablist" aria-label={textes.bascule}>
+          {(["semaines", "liens"] as const).map((v, i, toutes) => (
             <button
               key={v}
               type="button"
-              aria-pressed={vue === v}
+              role="tab"
+              aria-selected={vue === v}
+              // Des onglets, comme la maquette (`tableau.js`) : un seul arrêt de tabulation,
+              // les flèches passent à l'autre vue et la choisissent.
+              tabIndex={vue === v ? 0 : -1}
               onClick={() => basculer(v)}
+              id={`${id}-vue-${v}`}
+              aria-controls={`${id}-graphe`}
+              onKeyDown={(e) => {
+                // Alt+← et Cmd+← sont le Retour du navigateur : jamais avalés ici.
+                if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+                const pas = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+                if (pas === 0) return;
+                e.preventDefault();
+                const suivante = toutes[(i + pas + toutes.length) % toutes.length];
+                if (suivante === undefined) return;
+                basculer(suivante);
+                const voisins = e.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+                voisins?.[(i + pas + toutes.length) % toutes.length]?.focus();
+              }}
             >
               {v === "semaines" ? textes.commandes : textes.liens}
             </button>
@@ -336,7 +354,12 @@ export function GrapheTableau({
         )}
       </header>
       <p className="bloc__aide">{aide}</p>
-      <div className={"graphe" + (fixe === "liens" ? " graphe--compact" : "") + (vise !== null ? " est-vise" : "")} ref={zone}>
+      {/* Le panneau des deux onglets (aucun quand la vue est fixe, sans bascule). */}
+      <div
+        className={"graphe" + (fixe === "liens" ? " graphe--compact" : "") + (vise !== null ? " est-vise" : "")}
+        ref={zone}
+        {...(fixe !== undefined ? {} : { id: `${id}-graphe`, role: "tabpanel", "aria-labelledby": `${id}-vue-${vue}` })}
+      >
         {dessin}
         {serie !== null && n > 0 ? (
           <div

@@ -48,7 +48,7 @@ export async function ClocheAlertes({
 
   return (
     <DetailsFermable className="alertes">
-      <summary className="alertes__bouton" aria-label={titre}>
+      <summary className="alertes__bouton" aria-label={titre} aria-expanded="false" aria-controls="panneau-alertes">
         <Bell aria-hidden="true" className="ic" />
         {total > 0 ? (
           <span className="alertes__pastille" aria-hidden="true">
@@ -56,7 +56,7 @@ export async function ClocheAlertes({
           </span>
         ) : null}
       </summary>
-      <div className="alertes__panneau">
+      <div className="alertes__panneau" id="panneau-alertes">
         <p className="alertes__titre">{titre}</p>
         {familles.length === 0 ? (
           // Le panneau est vide la plupart du temps : c'est une bonne nouvelle,

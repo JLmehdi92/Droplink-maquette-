@@ -218,6 +218,7 @@ export default async function Parametres({
         <div className="barre-liste reglages__onglets">
           <VuesListe
             etiquette={t("onglets.titre")}
+            panneau="panneau-reglages"
             vues={onglets.map(({ clef, Icone }) => ({
               clef,
               href: clef === "compte" ? base : `${base}?section=${clef}`,
@@ -234,12 +235,12 @@ export default async function Parametres({
 
         <div className="reglages">
           <TraductionsClient espaces={["parametres"]}>
-            <PanneauReglages key={section} etiquette={t(`onglets.${section}`)}>
+            <PanneauReglages key={section} id="panneau-reglages" onglet={`onglet-${section}`}>
               {section === "compte" ? (
                 <>
                   <BlocNom nomActuel={profil.nomAffiche} initiales={initiales} repli={profil.nomBoutique ?? profil.email} />
                   <BlocAdresse adresse={profil.email} locale={langue} adresseSuivie={adresseSuivie} />
-                  <BlocMotDePasse />
+                  <BlocMotDePasse adresse={profil.email} />
                   <BlocSuppression variante="compte" adresse={profil.email} locale={langue} />
                 </>
               ) : null}

@@ -1,6 +1,8 @@
 {
   "commun": {
-    "chargement": "Loading…"
+    "chargement": "Loading…",
+    "dureeLecture": "{n} min read",
+    "dureeCourte": "{n} min"
   },
   "navigation": {
     "seConnecter": "Log in",
@@ -2577,7 +2579,8 @@
     "faqQ6": "What does my customer see if I revoked the link?",
     "faqR6": "A DropLink page explaining the link is no longer valid and inviting them to contact you. It reveals nothing about your shop.",
     "support": "Contacting support",
-    "supportTexte": "A question not answered here? Write to us at contact@droplink.fr: every message reaches the product team.",
+    "supportTexte": "A question not answered here? Write to us at <courriel>contact@droplink.fr</courriel>: every message reaches the product team.",
+    "supportSignaler": "Report content",
     "ctaTitre": "Ready to create your first link?",
     "ctaTexte": "Free account, no credit card, ready in under a minute.",
     "ctaBouton": "Create my account",

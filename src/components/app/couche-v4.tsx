@@ -21,15 +21,29 @@ const CARTES_LUMINEUSES = ".v4-carte, .bloc, .compteurs, .bloc-r, .formulaire-ca
 export function CoucheV4() {
   useEffect(() => {
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-    const suivre = (e: PointerEvent) => {
-      const c = (e.target as Element | null)?.closest?.<HTMLElement>(CARTES_LUMINEUSES);
-      if (!c) return;
+    // UNE ÉCRITURE PAR IMAGE AU PLUS (contre-audit du 03/10/2026, C6) : une souris à
+    // haute fréquence émet plusieurs `pointermove` par image ; seul le dernier compte.
+    let dernier: PointerEvent | null = null;
+    let image = 0;
+    const poser = () => {
+      image = 0;
+      const e = dernier;
+      dernier = null;
+      const c = (e?.target as Element | null | undefined)?.closest?.<HTMLElement>(CARTES_LUMINEUSES);
+      if (!e || !c) return;
       const r = c.getBoundingClientRect();
       c.style.setProperty("--mx", `${e.clientX - r.left}px`);
       c.style.setProperty("--my", `${e.clientY - r.top}px`);
     };
+    const suivre = (e: PointerEvent) => {
+      dernier = e;
+      if (image === 0) image = requestAnimationFrame(poser);
+    };
     document.addEventListener("pointermove", suivre, { passive: true });
-    return () => document.removeEventListener("pointermove", suivre);
+    return () => {
+      document.removeEventListener("pointermove", suivre);
+      cancelAnimationFrame(image);
+    };
   }, []);
   return null;
 }

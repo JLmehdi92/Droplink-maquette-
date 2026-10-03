@@ -89,6 +89,16 @@ export function LienEcran({
   readonly style?: React.CSSProperties;
   /** Le sens de l'entrée de l'écran suivant, posé au clic (`NavigationVendeur`). */
   readonly onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  /**
+   * Les onglets des Paramètres (maquette `parametres.js`) : des LIENS qui portent le rôle
+   * d'onglet, un seul arrêt de tabulation, et les flèches pour passer de l'un à l'autre.
+   */
+  readonly id?: string;
+  readonly role?: "tab";
+  readonly "aria-selected"?: boolean;
+  readonly "aria-controls"?: string | undefined;
+  readonly tabIndex?: number;
+  readonly onKeyDown?: (e: React.KeyboardEvent<HTMLAnchorElement>) => void;
 }) {
   return (
     <Link href={href} className={className} {...reste}>

@@ -111,7 +111,7 @@ export default async function NouveauMotDePasse({
       </p>
 
       <TraductionsClient espaces={["connexion", "inscription", "motDePasse"]}>
-        <FormulaireNouveauMotDePasse locale={langue} longueurMinimale={LONGUEUR_MINIMALE} />
+        <FormulaireNouveauMotDePasse locale={langue} longueurMinimale={LONGUEUR_MINIMALE} adresse={profil.email} />
       </TraductionsClient>
       {/* ⚠️ UNE DÉCONNEXION, PAS UN LIEN (relecture du 02/10/2026) : cet écran tient
           une session de récupération, et `/connexion` renvoie toute session ouverte

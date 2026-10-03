@@ -3,6 +3,7 @@
 import { useActionState, useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Monitor, Smartphone } from "lucide-react";
+import { contientAdresse, sortieVersEnvoi, valeurEnvoyee } from "@/components/acces/validation-locale";
 import {
   changerAdresseCompte,
   changerMotDePasseCompte,
@@ -74,11 +75,18 @@ function Pied({
   aide,
   message,
   idAide,
+  relance = 0,
   children,
 }: {
   readonly aide: ReactNode;
   readonly message: Message | null;
   readonly idAide?: string;
+  /**
+   * Un refus LOCAL redit (sans envoi) : le même texte, calmé par la frappe, doit pouvoir
+   * se réafficher. Changer ce nombre lève le calme — sans remonter le pied, ce qui
+   * détruirait le bouton vers lequel le focus allait (relecture du 03/10/2026).
+   */
+  readonly relance?: number;
   readonly children: ReactNode;
 }) {
   const pied = useRef<HTMLElement>(null);
@@ -89,6 +97,11 @@ function Pied({
   const [calme, setCalme] = useState<string | null>(null);
   const texte = message?.texte ?? null;
   const affiche = texte !== null && texte !== calme;
+  const [relanceVue, setRelanceVue] = useState(relance);
+  if (relanceVue !== relance) {
+    setRelanceVue(relance);
+    setCalme(null);
+  }
 
   useEffect(() => {
     const formulaire = pied.current?.closest("form");
@@ -181,7 +194,16 @@ function Devoile({ className, id, children }: { readonly className?: string; rea
  * seulement alors — pas à l'arrivée sur l'écran, qui a déjà son entrée. Les onglets
  * sont des liens (`?section=`) : `TransitionsEcran` marque un changement sur place.
  */
-export function PanneauReglages({ etiquette, children }: { readonly etiquette: string; readonly children: ReactNode }) {
+export function PanneauReglages({
+  id,
+  onglet,
+  children,
+}: {
+  readonly id: string;
+  /** L'identifiant de l'onglet qui le nomme (`VuesListe`, rangée en onglets). */
+  readonly onglet: string;
+  readonly children: ReactNode;
+}) {
   const ref = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
     const surPlace = window.__changementSurPlace === true;
@@ -196,7 +218,7 @@ export function PanneauReglages({ etiquette, children }: { readonly etiquette: s
     );
   }, []);
   return (
-    <section ref={ref} className="reglages__panneau" aria-label={etiquette}>
+    <section ref={ref} id={id} className="reglages__panneau" role="tabpanel" aria-labelledby={onglet}>
       {children}
     </section>
   );
@@ -209,6 +231,7 @@ function ChampMotDePasse({
   decritPar,
   devoile = false,
   surSaisie,
+  surSortie,
 }: {
   readonly libelle: string;
   readonly nom: string;
@@ -217,6 +240,8 @@ function ChampMotDePasse({
   /** Apparu sur demande : il entre (maquette, `devoiler`). */
   readonly devoile?: boolean;
   readonly surSaisie?: (valeur: string) => void;
+  /** La sortie du champ, avec l'élément qui prend le focus (`relatedTarget`). */
+  readonly surSortie?: (vers: EventTarget | null) => void;
 }) {
   const id = useId();
   const ref = useDevoilement<HTMLDivElement>(false);
@@ -227,6 +252,7 @@ function ChampMotDePasse({
         id={id}
         name={nom}
         onChange={surSaisie === undefined ? undefined : (e) => surSaisie(e.target.value)}
+        onBlur={surSortie === undefined ? undefined : (e) => surSortie(e.relatedTarget)}
         type="password"
         required
         minLength={nouveau ? 12 : undefined}
@@ -364,9 +390,23 @@ export function BlocAdresse({
   );
 }
 
-export function BlocMotDePasse() {
+export function BlocMotDePasse({ adresse }: { readonly adresse: string }) {
   const t = useTranslations("parametres.compte");
+  const te = useTranslations("parametres.erreurs");
   const [etat, action, pendant] = useActionState(changerMotDePasseCompte, INITIAL);
+  // LE REFUS IMMÉDIAT DE L'ADRESSE RECOPIÉE (maquette `parametres.js:120`, contre-audit du
+  // 03/10/2026) : à la sortie du champ et à l'envoi, par la règle exacte du serveur, qui
+  // reste l'autorité. Chaque refus local remonte le pied (`key`) : un même texte, calmé par
+  // la frappe, doit pouvoir se redire.
+  const [refusLocal, setRefusLocal] = useState<{ readonly n: number; readonly dit: boolean }>({ n: 0, dit: false });
+  // La réponse du serveur en vigueur au moment du refus local : levé, le refus ne doit pas
+  // laisser revenir un ancien « mot de passe changé » que la frappe avait calmé.
+  const [etatAuRefus, setEtatAuRefus] = useState<EtatParametres | null>(null);
+  const refuser = (): void => {
+    setRefusLocal((r) => ({ n: r.n + 1, dit: true }));
+    setEtatAuRefus(etat);
+  };
+  const messageServeur = useMessage(etat, t("motDePasseChange"));
   const idAide = useId();
   // Désactivé tant que les deux champs ne sont pas remplis (maquette).
   const [actuel, setActuel] = useState("");
@@ -381,16 +421,52 @@ export function BlocMotDePasse() {
     }
   }
   return (
-    <form action={action} className="bloc-r" noValidate>
+    <form
+      action={action}
+      className="bloc-r"
+      noValidate
+      onSubmit={(e) => {
+        if (!contientAdresse(valeurEnvoyee(e.currentTarget, "nouveau"), adresse)) return;
+        e.preventDefault();
+        refuser();
+        // Le champ fautif reprend le focus, comme `/nouveau-mot-de-passe`.
+        e.currentTarget.querySelector<HTMLInputElement>('input[name="nouveau"]')?.focus();
+      }}
+    >
       <div className="bloc-r__corps">
         <Tete titre={t("motDePasse")} aide={t("motDePasseAide")} />
         <div className="grille-r">
           <ChampMotDePasse libelle={t("actuel")} nom="actuel" surSaisie={setActuel} />
-          <ChampMotDePasse libelle={t("nouveau")} nom="nouveau" nouveau decritPar={idAide} surSaisie={setNouveau} />
+          <ChampMotDePasse
+            libelle={t("nouveau")}
+            nom="nouveau"
+            nouveau
+            decritPar={idAide}
+            surSaisie={(v) => {
+              setNouveau(v);
+              if (refusLocal.dit && !contientAdresse(v, adresse)) setRefusLocal((r) => ({ ...r, dit: false }));
+            }}
+            surSortie={(vers) => {
+              // Vers le bouton d'envoi, l'envoi dira le refus lui-même : le dire ici
+              // ferait bouger le pied sous le geste.
+              if (!sortieVersEnvoi(vers) && contientAdresse(nouveau, adresse)) refuser();
+            }}
+          />
         </div>
         <p className="aide-r aide-r--note">{t("sansMotDePasse")}</p>
       </div>
-      <Pied aide={t("nouveauAide")} idAide={idAide} message={useMessage(etat, t("motDePasseChange"))}>
+      <Pied
+        relance={refusLocal.n}
+        aide={t("nouveauAide")}
+        idAide={idAide}
+        message={
+          refusLocal.dit
+            ? { texte: te("mdpContientEmail"), erreur: true }
+            : etatAuRefus !== null && etat === etatAuRefus
+              ? null
+              : messageServeur
+        }
+      >
         <button type="submit" className="bouton-app bouton-app--plein" disabled={pendant || actuel === "" || nouveau === ""}>
           {pendant ? t("changement") : t("changerMotDePasse")}
         </button>

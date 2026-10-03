@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { ArrowLeft, ArrowRight, FileText } from "lucide-react";
 import { CoqueSite } from "@/components/public/coque-site";
@@ -66,6 +66,8 @@ export default async function ArticleDuBlog({
   if (article === null) notFound();
 
   setRequestLocale(locale);
+  // La durée de lecture se dit par règle de traduction, pas en dur (contre-audit du 03/10/2026).
+  const tc = await getTranslations("commun");
   const graphe = donneesArticle(langue, article);
 
   // « À lire aussi » : les deux articles qui suivent dans la liste, en boucle.
@@ -104,7 +106,7 @@ export default async function ArticleDuBlog({
           </p>
           <h1 className="pub-titre art-titre">{article.titre}</h1>
           <p className="art-meta">
-            <MetaArticle date={article.date} duree={`${article.minutes} min de lecture`} />
+            <MetaArticle date={article.date} duree={tc("dureeLecture", { n: article.minutes })} />
           </p>
 
           <CorpsArticle blocs={article.blocs} />
@@ -130,7 +132,7 @@ export default async function ArticleDuBlog({
                     <span className="blog-carte__etiquette">{a.etiquette}</span>
                     <h2>{a.titre}</h2>
                     <span className="blog-carte__pied">
-                      <MetaArticle date={a.date} duree={`${a.minutes} min`} />
+                      <MetaArticle date={a.date} duree={tc("dureeCourte", { n: a.minutes })} />
                       <span className="blog-carte__lire">
                         Lire
                         <ArrowRight aria-hidden="true" className="ic" />

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { ArrowRight, FileText } from "lucide-react";
 import { CoqueSite } from "@/components/public/coque-site";
@@ -59,6 +59,8 @@ export default async function Blog({ params }: { params: Promise<{ locale: strin
   const langue = estLangueSupportee(locale) ? locale : LANGUE_DEFAUT;
   if (!estLangueDuBlog(langue)) notFound();
   setRequestLocale(locale);
+  // La durée de lecture se dit par règle de traduction, pas en dur (contre-audit du 03/10/2026).
+  const tc = await getTranslations("commun");
 
   const articles = tousLesArticles();
 
@@ -94,7 +96,7 @@ export default async function Blog({ params }: { params: Promise<{ locale: strin
               <h2>{a.titre}</h2>
               <p>{a.resume}</p>
               <span className="blog-carte__pied">
-                <MetaArticle date={a.date} duree={`${a.minutes} min`} />
+                <MetaArticle date={a.date} duree={tc("dureeCourte", { n: a.minutes })} />
                 <span className="blog-carte__lire">
                   Lire
                   <ArrowRight aria-hidden="true" className="ic" />

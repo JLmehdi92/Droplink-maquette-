@@ -16,6 +16,9 @@ import {
 import { SommaireDocs } from "@/components/docs/sommaire-docs";
 import { CoqueSite } from "@/components/public/coque-site";
 
+/** L'adresse du support : le texte la porte dans chaque langue, le lien la reprend ici. */
+const COURRIEL_SUPPORT = "contact@droplink.fr";
+
 /** La date de la dernière révision du contenu — Paramètres, 2FA, export, suppression. */
 const MISE_A_JOUR = new Date("2026-09-14T00:00:00Z");
 import { LienEcran } from "@/components/lien-ecran";
@@ -292,7 +295,7 @@ export default async function Documentation({
                   t("clientVoit6"),
                 ]}
               />
-              <Encart ton="alerte" titre={t("lienAlerteTitre")}>
+              <Encart titre={t("lienAlerteTitre")}>
                 {t("lienAlerteTexte")}
               </Encart>
             </Section>
@@ -387,7 +390,23 @@ export default async function Documentation({
             </Section>
 
             <Section id="support" titre={t("support")}>
-              <Paragraphe>{t("supportTexte")}</Paragraphe>
+              {/* L'adresse est un lien `mailto:` ET un texte sélectionnable (on la copie
+                  autant qu'on la clique) ; le signalement revient comme dans la maquette. */}
+              <Paragraphe>
+                {t.rich("supportTexte", {
+                  courriel: (adresse) => (
+                    <a className="lien-texte" href={`mailto:${COURRIEL_SUPPORT}`}>
+                      {adresse}
+                    </a>
+                  ),
+                })}
+              </Paragraphe>
+              <p>
+                <LienEcran className="lien-texte doc-lien" href={`/${langue}/signalement`}>
+                  {t("supportSignaler")}
+                  <ArrowRight aria-hidden="true" className="ic" />
+                </LienEcran>
+              </p>
             </Section>
 
             {/* L'APPEL FINAL : une carte, et le dégradé sur son bouton — la seule action

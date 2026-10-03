@@ -1,6 +1,8 @@
 {
   "commun": {
-    "chargement": "Chargement…"
+    "chargement": "Chargement…",
+    "dureeLecture": "{n} min de lecture",
+    "dureeCourte": "{n} min"
   },
   "navigation": {
     "seConnecter": "Se connecter",
@@ -2577,7 +2579,8 @@
     "faqQ6": "Que voit mon client si j'ai révoqué le lien ?",
     "faqR6": "Une page DropLink lui expliquant que le lien n'est plus valable et l'invitant à vous contacter. Elle ne divulgue rien de votre boutique.",
     "support": "Contacter le support",
-    "supportTexte": "Une question qui n'a pas sa réponse ici ? Écrivez-nous à contact@droplink.fr : chaque message arrive à l'équipe produit.",
+    "supportTexte": "Une question qui n'a pas sa réponse ici ? Écrivez-nous à <courriel>contact@droplink.fr</courriel> : chaque message arrive à l'équipe produit.",
+    "supportSignaler": "Signaler un contenu",
     "ctaTitre": "Prêt à créer votre premier lien ?",
     "ctaTexte": "Compte gratuit, sans carte bancaire, prêt en moins d'une minute.",
     "ctaBouton": "Créer mon compte",
