@@ -1841,6 +1841,59 @@ de finition point par point. **Clés modifiées : 15 en français, 16 en anglais
 - Portes : `typecheck` 0, `lint` 0 erreur (1 avertissement préexistant), `build` vert, `test`
   1311/1312 (alarme Railway).
 
+### ▶️ 03/10/2026 — passe de finition, lot 2 : les textes légaux (session cloud)
+
+Règle : chaque langue dit EXACTEMENT ce que dit le français, rien de plus, rien de moins. Les
+305 feuilles de `legal.pages` ont été comparées une à une au français, en anglais et en chinois.
+**Anglais : 5 feuilles** (2 additions — « France » absent du français dans l'adresse de contact
+et celle de la CNIL —, 1 omission — « souscrit » —, 1 écart — « donnée nominative » rendue par
+« personal names » —, et le sigle « (RNE) » absent du français). **Chinois : 19 feuilles**
+(« 即网站发布方本人 » retiré, « France » retiré aux deux mêmes endroits, « 任何订阅 » → « 其可能存在的
+订阅 », « 专业版 » → « Pro » partout, « 暂停 / 封禁 » → « 停用 » là où le français dit suspendre
+ou bloquer, « 严格必需 », « 不为广告目的转让 », « 登录令牌 », « 临时停用 » pour « à titre
+conservatoire », « 或 » pour « ni … ni », sigle « RNE » retiré).
+- **Gardé, avec sa raison** : « French » / « 法国 » devant le registre national des entreprises
+  et la CNIL — c'est la traduction du nom de l'institution pour un lecteur étranger, pas une
+  information ajoutée ; « France » là où le français l'écrit (éditeur, responsable du
+  traitement) ; « sole trader », « by post » (terminologie, déjà tranché).
+- `NOMS_PROPRES_LEGAUX` (`catalogue-chinois.test.ts`) déclare deux valeurs neuves, avec leur
+  raison : « Mahfoud SEDDIKI。 » et « Pro ».
+- `DERNIERE_MAJ` (`page-legale.tsx`) passe au **3 octobre 2026**.
+- Revues natives (anglais, chinois) : zéro défaut en anglais ; deux défauts mineurs en chinois,
+  corrigés (« 临时停用 », « 或 »).
+- ⚠️ **Ces textes restent à faire relire par un juriste** avant l'ouverture publique.
+- Portes : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1311/1312 (alarme Railway).
+
+#### À reporter dans ui_kits/legal/contenu-legal-*.js
+
+Chemin dans `legal.pages` (ou `legal.*`), avant → après :
+
+  - **en** `legal.pages.conditions.sections.4.blocs.0.ul.4` : « Circumventing the limits of the plan, automating requests in bulk or degrading the service. » → « Circumventing the limits of the plan subscribed to, automating requests in bulk or degrading the service. »
+  - **en** `legal.pages.confidentialite.sections.5.blocs.0.p` : « When data is processed by a provider established outside the European Union, the transfer is covered by the European Commission's standard contractual clauses or, for providers that have joined it, by the EU–US Data Privacy Framework. 17TRACK receives no personal names: only the tracking number and the carrier. » → « When data is processed by a provider established outside the European Union, the transfer is covered by the European Commission's standard contractual clauses or, for providers that have joined it, by the EU–US Data Privacy Framework. 17TRACK receives no data identifying anyone by name: only the tracking number and the carrier. »
+  - **en** `legal.pages.confidentialite.sections.9.blocs.0.p` : « For any question about your data: contact@droplink.fr, or by post to Mahfoud SEDDIKI, 2 square de l'Avre, 92100 Boulogne-Billancourt, France. » → « For any question about your data: contact@droplink.fr, or by post to Mahfoud SEDDIKI, 2 square de l'Avre, 92100 Boulogne-Billancourt. »
+  - **en** `legal.pages.confidentialite.sections.9.blocs.1.p` : « If you are not satisfied with the reply, you can lodge a complaint with the French data protection authority (CNIL), 3 place de Fontenoy, 75007 Paris, France, or at cnil.fr. » → « If you are not satisfied with the reply, you can lodge a complaint with the French data protection authority (CNIL), 3 place de Fontenoy, 75007 Paris, or at cnil.fr. »
+  - **en** `legal.pages.mentions.sections.0.blocs.1.ul.1` : « Registered with the French National Business Register (RNE) » → « Registered with the French National Business Register »
+  - **zh-CN** `legal.pages.conditions.sections.4.blocs.0.ul.4` : « 规避套餐限制、批量自动化请求或破坏服务。 » → « 规避所订套餐的限制、批量自动化请求或破坏服务。 »
+  - **zh-CN** `legal.pages.conditions.sections.4.blocs.1.encart.texte` : « 如有违反，账户访问可被立即暂停，且不影响可能的法律追究。暂停可以撤销：恢复后，页面在原链接上重新可用。 » → « 如有违反，账户访问可被立即停用，且不影响可能的法律追究。停用可以撤销：恢复后，页面在原链接上重新可用。 »
+  - **zh-CN** `legal.pages.conditions.sections.5.blocs.0.p` : « 任何人都可以写信至 contact@droplink.fr，举报其认为违法的内容。每条举报都由人工审核，相关账户可被预防性暂停：其页面随即停止提供。 » → « 任何人都可以写信至 contact@droplink.fr，举报其认为违法的内容。每条举报都由人工审核，相关账户可被临时停用：其页面随即停止提供。 »
+  - **zh-CN** `legal.pages.conditions.sections.5.blocs.2.p` : « 卖家会被告知封禁的原因，并可在其账户中提出申诉。 » → « 卖家会被告知停用的原因，并可在其账户中提出申诉。 »
+  - **zh-CN** `legal.pages.conditions.sections.6.blocs.0.table.entetes.2` : « 专业版 » → « Pro »
+  - **zh-CN** `legal.pages.conditions.sections.6.blocs.1.ul.0` : « 专业版订阅由经销商兼发票开具方 Lemon Squeezy 按其购买条款收款。DropLink 既看不到也不保存任何银行卡数据。 » → « Pro 订阅由经销商兼发票开具方 Lemon Squeezy 按其购买条款收款。DropLink 既看不到也不保存任何银行卡数据。 »
+  - **zh-CN** `legal.pages.conditions.sections.6.blocs.1.ul.2` : « 付款失败时账户恢复为免费版；付款成功后恢复专业版。 » → « 付款失败时账户恢复为免费版；付款成功后恢复 Pro 套餐。 »
+  - **zh-CN** `legal.pages.conditions.sections.7.blocs.0.p` : « 卖家可随时在 Lemon Squeezy 客户中心取消专业版订阅：专业版在已付费周期结束前保持有效。 » → « 卖家可随时在 Lemon Squeezy 客户中心取消 Pro 订阅：Pro 套餐在已付费周期结束前保持有效。 »
+  - **zh-CN** `legal.pages.conditions.sections.7.blocs.1.p` : « 卖家在取消任何订阅后，可随时在设置中删除账户：只要仍可能发生扣款，DropLink 就会拒绝删除。删除立即生效，并一并删除订单、媒体和跟踪；已发送的链接随即失效。如隐私政策所述，仅保留：邮箱地址及注册、删除日期，依托管方义务保留一年，此后自动清除；订阅事件存档，不含姓名、邮箱或银行卡，保留三年；管理访问记录。被暂停的账户无法在设置中删除：此时请写信至 contact@droplink.fr 提出申请。 » → « 卖家在其可能存在的订阅取消后，可随时在设置中删除账户：只要仍可能发生扣款，DropLink 就会拒绝删除。删除立即生效，并一并删除订单、媒体和跟踪；已发送的链接随即失效。如隐私政策所述，仅保留：邮箱地址及注册、删除日期，依托管方义务保留一年，此后自动清除；订阅事件存档，不含姓名、邮箱或银行卡，保留三年；管理访问记录。被停用的账户无法在设置中删除：此时请写信至 contact@droplink.fr 提出申请。 »
+  - **zh-CN** `legal.pages.confidentialite.sections.1.blocs.1.table.lignes.4.0` : « 专业版订阅的套餐、状态和日期 » → « Pro 订阅的套餐、状态和日期 »
+  - **zh-CN** `legal.pages.confidentialite.sections.2.blocs.0.table.lignes.1.0` : « 管理专业版订阅 » → « 管理 Pro 订阅 »
+  - **zh-CN** `legal.pages.confidentialite.sections.3.blocs.0.p` : « 数据绝不出售、出租或用于广告。数据仅传送给服务所必需的服务商： » → « 数据不出售、不出租，也不为广告目的转让。数据仅传送给服务所必需的服务商： »
+  - **zh-CN** `legal.pages.confidentialite.sections.3.blocs.1.table.lignes.5.1` : « 技术错误报告，不含 IP 地址和登录凭据 » → « 技术错误报告，不含 IP 地址或登录令牌 »
+  - **zh-CN** `legal.pages.confidentialite.sections.3.blocs.1.table.lignes.8.1` : « 收取专业版订阅费用，作为对自身处理活动负责的经销商 » → « 收取 Pro 订阅费用，作为对自身处理活动负责的经销商 »
+  - **zh-CN** `legal.pages.confidentialite.sections.6.blocs.0.p` : « DropLink 仅使用运行所必需的 Cookie，无需征得同意。未登录的访客最多只会收到语言 Cookie。 » → « DropLink 仅使用运行所严格必需的 Cookie，无需征得同意。未登录的访客最多只会收到语言 Cookie。 »
+  - **zh-CN** `legal.pages.confidentialite.sections.9.blocs.0.p` : « 有关您数据的任何问题：contact@droplink.fr，或邮寄至 Mahfoud SEDDIKI, 2 square de l'Avre, 92100 Boulogne-Billancourt, France。 » → « 有关您数据的任何问题：contact@droplink.fr，或邮寄至 Mahfoud SEDDIKI, 2 square de l'Avre, 92100 Boulogne-Billancourt。 »
+  - **zh-CN** `legal.pages.confidentialite.sections.9.blocs.1.p` : « 如对答复不满意，您可以向法国国家信息与自由委员会（CNIL）投诉：3 place de Fontenoy, 75007 Paris, France，或访问 cnil.fr。 » → « 如对答复不满意，您可以向法国国家信息与自由委员会（CNIL）投诉：3 place de Fontenoy, 75007 Paris，或访问 cnil.fr。 »
+  - **zh-CN** `legal.pages.mentions.sections.0.blocs.1.ul.1` : « 已在法国国家企业登记册（RNE）登记 » → « 已在法国国家企业登记册登记 »
+  - **zh-CN** `legal.pages.mentions.sections.1.blocs.0.p` : « Mahfoud SEDDIKI（即网站发布方本人）。 » → « Mahfoud SEDDIKI。 »
+
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

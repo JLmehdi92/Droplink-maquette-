@@ -198,6 +198,9 @@ const NOMS_PROPRES_LEGAUX: ReadonlyMap<string, string> = new Map([
   ["17TRACK", "Prestataire, nom propre."],
   ["Google", "Prestataire, nom propre."],
   ["Lemon Squeezy", "Prestataire, nom propre."],
+  /* Passe de finition du 03/10/2026 : le chinois disait ce que dit le français, ni plus ni moins. */
+  ["Mahfoud SEDDIKI。", "Nom propre de l'éditeur, seul, comme en français (« Mahfoud SEDDIKI. ») ; l'ajout « 即网站发布方本人 » est retiré."],
+  ["Pro", "Le nom du plan, « Pro », qui ne se traduit pas : l'interface le dit ainsi, et le texte légal aussi désormais."],
   ["NEXT_LOCALE", "Nom technique d'un cookie : c'est lui qu'on lit dans le navigateur."],
   ["dl_appareil", "Nom technique d'un cookie : c'est lui qu'on lit dans le navigateur."],
   ["Railway Corporation", "Raison sociale de l'hébergeur, telle qu'immatriculée."],

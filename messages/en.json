@@ -180,7 +180,7 @@
                   "Using the service to mislead a customer about the nature, origin or existence of a shipment.",
                   "Entering fake tracking numbers or numbers belonging to third-party shipments.",
                   "Trying to access another account's orders, or to enumerate order links.",
-                  "Circumventing the limits of the plan, automating requests in bulk or degrading the service."
+                  "Circumventing the limits of the plan subscribed to, automating requests in bulk or degrading the service."
                 ]
               },
               {
@@ -653,7 +653,7 @@
             "titre": "Transfers outside the European Union",
             "blocs": [
               {
-                "p": "When data is processed by a provider established outside the European Union, the transfer is covered by the European Commission's standard contractual clauses or, for providers that have joined it, by the EU–US Data Privacy Framework. 17TRACK receives no personal names: only the tracking number and the carrier."
+                "p": "When data is processed by a provider established outside the European Union, the transfer is covered by the European Commission's standard contractual clauses or, for providers that have joined it, by the EU–US Data Privacy Framework. 17TRACK receives no data identifying anyone by name: only the tracking number and the carrier."
               }
             ]
           },
@@ -734,10 +734,10 @@
             "titre": "Contact and complaints",
             "blocs": [
               {
-                "p": "For any question about your data: contact@droplink.fr, or by post to Mahfoud SEDDIKI, 2 square de l'Avre, 92100 Boulogne-Billancourt, France."
+                "p": "For any question about your data: contact@droplink.fr, or by post to Mahfoud SEDDIKI, 2 square de l'Avre, 92100 Boulogne-Billancourt."
               },
               {
-                "p": "If you are not satisfied with the reply, you can lodge a complaint with the French data protection authority (CNIL), 3 place de Fontenoy, 75007 Paris, France, or at cnil.fr."
+                "p": "If you are not satisfied with the reply, you can lodge a complaint with the French data protection authority (CNIL), 3 place de Fontenoy, 75007 Paris, or at cnil.fr."
               }
             ]
           }
@@ -758,7 +758,7 @@
               {
                 "ul": [
                   "SIREN: 990 848 004 — SIRET: 990 848 004 00018",
-                  "Registered with the French National Business Register (RNE)",
+                  "Registered with the French National Business Register",
                   "VAT not applicable, article 293 B of the French General Tax Code",
                   "Phone: +33 7 66 96 57 96",
                   "Email: contact@droplink.fr"
